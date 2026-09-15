@@ -40,7 +40,7 @@ prose.
 | 5 | lore mirror files | `ls docs/lore/*.md \| grep -v README \| wc -l` (canon, oracles, machines, arena, scenes) |
 | 15 | lore dossiers | `ls docs/lore/dossiers \| wc -l` |
 | 20 | lore total | 5 mirror files + 15 dossiers, the two rows above summed |
-| 15 | art images | `ls docs/images/*.jpg docs/images/roster/*.jpg docs/images/portraits/*.jpg \| wc -l` |
+| 16 | art images | `ls docs/images/*.jpg docs/images/roster/*.jpg docs/images/portraits/*.jpg \| wc -l` |
 
 Notes on the rows.
 
@@ -70,9 +70,11 @@ twenty. The mirror is the frozen canon; the dossiers are the deep canon. They ar
 separate because a dossier deepens a seat and never contradicts it, and the count is the
 proof they are both present.
 
-The art row is three groups: the team composite (`docs/images/*.jpg`, one file), the
-seven roster cards (`docs/images/roster/*.jpg`), and the seven portraits
-(`docs/images/portraits/*.jpg`). Fifteen total.
+The art row is four groups: the team composite (`docs/images/*.jpg`, one file), the
+seven roster cards (`docs/images/roster/*.jpg`), the seven portraits
+(`docs/images/portraits/*.jpg`), and the social card (`docs/images/social-preview.jpg`,
+one file). Sixteen total, all jpgs; the loop diagram is `docs/images/loop.svg` and is
+not counted here.
 
 The seat pages and the first row are the same seven files. They are not counted twice
 as different things; seven seats, seven pages, one row.
