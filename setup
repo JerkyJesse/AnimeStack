@@ -1,0 +1,434 @@
+#!/usr/bin/env bash
+# AnimeStack setup - install the seven-seat house skills and agents into
+# supported AI coding hosts. No network, no bun, no sudo, no node.
+#
+# The cage rule: never delete or edit a target without proof that we own it.
+# A skill target is ours when it is a symlink resolving into this repo, or a
+# directory carrying the .animestack-owned marker. An agent file is ours when
+# its last line is the ownership marker. Everything else is left untouched.
+set -e
+
+ROOT="$(cd "$(dirname "$0")" && pwd -P)"
+
+IS_WINDOWS=0
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*|Windows_NT) IS_WINDOWS=1 ;;
+esac
+
+QUIET=0
+UNINSTALL=0
+HOST="claude"
+
+SKILLS="house reika mei elo yui niko rin aria simple"
+ALL_HOSTS="claude cursor codex factory opencode kiro slate openclaw hermes gbrain"
+AUTO_HOSTS="claude cursor codex factory opencode kiro openclaw hermes gbrain"
+
+OWN_MARKER="<!-- animestack-owned -->"
+OWN_FLAG=".animestack-owned"
+ROOT_FLAG=".animestack-root"
+
+# ─── Counters (final summary) ─────────────────────────────────
+SKILL_COUNT=0
+AGENT_COUNT=0
+DIGEST_COUNT=0
+SKIP_COUNT=0
+PATHS=""
+
+usage() {
+  cat <<'EOF'
+AnimeStack setup - install the seven-seat house skills + agents into AI hosts
+
+Usage: ./setup [options]
+
+Options:
+  --host <name>     Target host: claude, cursor, codex, factory, opencode,
+                    kiro, slate, openclaw, hermes, gbrain, all, auto.
+                    Default: claude.
+  --uninstall       Remove only provably-owned AnimeStack items for the
+                    selected host(s). Everything else is left untouched.
+  -q, --quiet       Suppress progress output; print only the final summary.
+  -h, --help        Show this help and exit.
+
+Examples:
+  ./setup                          # install for Claude Code
+  ./setup --host opencode          # opencode skills + agents
+  ./setup --host all               # every supported host
+  ./setup --host auto              # hosts whose config dir already exists
+  ./setup --host claude --uninstall
+EOF
+}
+
+# Short-circuit help before any other work.
+for _arg in "$@"; do
+  case "$_arg" in
+    -h|--help) usage; exit 0 ;;
+  esac
+done
+
+# ─── Argument parsing ──────────────────────────────────────────
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --host)
+      if [ $# -lt 2 ]; then
+        echo "Error: --host needs a value" >&2
+        usage >&2
+        exit 1
+      fi
+      HOST="$2"
+      shift 2
+      ;;
+    --host=*) HOST="${1#--host=}"; shift ;;
+    --uninstall) UNINSTALL=1; shift ;;
+    -q|--quiet) QUIET=1; shift ;;
+    *)
+      echo "Error: unknown flag: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+case "$HOST" in
+  claude|cursor|codex|factory|opencode|kiro|slate|openclaw|hermes|gbrain|all|auto) ;;
+  *)
+    echo "Error: unknown --host value: $HOST" >&2
+    usage >&2
+    exit 1
+    ;;
+esac
+
+log() { [ "$QUIET" -eq 0 ] && echo "$@" || true; }
+
+# ─── Host directory mapping ────────────────────────────────────
+_host_config_dir() {
+  case "$1" in
+    claude)   printf '%s\n' "$HOME/.claude" ;;
+    cursor)   printf '%s\n' "$HOME/.cursor" ;;
+    codex)    printf '%s\n' "${CODEX_HOME:-$HOME/.codex}" ;;
+    factory)  printf '%s\n' "$HOME/.factory" ;;
+    opencode) printf '%s\n' "$HOME/.config/opencode" ;;
+    kiro)     printf '%s\n' "$HOME/.kiro" ;;
+    openclaw) printf '%s\n' "$HOME/.openclaw" ;;
+    hermes)   printf '%s\n' "$HOME/.hermes" ;;
+    gbrain)   printf '%s\n' "$HOME/.gbrain" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_skills_dir() {
+  case "$1" in
+    claude)   printf '%s\n' "$HOME/.claude/skills" ;;
+    cursor)   printf '%s\n' "$HOME/.cursor/skills" ;;
+    codex)    printf '%s\n' "${CODEX_HOME:-$HOME/.codex}/skills" ;;
+    factory)  printf '%s\n' "$HOME/.factory/skills" ;;
+    opencode) printf '%s\n' "$HOME/.config/opencode/skills" ;;
+    kiro)     printf '%s\n' "$HOME/.kiro/skills" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_agents_dir() {
+  case "$1" in
+    claude)   printf '%s\n' "$HOME/.claude/agents" ;;
+    opencode) printf '%s\n' "$HOME/.config/opencode/agent" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_agents_src() {
+  case "$1" in
+    claude)   printf '%s\n' "$ROOT/agents/claude" ;;
+    opencode) printf '%s\n' "$ROOT/agents/opencode" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_digest_dir() {
+  case "$1" in
+    openclaw) printf '%s\n' "$HOME/.openclaw/skills/animestack" ;;
+    hermes)   printf '%s\n' "$HOME/.hermes/skills/animestack" ;;
+    gbrain)   printf '%s\n' "$HOME/.gbrain/skills/animestack" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+# Expand the requested host into a concrete, ordered list.
+expand_hosts() {
+  case "$HOST" in
+    all)
+      printf '%s\n' $ALL_HOSTS
+      ;;
+    auto)
+      local h d
+      for h in $AUTO_HOSTS; do
+        d="$(_host_config_dir "$h")"
+        if [ -d "$d" ]; then printf '%s\n' "$h"; fi
+      done
+      ;;
+    *)
+      printf '%s\n' "$HOST"
+      ;;
+  esac
+}
+
+# ─── Ownership proof ───────────────────────────────────────────
+# A target is provably ours when:
+#   - it is a symlink that resolves into $ROOT, or
+#   - it is a directory containing the .animestack-owned marker.
+# Nothing is ever removed or edited without passing this gate.
+_is_ours() {
+  local t="$1"
+  if [ ! -e "$t" ] && [ ! -L "$t" ]; then return 1; fi
+  if [ -L "$t" ]; then
+    local link resolved
+    link="$(readlink "$t" 2>/dev/null || true)"
+    case "$link" in
+      "$ROOT"/*) return 0 ;;
+    esac
+    resolved="$(cd -P "$t" 2>/dev/null && pwd -P 2>/dev/null || true)"
+    if [ -z "$resolved" ]; then return 1; fi
+    case "$resolved" in
+      "$ROOT"/*) return 0 ;;
+    esac
+    return 1
+  fi
+  if [ -d "$t" ] && [ -f "$t/$OWN_FLAG" ]; then return 0; fi
+  return 1
+}
+
+# Remove a target only when provably owned. Returns 1 when not ours.
+_remove_owned() {
+  local t="$1"
+  if _is_ours "$t"; then
+    if [ -L "$t" ]; then rm -f "$t"; else rm -rf "$t"; fi
+    return 0
+  fi
+  return 1
+}
+
+# Install one skill dir as symlink (unix) or copy (windows / link fallback).
+_copy_skill() {
+  local name="$1" target="$2"
+  mkdir -p "$(dirname "$target")"
+  if [ "$IS_WINDOWS" -eq 1 ]; then
+    cp -R "$ROOT/skills/$name" "$target"
+    printf '%s\n' "$ROOT" > "$target/$ROOT_FLAG"
+    printf '%s\n' "animestack-owned" > "$target/$OWN_FLAG"
+    return 1
+  fi
+  if ln -snf "$ROOT/skills/$name" "$target" 2>/dev/null; then
+    return 0
+  fi
+  cp -R "$ROOT/skills/$name" "$target"
+  printf '%s\n' "$ROOT" > "$target/$ROOT_FLAG"
+  printf '%s\n' "animestack-owned" > "$target/$OWN_FLAG"
+  return 1
+}
+
+_install_skill() {
+  local name="$1" target="$2"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    if _is_ours "$target"; then
+      _remove_owned "$target"
+    else
+      log "Not registered (a skill you own already uses the name; left untouched): $name"
+      SKIP_COUNT=$((SKIP_COUNT + 1))
+      return 0
+    fi
+  fi
+  local copied=0
+  if _copy_skill "$name" "$target"; then
+    copied=0
+  else
+    copied=1
+  fi
+  SKILL_COUNT=$((SKILL_COUNT + 1))
+  PATHS="$PATHS
+  $target"
+  if [ "$copied" -eq 1 ]; then
+    log "Installed (copy): $name -> $target"
+  else
+    log "Installed (link): $name -> $target"
+  fi
+}
+
+_install_digest() {
+  local host="$1" target="$2"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    if _is_ours "$target"; then
+      _remove_owned "$target"
+    else
+      log "Not registered (a directory you own already uses the name; left untouched): $host/animestack"
+      SKIP_COUNT=$((SKIP_COUNT + 1))
+      return 0
+    fi
+  fi
+  mkdir -p "$target"
+  cp -f "$ROOT/AGENTS.md" "$target/AGENTS.md" 2>/dev/null || true
+  cat > "$target/README.md" <<EOF
+# AnimeStack (digest for $host)
+
+AnimeStack is installed here as a rules-only digest: the house voice lives in
+AGENTS.md, and the full skill pack (seven seat skills, the /house router, the
+/simple waiver, playbooks, principles, and agents) lives in the source repo.
+
+Repo: https://github.com/JerkyJesse/AnimeStack
+
+Refresh: re-run ./setup --host $host from a clone of the repo.
+EOF
+  printf '%s\n' "animestack-owned" > "$target/$OWN_FLAG"
+  DIGEST_COUNT=$((DIGEST_COUNT + 1))
+  PATHS="$PATHS
+  $target"
+  log "Installed digest: $host -> $target"
+}
+
+_install_agents() {
+  local host="$1" srcdir="$2" targetdir="$3"
+  if [ ! -d "$srcdir" ]; then return 0; fi
+  mkdir -p "$targetdir"
+  local src base dst last
+  for src in "$srcdir"/*.md; do
+    [ -e "$src" ] || continue
+    base="$(basename "$src")"
+    dst="$targetdir/$base"
+    if [ -e "$dst" ]; then
+      last="$(tail -n 1 "$dst" 2>/dev/null | sed 's/[[:space:]]*$//' || true)"
+      if [ "$last" != "$OWN_MARKER" ]; then
+        log "Not registered (an agent file you own already uses the name; left untouched): $base"
+        SKIP_COUNT=$((SKIP_COUNT + 1))
+        continue
+      fi
+    fi
+    cp -f "$src" "$dst"
+    AGENT_COUNT=$((AGENT_COUNT + 1))
+    log "Installed agent: $base -> $dst"
+  done
+}
+
+_uninstall_skill() {
+  local name="$1" target="$2"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    if _remove_owned "$target"; then
+      SKILL_COUNT=$((SKILL_COUNT + 1))
+      log "Removed: $target"
+    else
+      log "Skipped (not provably ours; left untouched): $target"
+      SKIP_COUNT=$((SKIP_COUNT + 1))
+    fi
+  fi
+}
+
+_uninstall_digest() {
+  local target="$1"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    if _remove_owned "$target"; then
+      DIGEST_COUNT=$((DIGEST_COUNT + 1))
+      log "Removed: $target"
+    else
+      log "Skipped (not provably ours; left untouched): $target"
+      SKIP_COUNT=$((SKIP_COUNT + 1))
+    fi
+  fi
+}
+
+_uninstall_agents() {
+  local targetdir="$1"
+  if [ ! -d "$targetdir" ]; then return 0; fi
+  local f last
+  for f in "$targetdir"/*.md; do
+    [ -e "$f" ] || continue
+    last="$(tail -n 1 "$f" 2>/dev/null | sed 's/[[:space:]]*$//' || true)"
+    if [ "$last" = "$OWN_MARKER" ]; then
+      rm -f "$f"
+      AGENT_COUNT=$((AGENT_COUNT + 1))
+      log "Removed: $f"
+    fi
+  done
+}
+
+# ─── Per-host dispatch ─────────────────────────────────────────
+_do_host() {
+  local host="$1"
+  case "$host" in
+    slate)
+      # Slate reads Claude Code skills as a compatibility fallback.
+      _do_host claude
+      log "Slate reads .claude/skills; claude install refreshed."
+      ;;
+    openclaw|hermes|gbrain)
+      if [ "$UNINSTALL" -eq 1 ]; then
+        _uninstall_digest "$(_host_digest_dir "$host")"
+      else
+        _install_digest "$host" "$(_host_digest_dir "$host")"
+      fi
+      ;;
+    *)
+      local sdir adir asrc
+      sdir="$(_host_skills_dir "$host")"
+      if [ "$UNINSTALL" -eq 1 ]; then
+        if [ -n "$sdir" ]; then
+          local n
+          for n in $SKILLS; do
+            _uninstall_skill "$n" "$sdir/$n"
+          done
+        fi
+        adir="$(_host_agents_dir "$host")"
+        if [ -n "$adir" ]; then _uninstall_agents "$adir"; fi
+      else
+        if [ -n "$sdir" ]; then
+          local n
+          for n in $SKILLS; do
+            _install_skill "$n" "$sdir/$n"
+          done
+        fi
+        asrc="$(_host_agents_src "$host")"
+        adir="$(_host_agents_dir "$host")"
+        if [ -n "$asrc" ] && [ -n "$adir" ]; then
+          _install_agents "$host" "$asrc" "$adir"
+        fi
+      fi
+      ;;
+  esac
+}
+
+# ─── Run ───────────────────────────────────────────────────────
+log "AnimeStack: root $ROOT"
+log ""
+
+HOSTS="$(expand_hosts)"
+
+if [ -z "$HOSTS" ]; then
+  log "No hosts matched (auto found no existing config dirs). Nothing to do."
+fi
+
+for _h in $HOSTS; do
+  _do_host "$_h"
+done
+
+if [ "$IS_WINDOWS" -eq 1 ] && [ "$UNINSTALL" -eq 0 ]; then
+  log ""
+  log "Copied (no symlinks). Re-run ./setup after git pull to refresh."
+fi
+
+log ""
+
+# ─── Final summary ─────────────────────────────────────────────
+if [ "$UNINSTALL" -eq 1 ]; then
+  echo "AnimeStack uninstall complete."
+  echo "  skills removed:   $SKILL_COUNT"
+  echo "  agents removed:   $AGENT_COUNT"
+  echo "  digests removed:  $DIGEST_COUNT"
+  echo "  skipped (not ours): $SKIP_COUNT"
+else
+  echo "AnimeStack setup complete."
+  echo "  skills installed:  $SKILL_COUNT"
+  echo "  agents installed:  $AGENT_COUNT"
+  echo "  digests installed: $DIGEST_COUNT"
+  echo "  skipped (not ours): $SKIP_COUNT"
+  if [ -n "$PATHS" ]; then
+    echo "Targets:"
+    printf '%s\n' "$PATHS" | sed 's/^[[:space:]]*/  /' | sed '/^[[:space:]]*$/d'
+  fi
+  echo "Open a new session and run /house."
+fi
