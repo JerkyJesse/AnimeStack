@@ -68,6 +68,7 @@ insubordination dressed as thoroughness.
 
 - `docs/lore/` — frozen canon mirror. Never edit it; the source repo is authoritative.
 - `docs/seats/`, `docs/loop.md`, `docs/measurement.md` — the seats, the spine, and the counts.
+- Seats read their digest (`docs/seats/<seat>.md`) and dossier (`docs/lore/dossiers/<seat>.md` + `_backstory.md`) on demand — the Canon trigger lines in the agent files say when; dossier text is never inlined (guard-the-context-window, steward Mei).
 - `principles/` — doctrine.
 - `skills/` — the nine skill dirs: `house`, `reika`, `mei`, `elo`, `yui`,
   `niko`, `rin`, `aria`, `simple`. Playbooks live under `skills/house/playbooks/`.
