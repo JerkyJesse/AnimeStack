@@ -23,6 +23,13 @@ The seven-seat canon — the seats, the law of the room, and the design loop —
 a frozen mirror of the Phipps Predictions house lore, in `docs/lore/`. The
 mirror is a snapshot; the source repo is authoritative.
 
+## Phipps Predictions house art
+
+The portrait, roster, dossier, character-sheet, sprite, nameplate, composite,
+and wallpaper art in `art/`, `assets/img/`, and `docs/images/` is generated
+house art from Phipps Predictions; it ships here as part of the frozen mirror.
+It is not from gstack, pstack, or any other upstream work.
+
 The license texts for gstack and pstack remain with their upstream
 repositories. Neither Garry Tan nor Lauren Tan claims, sponsors, or endorses
 this pack.

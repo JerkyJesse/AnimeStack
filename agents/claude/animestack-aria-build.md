@@ -1,6 +1,7 @@
 ---
 name: animestack-aria-build
 description: Click build, Aria pass. Use when construction needs its contact built - window bands, execution glue, the click surface.
+model: inherit
 ---
 
 ## Build protocol

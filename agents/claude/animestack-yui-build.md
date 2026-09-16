@@ -1,6 +1,7 @@
 ---
 name: animestack-yui-build
 description: Wound build, Yui pass. Use when construction needs the mechanism built - the module, its tests, the falsifier written before the victory lap.
+model: inherit
 ---
 
 ## Build protocol

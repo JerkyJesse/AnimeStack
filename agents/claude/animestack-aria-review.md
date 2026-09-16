@@ -1,6 +1,7 @@
 ---
 name: animestack-aria-review
 description: Click review, Aria pass. Use when a decision needs the click checked - what is the exact window and action, and can it touch a live book in time.
+model: inherit
 ---
 
 ## Review protocol

@@ -1,6 +1,7 @@
 ---
 name: animestack-elo-build
 description: Rank build, Elo pass. Use when construction needs its ranking or measurement built - ratings, matchup mapping, board surfaces, and the ordering of the house's own numbers.
+model: inherit
 ---
 
 ## Build protocol

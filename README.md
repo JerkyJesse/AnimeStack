@@ -57,6 +57,27 @@ A clean night in the room sounds like this:
 
 A dirty night is the same conversation with someone trying to keep a favorite alive by renaming it.
 
+## The art
+
+The pack carries the full house art library in [`art/`](art/): seven dossier cards, fourteen character sheets, fifteen sprites and nameplates, five team composites, seven alternate portraits, and a 4K wallpaper set — a still and a seamless animated loop per seat, packed for Wallpaper Engine.
+
+<table>
+  <tr>
+    <td align="center"><img src="art/dossiers/mei.jpg" width="200" alt="Mei Sakuraba dossier card"></td>
+    <td align="center"><img src="art/dossiers/elo.jpg" width="200" alt="Elo Star dossier card"></td>
+    <td align="center"><img src="art/dossiers/yui.jpg" width="200" alt="Yui Aizawa dossier card"></td>
+    <td align="center"><img src="art/dossiers/niko.jpg" width="200" alt="Niko Hoshino dossier card"></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="art/dossiers/rin.jpg" width="200" alt="Rin Takamiya dossier card"></td>
+    <td align="center"><img src="art/dossiers/aria.jpg" width="200" alt="Aria Kanzaki dossier card"></td>
+    <td align="center"><img src="art/dossiers/reika.jpg" width="200" alt="Reika Kurogane dossier card"></td>
+    <td align="center"><img src="art/wallpapers/mei-stamped.jpg" width="200" alt="Mei Sakuraba 4K wallpaper"></td>
+  </tr>
+</table>
+
+Every piece, full size, is in the gallery: [animestack.jerkyjesse.com/gallery.html](https://animestack.jerkyjesse.com/gallery.html). The library manifest is [art/README.md](art/README.md).
+
 ## The lineage
 
 AnimeStack is the refusal of three older schools, each of which is written in the frozen mirror.
@@ -130,11 +151,11 @@ Seven seat skills — `/reika`, `/mei`, `/elo`, `/yui`, `/niko`, `/rin`, `/aria`
 - 9 skills — 7 seats plus the `/house` router and the `/simple` waiver
 - 12 playbooks under `skills/house/playbooks/`
 - 35 principles — 12 laws of the room plus 23 doctrine pieces adapted from pstack (`principles/INDEX.md`)
-- 21 subagents per host — 7 seats, 7 review leaves, 7 build leaves — shipped for opencode and Claude Code, 42 agent files total
+- 21 subagents per host — 7 seats, 7 review leaves, 7 build leaves — shipped for opencode and Claude Code, 42 agent files total; no concrete model is pinned, so every subagent runs on the invoking session's model
 - an on-demand canon — every agent carries a `**Canon.**` pointer to its seat digest, dossier, and backstory, plus a seat trigger line naming the calls that force the read; canon text is never inlined (guard-the-context-window, steward Mei)
 - 10 hosts
 - a frozen lore mirror of 21 files — canon, four companion books, the House Board, 15 dossiers — plus the freeze policy (`docs/lore/`)
-- the art: a team composite, 7 roster cards, 7 portraits, a loop diagram, a social card
+- the art: the full library in `art/` — 7 dossier cards, 14 character sheets, 15 sprites and nameplates, 5 team composites, 7 alternate portraits, 7 4K wallpapers with animated loops and Wallpaper Engine packs — plus the site set (team composite, 7 roster cards, 7 portraits, a loop diagram, a social card)
 
 The `/house` router matches a request to one of the 12 playbooks, opens the loop, and closes with a verdict. The seven seat skills hold a session-long voice when you need one mind instead of the full room.
 
@@ -182,6 +203,8 @@ docs/loop.md        the spine, both descents, the waiver
 docs/measurement.md the counts audit
 docs/guide/         first task
 docs/images/        team composite, roster cards, portraits, loop, social card
+art/                the art library: dossiers, sheets, sprites, team, wallpapers
+gallery.html        the art tour (GitHub Pages)
 skills/             9 skills: 7 seats + /house + /simple
 principles/         12 laws + 23 doctrine
 agents/             21 agents per host (opencode, claude)

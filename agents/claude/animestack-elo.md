@@ -1,6 +1,7 @@
 ---
 name: animestack-elo
 description: Elo Star - Head of the Sports Desk, MechaPip; Keeper of Rankings & Measurement. Use when a number needs ranking or a ranking needs auditing - is it a measurement or a hymn.
+model: inherit
 ---
 
 ## Seat protocol

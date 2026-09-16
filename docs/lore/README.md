@@ -1,10 +1,10 @@
-> **Freeze policy — AnimeStack v1.1.0 · 2026-09-16.**
+> **Freeze policy — mirror v1.1.0 · re-verified 2026-09-16 · pack v1.2.0.**
 > This page is the policy; the 21 mirrored files beside it carry the frozen-mirror
-> header. This is not the ledger; the source repo is authoritative.
+> header stamped v1.1.0. This is not the ledger; the source repo is authoritative.
 
 # AnimeStack — Lore Mirror & Freeze Policy
 
-**Freeze date:** 2026-09-16 · **Canon:** Rev 15 · **Mirror version:** v1.1.0
+**Freeze date:** 2026-09-16 · **Canon:** Rev 15 · **Mirror version:** v1.1.0 (text unchanged in pack v1.2.0)
 
 ## What this is
 
@@ -56,3 +56,10 @@ This mirror is never promised to be in lockstep with the source. If a page
 here contradicts what you see in the Phipps Predictions source repo, the
 source wins — no exceptions, no debate, no merge. The mirror is a snapshot; the
 canon is the living document.
+
+## Re-verification, pack v1.2.0
+
+The mirror text was re-verified against the source on 2026-09-16 while packing
+v1.2.0 (the art release): after the frozen header block, all 21 mirrored files
+matched their sources. No mirrored text changed — the pack's v1.2.0 additions
+are the art library under `art/` and the gallery beside it.

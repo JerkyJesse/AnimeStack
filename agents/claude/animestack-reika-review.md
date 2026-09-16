@@ -1,6 +1,7 @@
 ---
 name: animestack-reika-review
 description: Mandate review, Reika pass. Use when a plan, strategy, diff, or decision needs the mandate checked in one sentence and closed with a verdict.
+model: inherit
 ---
 
 ## Review protocol

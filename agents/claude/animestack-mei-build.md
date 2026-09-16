@@ -1,6 +1,7 @@
 ---
 name: animestack-mei-build
 description: Weather build, Mei pass. Use when construction needs its climate built - regime notes, named relationships, blackout inputs, and what makes it obsolete.
+model: inherit
 ---
 
 ## Build protocol

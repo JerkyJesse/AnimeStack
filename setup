@@ -6,6 +6,12 @@
 # A skill target is ours when it is a symlink resolving into this repo, or a
 # directory carrying the .animestack-owned marker. An agent file is ours when
 # its last line is the ownership marker. Everything else is left untouched.
+#
+# The model rule: no shipped agent names a concrete model. opencode agents
+# omit the `model` key (opencode runs an unset subagent on the invoking
+# session's model); claude agents carry `model: inherit` (Claude Code's
+# same-model-as-the-conversation form). Setup refuses to install from
+# a pack that violates this.
 set -e
 
 ROOT="$(cd "$(dirname "$0")" && pwd -P)"
@@ -392,7 +398,50 @@ _do_host() {
   esac
 }
 
+# ─── Model-pin gate ────────────────────────────────────────────
+# No shipped agent names a concrete model: opencode agents omit the `model`
+# key (opencode runs an unset subagent on the invoking session's model) and
+# claude agents carry `model: inherit` (Claude Code's
+# same-model-as-the-conversation form). A pack that violates this never
+# touches a host.
+_frontmatter_of() {
+  tr -d '\r' < "$1" | sed -n '2,/^---$/p'
+}
+
+_assert_no_model_pins() {
+  local f fm bad=0 n_model
+  for f in "$ROOT"/agents/opencode/*.md; do
+    [ -e "$f" ] || continue
+    fm="$(_frontmatter_of "$f")"
+    if printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:'; then
+      echo "Error: model pin in shipped opencode agent (omit the key; opencode inherits the session model): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  for f in "$ROOT"/agents/claude/*.md; do
+    [ -e "$f" ] || continue
+    fm="$(_frontmatter_of "$f")"
+    # grep -c exits 1 on a zero count; keep set -e alive while counting.
+    n_model="$(printf '%s\n' "$fm" | grep -Ec '^[[:space:]]*model[[:space:]]*:')" || true
+    if [ "$n_model" -ne 1 ]; then
+      echo "Error: shipped claude agent needs exactly one 'model: inherit' line (found $n_model): ${f#"$ROOT"/}" >&2
+      bad=1
+    elif ! printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:[[:space:]]*inherit[[:space:]]*$'; then
+      echo "Error: concrete model pin in shipped claude agent (only 'model: inherit' is allowed): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  if [ "$bad" -ne 0 ]; then
+    echo "Refusing to install from this pack: fix the agent frontmatter first." >&2
+    exit 1
+  fi
+}
+
 # ─── Run ───────────────────────────────────────────────────────
+if [ "$UNINSTALL" -eq 0 ]; then
+  _assert_no_model_pins
+fi
+
 log "AnimeStack: root $ROOT"
 log ""
 

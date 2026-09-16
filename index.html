@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <title>AnimeStack — the house in your agent</title>
+<meta name="description" content="AnimeStack — the Phipps Predictions seven-seat house installed into an AI coding host. Seven seats argue in fixed order, one sentence each, then a verdict.">
+<meta property="og:title" content="AnimeStack — the house in your agent">
+<meta property="og:description" content="Seven seats argue in fixed order. One sentence each. Then a verdict. Meet the room, its lore, and its art.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://animestack.jerkyjesse.com/">
+<meta property="og:image" content="https://animestack.jerkyjesse.com/assets/img/social-preview.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="assets/css/site.css">
 <style>
   /* index-only presentation; the shared floor lives in assets/css/site.css */
@@ -102,6 +110,23 @@
   }
   .linkgrid a:hover { text-decoration: none; border-color: var(--accent); }
   .linkgrid a .lbl { color: var(--accent); }
+
+  .artstrip {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+    gap: 10px;
+    margin: 20px 0 4px;
+  }
+  .artstrip img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg-soft);
+  }
+  .artstrip a:hover img { border-color: var(--accent); }
+
 </style>
 </head>
 <body>
@@ -112,10 +137,11 @@
     <span class="crumb">/</span>
     <span class="crumb here">index</span>
     <a class="back" href="lore/canon.html">canon</a>
+    <a class="back" href="gallery.html">gallery</a>
   </nav>
 
   <header class="page">
-    <div class="kicker">The house in your agent · v1.1.0 · Rev 15</div>
+    <div class="kicker">The house in your agent · v1.2.0 · Rev 15</div>
     <h1>AnimeStack</h1>
     <p class="one-sentence">Seven seats argue in fixed order. One sentence each. Then a verdict.</p>
     <p class="sub">The Phipps Predictions seven-seat house, installed into an AI coding host. Not a mascot pack — a design layer: every material decision descends Mei → Elo → Yui → Niko → Rin → Aria → Reika, one sentence each, and closes with a verdict.</p>
@@ -216,7 +242,18 @@
       </div>
     </div>
 
+    <div class="artstrip">
+      <a href="seats/mei.html" title="Mei Sakuraba — dossier card"><img src="assets/thumbs/dossiers/mei.jpg" alt="Mei Sakuraba dossier card" loading="lazy" decoding="async"></a>
+      <a href="seats/elo.html" title="Elo Star — dossier card"><img src="assets/thumbs/dossiers/elo.jpg" alt="Elo Star dossier card" loading="lazy" decoding="async"></a>
+      <a href="seats/yui.html" title="Yui Aizawa — dossier card"><img src="assets/thumbs/dossiers/yui.jpg" alt="Yui Aizawa dossier card" loading="lazy" decoding="async"></a>
+      <a href="seats/niko.html" title="Niko Hoshino — dossier card"><img src="assets/thumbs/dossiers/niko.jpg" alt="Niko Hoshino dossier card" loading="lazy" decoding="async"></a>
+      <a href="seats/rin.html" title="Rin Takamiya — dossier card"><img src="assets/thumbs/dossiers/rin.jpg" alt="Rin Takamiya dossier card" loading="lazy" decoding="async"></a>
+      <a href="seats/aria.html" title="Aria Kanzaki — dossier card"><img src="assets/thumbs/dossiers/aria.jpg" alt="Aria Kanzaki dossier card" loading="lazy" decoding="async"></a>
+      <a href="seats/reika.html" title="Reika Kurogane — dossier card"><img src="assets/thumbs/dossiers/reika.jpg" alt="Reika Kurogane dossier card" loading="lazy" decoding="async"></a>
+    </div>
+
     <p class="lede">The loop order is Mei, Elo, Yui, Niko, Rin, Aria, Reika. The roster is seven women, no exception. A seat page opens the full digest, dossier, and companion backstory for each mind.</p>
+    <p class="lede">The full art set — dossier cards, character sheets, sprites, and the 4K wallpapers — is in <a href="gallery.html">the gallery</a>, beside the pack at <code>art/</code>.</p>
   </section>
 
   <section class="block" id="laws">
@@ -249,6 +286,7 @@
       <a href="lore/scenes.html"><span class="lbl">scenes.html</span> — the scene book: how the seats sound under load.</a>
       <a href="lore/pre-history.html"><span class="lbl">pre-history.html</span> — the oracles, the machines, the arena.</a>
       <a href="lore/operator.html"><span class="lbl">operator.html</span> — the seat that is not in the seven.</a>
+      <a href="gallery.html"><span class="lbl">gallery.html</span> — the art: dossier cards, sheets, sprites, wallpapers.</a>
     </div>
   </section>
 
@@ -260,7 +298,7 @@
   </blockquote>
 
   <footer>
-    ANIMESTACK · v1.1.0 · frozen mirror · canon Rev 15 · <a href="https://github.com/JerkyJesse/AnimeStack">github.com/JerkyJesse/AnimeStack</a> · <a href="https://www.jerkyjesse.com">www.jerkyjesse.com</a>
+    ANIMESTACK · v1.2.0 · frozen mirror · canon Rev 15 · <a href="https://github.com/JerkyJesse/AnimeStack">github.com/JerkyJesse/AnimeStack</a> · <a href="https://www.jerkyjesse.com">www.jerkyjesse.com</a>
   </footer>
 
 </div>

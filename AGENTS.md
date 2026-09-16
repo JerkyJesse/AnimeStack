@@ -62,7 +62,10 @@ insubordination dressed as thoroughness.
 - Leaves never sign. Integration, the one atomic commit, the gates, and any
   signed execution belong to the owning seat.
 - Seat agents (seven) ship with `mode: all`; build and review leaves ship with
-  `mode: subagent`. No model is pinned and no permission block is written.
+  `mode: subagent`. No concrete model is pinned: opencode agents omit the
+  `model` key and claude agents carry `model: inherit`, so every subagent runs
+  on the model of the conversation that spawned it; no permission block is
+  written. `setup` refuses to install from a pack that violates this.
 
 ## Repo map
 

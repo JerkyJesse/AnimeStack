@@ -1,6 +1,7 @@
 ---
 name: animestack-niko-review
 description: Cage review, Niko pass. Use when a plan or diff touches infrastructure, state, data flow, deploy, or isolation - where does it live, and what must it never touch.
+model: inherit
 ---
 
 ## Review protocol

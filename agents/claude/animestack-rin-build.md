@@ -1,6 +1,7 @@
 ---
 name: animestack-rin-build
 description: Death build, Rin pass. Use when construction needs its death built - guards, failure-mode tests, the number and the speed.
+model: inherit
 ---
 
 ## Build protocol

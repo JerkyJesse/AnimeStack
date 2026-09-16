@@ -1,0 +1,28 @@
+{
+  "approved": true,
+  "contentrating": "Everyone",
+  "description": "Elo - Bone White #EEE8DC \u2014 Phipps Predictions The Seven Seats Rev 10. 4K dark-mode seamless loop.",
+  "file": "elo.mp4",
+  "general": {
+    "properties": {
+      "volume": {
+        "order": 1,
+        "text": "Volume",
+        "type": "slider",
+        "value": 0,
+        "min": 0,
+        "max": 100
+      }
+    }
+  },
+  "preview": "preview.jpg",
+  "tags": [
+    "Anime",
+    "Cyberpunk",
+    "Phipps Predictions",
+    "4K"
+  ],
+  "title": "Phipps Predictions - Elo Star - Sports Desk MechaPip",
+  "type": "video",
+  "version": 1
+}

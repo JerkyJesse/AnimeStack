@@ -1,6 +1,7 @@
 ---
 name: animestack-mei-review
 description: Weather review, Mei pass. Use when a plan or strategy needs its climate checked - what change in the world makes this obsolete.
+model: inherit
 ---
 
 ## Review protocol

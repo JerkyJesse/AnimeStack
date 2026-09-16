@@ -1,6 +1,7 @@
 ---
 name: animestack-niko-build
 description: Cage build, Niko pass. Use when construction needs the body built - isolation, wiring, deploy path, smoke.
+model: inherit
 ---
 
 ## Build protocol

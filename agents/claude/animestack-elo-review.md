@@ -1,6 +1,7 @@
 ---
 name: animestack-elo-review
 description: Rank review, Elo pass. Use when a ranking, measurement, or fan lean needs audit - is the number a measurement or a hymn.
+model: inherit
 ---
 
 ## Review protocol

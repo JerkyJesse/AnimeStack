@@ -1,0 +1,28 @@
+{
+  "approved": true,
+  "contentrating": "Everyone",
+  "description": "Reika - Gold Circuit Pulse #E8B552 \u2014 Phipps Predictions The Seven Seats Rev 10. 4K dark-mode seamless loop.",
+  "file": "reika.mp4",
+  "general": {
+    "properties": {
+      "volume": {
+        "order": 1,
+        "text": "Volume",
+        "type": "slider",
+        "value": 0,
+        "min": 0,
+        "max": 100
+      }
+    }
+  },
+  "preview": "preview.jpg",
+  "tags": [
+    "Anime",
+    "Cyberpunk",
+    "Phipps Predictions",
+    "4K"
+  ],
+  "title": "Phipps Predictions - Reika Kurogane - Founder & CIO",
+  "type": "video",
+  "version": 1
+}

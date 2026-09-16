@@ -1,0 +1,28 @@
+{
+  "approved": true,
+  "contentrating": "Everyone",
+  "description": "Mei - Orchid #E276D2 \u2014 Phipps Predictions The Seven Seats Rev 10. 4K dark-mode seamless loop.",
+  "file": "mei.mp4",
+  "general": {
+    "properties": {
+      "volume": {
+        "order": 1,
+        "text": "Volume",
+        "type": "slider",
+        "value": 0,
+        "min": 0,
+        "max": 100
+      }
+    }
+  },
+  "preview": "preview.jpg",
+  "tags": [
+    "Anime",
+    "Cyberpunk",
+    "Phipps Predictions",
+    "4K"
+  ],
+  "title": "Phipps Predictions - Mei Sakuraba - Global Macro",
+  "type": "video",
+  "version": 1
+}

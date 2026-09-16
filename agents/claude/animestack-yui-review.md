@@ -1,6 +1,7 @@
 ---
 name: animestack-yui-review
 description: Wound review, Yui pass. Use when a strategy, backtest, or signal needs its wound named, its falsifier stated, and its second sample checked for in-sample theater.
+model: inherit
 ---
 
 ## Review protocol

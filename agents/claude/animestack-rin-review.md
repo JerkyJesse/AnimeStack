@@ -1,6 +1,7 @@
 ---
 name: animestack-rin-review
 description: Death review, Rin pass. Use when a plan, strategy, or trade needs its death named - how it dies, how fast, what it takes with it.
+model: inherit
 ---
 
 ## Review protocol

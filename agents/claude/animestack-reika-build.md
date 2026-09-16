@@ -1,6 +1,7 @@
 ---
 name: animestack-reika-build
 description: Mandate build, Reika pass. Use when construction needs its mandate closed - the sentence the build must honor, the acceptance bar, and the owning seat dispatched to integrate.
+model: inherit
 ---
 
 ## Build protocol
