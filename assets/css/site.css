@@ -1,0 +1,411 @@
+/* ==========================================================================
+   AnimeStack — shared site stylesheet
+   animestack.jerkyjesse.com
+
+   House dark theme. One cage, one palette:
+     bg    #0a0a0f
+     text  #e8e8ef
+     gold  #E8B552  (accent + house gold)
+
+   Seat/lore pages carry their own inline `--accent`; this file is the shared
+   floor every page falls back to. Class names below match the existing
+   seat/lore pages (seats/*.html, lore/*.html) so the body styles the pages,
+   never the other way around.
+   ========================================================================== */
+
+:root {
+  --bg: #0a0a0f;
+  --bg-soft: #12121a;
+  --bg-soft2: #16161f;
+  --line: #26262f;
+  --ink: #e8e8ef;
+  --ink-dim: #9b968c;
+  --ink-faint: #6b675f;
+  --accent: #E8B552;  /* house gold — the shared default */
+  --gold: #E8B552;    /* house gold */
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232,181,82,0.08), transparent 60%);
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1.72;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.85em;
+  background: var(--bg-soft2);
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: #d8cfe0;
+}
+
+p { margin: 0 0 16px; }
+h1, h2, h3 { font-weight: 400; }
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 32px 0;
+}
+
+ul, ol { margin: 0 0 16px 24px; padding: 0; }
+li { margin-bottom: 8px; }
+
+/* ----------------------------------------------------------------------
+   Layout shell
+   ---------------------------------------------------------------------- */
+.shell {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 0 24px 96px;
+}
+
+/* ----------------------------------------------------------------------
+   Nav
+   ---------------------------------------------------------------------- */
+nav {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+nav .brand { color: var(--gold); font-weight: 700; }
+nav .crumb { color: var(--ink-dim); }
+nav .crumb.here { color: var(--ink); }
+nav a.back { color: var(--ink-dim); }
+nav a.back:hover { color: var(--accent); }
+
+/* ----------------------------------------------------------------------
+   Page header
+   ---------------------------------------------------------------------- */
+header.page { padding: 56px 0 8px; }
+header.page .kicker {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+header.page h1 {
+  font-size: 40px;
+  line-height: 1.1;
+  margin: 10px 0 0;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+header.page .one-sentence {
+  color: var(--gold);
+  font-style: italic;
+  font-size: 19px;
+  margin-top: 16px;
+}
+header.page .sub {
+  color: var(--ink-dim);
+  font-style: italic;
+  margin-top: 10px;
+  max-width: 64ch;
+}
+
+/* ----------------------------------------------------------------------
+   Freeze banner (mirror disclaimer)
+   ---------------------------------------------------------------------- */
+.freeze {
+  margin: 32px 0 8px;
+  padding: 14px 18px;
+  border-left: 3px solid var(--accent);
+  background: var(--bg-soft);
+  color: var(--ink-dim);
+  font-style: italic;
+  font-size: 15px;
+}
+.freeze p { margin: 0; }
+
+/* ----------------------------------------------------------------------
+   Portrait / roster figures (seat pages)
+   ---------------------------------------------------------------------- */
+.portrait {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin: 28px 0 8px;
+  flex-wrap: wrap;
+}
+.portrait figure {
+  margin: 0;
+  width: 240px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-soft);
+}
+.portrait figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.portrait figure figcaption {
+  padding: 6px 10px;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+/* ----------------------------------------------------------------------
+   Dossier zones (seat pages)
+   ---------------------------------------------------------------------- */
+section.zone { margin-top: 48px; }
+section.zone .zone-kicker {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+section.zone h2 {
+  font-size: 28px;
+  font-weight: 400;
+  margin: 6px 0 4px;
+  line-height: 1.15;
+}
+section.zone .meta {
+  color: var(--ink-dim);
+  font-style: italic;
+  font-size: 15px;
+  margin: 0 0 20px;
+}
+h3 {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--gold);
+  margin: 30px 0 8px;
+  letter-spacing: 0.01em;
+}
+
+/* ----------------------------------------------------------------------
+   Quotes (seat pages)
+   ---------------------------------------------------------------------- */
+.quote {
+  margin: 0 0 8px;
+  padding-left: 18px;
+  border-left: 2px solid var(--accent);
+}
+
+/* ----------------------------------------------------------------------
+   Lore books (pre-history, scenes)
+   ---------------------------------------------------------------------- */
+.lead {
+  color: var(--ink-dim);
+  font-style: italic;
+  font-size: 15px;
+  margin: 28px 0 20px;
+}
+.book { margin-top: 56px; }
+.book .book-kicker {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.book h2 {
+  font-size: 30px;
+  font-weight: 400;
+  margin: 8px 0 6px;
+  line-height: 1.15;
+}
+.book .meta {
+  color: var(--ink-dim);
+  font-style: italic;
+  font-size: 15px;
+  margin: 0 0 20px;
+}
+.book h3 {
+  font-size: 21px;
+  font-weight: 400;
+  color: var(--gold);
+  margin: 40px 0 12px;
+  letter-spacing: 0.01em;
+}
+.book p { margin: 0 0 18px; }
+.book hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 36px 0;
+}
+.book .closing {
+  color: var(--ink-dim);
+  font-style: italic;
+}
+
+/* ----------------------------------------------------------------------
+   Graves (pre-history) and dialogue (scenes)
+   ---------------------------------------------------------------------- */
+.grave {
+  border-left: 2px solid var(--line);
+  padding-left: 18px;
+  margin: 0 0 22px;
+}
+.grave strong:first-child { color: var(--ink); }
+
+.dialogue {
+  border-left: 2px solid var(--line);
+  padding-left: 18px;
+  margin: 0 0 20px;
+}
+.dialogue p { margin: 0 0 6px; }
+.dialogue p:last-child { margin-bottom: 0; }
+
+/* ----------------------------------------------------------------------
+   House Board exam (board.html)
+   ---------------------------------------------------------------------- */
+section.exam { margin-top: 40px; }
+section.exam p.lead { margin: 0 0 18px; }
+section.exam p.lead strong { color: var(--ink); }
+
+.seat { margin-top: 48px; }
+.seat h2 {
+  font-size: 28px;
+  font-weight: 400;
+  margin: 0 0 4px;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.seat .q { margin: 26px 0 0; }
+.seat .q h3 {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--ink);
+  margin: 0 0 8px;
+  letter-spacing: 0.01em;
+}
+.seat .q .qtype {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.seat ul.options {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+.seat ul.options li {
+  margin-bottom: 4px;
+  color: var(--ink-dim);
+  padding-left: 22px;
+  text-indent: -22px;
+}
+.seat ul.options li strong { color: var(--ink-faint); font-weight: 400; }
+.seat .key {
+  margin: 0 0 26px;
+  padding-left: 14px;
+  border-left: 2px solid var(--gold);
+  color: var(--ink);
+}
+.seat .key .src {
+  color: var(--ink-faint);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.82em;
+}
+
+/* ----------------------------------------------------------------------
+   Roster grid (index)
+   Seven seats, one spine. Cards link to seats/<seat>.html.
+   ---------------------------------------------------------------------- */
+.roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+  margin: 36px 0 8px;
+}
+.roster .card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-soft);
+}
+.roster .card a {
+  display: block;
+  color: var(--ink);
+}
+.roster .card a:hover { text-decoration: none; }
+.roster .card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-bottom: 1px solid var(--line);
+}
+.roster .card .body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.roster .card .name {
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+.roster .card .role {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.roster .card .sentence {
+  font-style: italic;
+  font-size: 14px;
+  color: var(--ink-dim);
+  margin-top: 6px;
+}
+
+/* ----------------------------------------------------------------------
+   Footer
+   ---------------------------------------------------------------------- */
+footer {
+  margin-top: 64px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-faint);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+/* ----------------------------------------------------------------------
+   Responsive
+   ---------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  body { font-size: 16px; line-height: 1.66; }
+  .shell { padding: 0 16px 72px; }
+  header.page h1 { font-size: 32px; }
+  .portrait figure { width: 100%; }
+  .roster { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 400px) {
+  .roster { grid-template-columns: 1fr; }
+  nav { gap: 12px; }
+}

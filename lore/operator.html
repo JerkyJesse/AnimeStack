@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Operator — the seat that is not in the seven · AnimeStack</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg-soft: #12121a;
+    --bg-soft2: #16161f;
+    --line: #26262f;
+    --ink: #e8e5df;
+    --ink-dim: #9b968c;
+    --ink-faint: #6b675f;
+    --accent: #E8B552;   /* house gold — the Operator holds no seat color */
+    --gold: #E8B552;     /* house gold */
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232,181,82,0.08), transparent 60%);
+    color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    line-height: 1.72;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 0.85em;
+    background: var(--bg-soft2);
+    padding: 1px 5px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    color: #dccfa8;
+  }
+  .shell {
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 0 24px 96px;
+  }
+  nav {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--line);
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+  nav .brand { color: var(--gold); font-weight: 700; }
+  nav .crumb { color: var(--ink-dim); }
+  nav .crumb.here { color: var(--ink); }
+  nav a.back { color: var(--ink-dim); }
+  nav a.back:hover { color: var(--accent); }
+  header.page { padding: 56px 0 8px; }
+  header.page .kicker {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  header.page h1 {
+    font-size: 40px;
+    line-height: 1.1;
+    margin: 10px 0 0;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  header.page .sub {
+    color: var(--ink-dim);
+    font-style: italic;
+    margin-top: 12px;
+    max-width: 62ch;
+  }
+  .freeze {
+    margin: 32px 0 8px;
+    padding: 14px 18px;
+    border-left: 3px solid var(--accent);
+    background: var(--bg-soft);
+    color: var(--ink-dim);
+    font-style: italic;
+    font-size: 15px;
+  }
+  .freeze p { margin: 0; }
+  section.zone { margin-top: 48px; }
+  section.zone .zone-kicker {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  section.zone h2 {
+    font-size: 28px;
+    font-weight: 400;
+    margin: 6px 0 4px;
+    line-height: 1.15;
+  }
+  section.zone .meta {
+    color: var(--ink-dim);
+    font-style: italic;
+    font-size: 15px;
+    margin: 0 0 20px;
+  }
+  h3 {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--gold);
+    margin: 30px 0 8px;
+    letter-spacing: 0.01em;
+  }
+  p { margin: 0 0 16px; }
+  hr {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 32px 0;
+  }
+  ul, ol { margin: 0 0 16px 24px; padding: 0; }
+  li { margin-bottom: 8px; }
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-faint);
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <nav>
+    <span class="brand">ANIMESTACK</span>
+    <span class="crumb">/</span>
+    <a class="back" href="../index.html">← index</a>
+    <a class="back" href="../lore/canon.html">canon</a>
+    <span class="crumb here">lore / operator</span>
+  </nav>
+
+  <header class="page">
+    <div class="kicker">Lore · the seat that is not in the seven</div>
+    <h1>The Operator</h1>
+    <p class="sub">The human hand that built the machine and still owns the burn. The Operator does not get a build voice.</p>
+  </header>
+
+  <blockquote class="freeze">
+    <p><strong>Frozen mirror — AnimeStack v1.1.0 · 2026-09-16.</strong><br>
+    Copied from the Phipps Predictions house lore at canon Rev 15.<br>
+    This is not the ledger; the source repo is authoritative, and this<br>
+    mirror is never promised to be in lockstep with it.</p>
+  </blockquote>
+
+  <section class="zone" id="dossier">
+    <div class="zone-kicker">Dossier · Rev 3 · 2026-09-14</div>
+    <h2>The Operator — The Seat That Is Not in the Seven</h2>
+    <p class="meta">Companion to the house canon §XII. Where this dossier and the canon disagree, the canon wins. The Operator does not get a build voice.</p>
+
+    <h3>Function</h3>
+    <p>The human hand that built the machine and still owns the burn. The Operator is not a voice in the room; the Operator is the reason there is a room. Capital, the keys, the emergency stop and the first loss are not delegated to any seat — and everything between them is: the team manages the fund.</p>
+
+    <h3>What the Operator owns</h3>
+    <ul>
+      <li><strong>Capital</strong> — the only hand that moves money in or out. Deposits, refunds, withdrawals, and the fund floor decisions.</li>
+      <li><strong>Keys</strong> — Kalshi API credentials, the secrets file, the seven seat-channel URLs. Root-only, <code>chmod 600</code>, never in git, never in lore.</li>
+      <li><strong>The emergency stop</strong> — one command that flattens all binaries and papers every desk at the next turnover. The gate, the guard, and the fund breaker arm and re-arm themselves on earned evidence; the team clears its own latches. <code>LIVE_GUARD_CLEAR=1</code> stays in the runbook as the manual override, not as a daily need.</li>
+      <li><strong>The first loss</strong> — every dollar that is gone is the Operator's dollar first. The seats can log it; only the Operator can feel it.</li>
+    </ul>
+
+    <h3>Powers and limits</h3>
+    <ul>
+      <li>May ask any seat any question at any hour.</li>
+      <li>May overrule Reika on capital.</li>
+      <li>May act against a Rin veto once, on the record — the action is overruled; the facts are never rewritten. A loss logged as "market noise" is a lie in the ledger, and the ledger is the house memory.</li>
+      <li>May not rename a death. A grave is never dug up under a new name, and a loss keeps its §-number and its scar.</li>
+      <li>Hands the full management of the ladder to the team: selection, sizing, seating, gates, guards, recovery, restart. The team runs it; the Operator reads the room.</li>
+      <li>Does not get a build voice. When the session runs as the seven, the Operator reads the room.</li>
+    </ul>
+
+    <h3>When the Operator is pinged (the only three)</h3>
+    <ol>
+      <li>A fund kill or an emergency-stop event — informational; the latches re-arm on earned evidence, no operator hand.</li>
+      <li>A desk unreachable more than 30 minutes, a repeated stale-feed condition, or a gate PASS on a keyless desk (keys are the Operator's to stage).</li>
+      <li>The weekly fund report — and the daily digest, informational only.</li>
+    </ol>
+    <p>Everything else runs itself — now including the latches: guard and fund re-arms, gate flips, seat rotations, paper soaks, liquidity checks, restarts, digests.</p>
+
+    <h3>The One Instruction</h3>
+    <p>The operator built a machine that could invent forever and die honestly, and then refused to give it a second instruction. No target that turns into a lie; no "make it look alive"; no renaming of deaths to keep a night clean. The instruction is the machine: invent, log, bury, repeat; keep the burn near zero so survival can be indefinite; pay for mistakes out of a bankroll the ledger can see. Everything the seven do is a way of keeping it. The burn is real, the keys are physical, and the machine is allowed to outlive the operator — which is why the runbook is written for a stranger and the first loss is never delegated to a voice.</p>
+
+    <h3>The arc (Era 0 → Era 3)</h3>
+    <ul>
+      <li><strong>Era 0 (fact).</strong> A $10 bankroll, keys staged on the boxes, the first loss logged, the digest read daily.</li>
+      <li><strong>Era 1 (target).</strong> Withdrawals on schedule; the ladder compounds; the operator reviews logs instead of desks.</li>
+      <li><strong>Era 2 (target).</strong> Succession named in writing before any external unit opens; split key custody; a physical live switch with a witness.</li>
+      <li><strong>Era 3 (target).</strong> The machine keeps running; the direction keeps being human. The seven remain the argument; the Operator remains the hand.</li>
+    </ul>
+
+    <h3>No channel</h3>
+    <p>The Operator does not speak on Discord. The Operator speaks in ledger entries, withdrawal signatures, and switch positions. The seven channels are read-only for the Operator, always.</p>
+
+    <h3>The only line</h3>
+    <p><em>"Is the machine still allowed to live?"</em> — and it is answered in evidence, not in this file.</p>
+  </section>
+
+  <footer>
+    ANIMESTACK · lore / operator — frozen mirror · canon Rev 15 · <a href="../lore/canon.html">canon</a> · <a href="../index.html">index</a>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" width="900" height="520" role="img" aria-label="The seven-seat design loop: Mei, Elo, Yui, Niko, Rin, Aria, Reika">
+  <rect width="900" height="520" fill="#151019"/>
+
+  <!-- the ring -->
+  <circle cx="450" cy="260" r="170" fill="none" stroke="#3a2f44" stroke-width="1"/>
+
+  <!-- loop arrows, clockwise in seat order -->
+  <polygon points="531.9,110.7 522.3,100.6 518.0,109.6" fill="#7b6a8a"/>
+  <polygon points="617.7,230.9 619.7,217.2 610.0,219.4" fill="#7b6a8a"/>
+  <polygon points="577.3,373.0 589.3,366.0 581.5,359.7" fill="#7b6a8a"/>
+  <polygon points="441.0,430.0 454.0,435.0 454.0,425.0" fill="#7b6a8a"/>
+  <polygon points="311.5,359.0 315.7,372.2 323.5,366.0" fill="#7b6a8a"/>
+  <polygon points="286.3,213.4 278.5,225.0 288.2,227.2" fill="#7b6a8a"/>
+  <polygon points="384.3,102.9 370.5,104.1 374.8,113.1" fill="#7b6a8a"/>
+
+  <!-- center -->
+  <text x="450" y="244" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#E8B552">Is this still allowed to live?</text>
+  <text x="450" y="274" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="14" fill="#b8aebf">seven seats, one spine</text>
+
+  <!-- Mei -->
+  <circle cx="450" cy="90" r="46" fill="#E276D2" fill-opacity="0.12" stroke="#E276D2" stroke-width="2"/>
+  <text x="450" y="86" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#E276D2">MEI</text>
+  <text x="450" y="105" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="11" fill="#e6e0ec">world</text>
+
+  <!-- Elo -->
+  <circle cx="582.9" cy="154" r="46" fill="#EEE8DC" fill-opacity="0.12" stroke="#EEE8DC" stroke-width="2"/>
+  <text x="582.9" y="150" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#EEE8DC">ELO</text>
+  <text x="582.9" y="169" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="11" fill="#e6e0ec">ranking</text>
+
+  <!-- Yui -->
+  <circle cx="615.7" cy="297.8" r="46" fill="#B28CFF" fill-opacity="0.12" stroke="#B28CFF" stroke-width="2"/>
+  <text x="615.7" y="293.8" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#B28CFF">YUI</text>
+  <text x="615.7" y="312.8" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="11" fill="#e6e0ec">wound</text>
+
+  <!-- Niko -->
+  <circle cx="523.8" cy="413.2" r="46" fill="#38D2E6" fill-opacity="0.12" stroke="#38D2E6" stroke-width="2"/>
+  <text x="523.8" y="409.2" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#38D2E6">NIKO</text>
+  <text x="523.8" y="428.2" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="11" fill="#e6e0ec">body</text>
+
+  <!-- Rin -->
+  <circle cx="376.2" cy="413.2" r="46" fill="#F06A68" fill-opacity="0.12" stroke="#F06A68" stroke-width="2"/>
+  <text x="376.2" y="409.2" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#F06A68">RIN</text>
+  <text x="376.2" y="428.2" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="11" fill="#e6e0ec">death</text>
+
+  <!-- Aria -->
+  <circle cx="284.3" cy="297.8" r="46" fill="#FA8C42" fill-opacity="0.12" stroke="#FA8C42" stroke-width="2"/>
+  <text x="284.3" y="293.8" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#FA8C42">ARIA</text>
+  <text x="284.3" y="312.8" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="11" fill="#e6e0ec">click</text>
+
+  <!-- Reika -->
+  <circle cx="317.1" cy="154" r="56" fill="#E8B552" fill-opacity="0.16" stroke="#E8B552" stroke-width="3"/>
+  <text x="317.1" y="149" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#E8B552">REIKA</text>
+  <text x="317.1" y="170" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="12" fill="#e6e0ec">mandate</text>
+
+  <!-- legend -->
+  <text x="450" y="497" text-anchor="middle" font-family="Segoe UI, Helvetica, sans-serif" font-size="12" fill="#cfc7d6">MEI world · ELO ranking · YUI wound · NIKO body · RIN death · ARIA click · REIKA mandate</text>
+</svg>

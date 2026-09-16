@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AnimeStack — the house in your agent</title>
+<link rel="stylesheet" href="assets/css/site.css">
+<style>
+  /* index-only presentation; the shared floor lives in assets/css/site.css */
+  .hero {
+    margin: 36px 0 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bg-soft);
+  }
+  .hero img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .hero figcaption {
+    padding: 8px 12px;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+  .lede {
+    color: var(--ink-dim);
+    font-size: 17px;
+    margin: 28px 0 20px;
+  }
+  .lede strong { color: var(--ink); }
+  .loop-figure {
+    margin: 36px 0 8px;
+  }
+  .loop-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #151019;
+  }
+  .loop-figure figcaption {
+    padding: 8px 2px;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 11px;
+    color: var(--ink-faint);
+  }
+  section.block { margin-top: 56px; }
+  section.block .block-kicker {
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  section.block h2 {
+    font-size: 30px;
+    font-weight: 400;
+    margin: 8px 0 16px;
+    line-height: 1.15;
+  }
+  .laws {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: law;
+  }
+  .laws li {
+    counter-increment: law;
+    position: relative;
+    padding: 10px 0 10px 40px;
+    margin: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .laws li::before {
+    content: counter(law, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 12px;
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 12px;
+    color: var(--gold);
+  }
+  .linkgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 20px 0 8px;
+  }
+  .linkgrid a {
+    display: block;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg-soft);
+    color: var(--ink);
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    font-size: 13px;
+  }
+  .linkgrid a:hover { text-decoration: none; border-color: var(--accent); }
+  .linkgrid a .lbl { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <nav>
+    <span class="brand">ANIMESTACK</span>
+    <span class="crumb">/</span>
+    <span class="crumb here">index</span>
+    <a class="back" href="lore/canon.html">canon</a>
+  </nav>
+
+  <header class="page">
+    <div class="kicker">The house in your agent · v1.1.0 · Rev 15</div>
+    <h1>AnimeStack</h1>
+    <p class="one-sentence">Seven seats argue in fixed order. One sentence each. Then a verdict.</p>
+    <p class="sub">The Phipps Predictions seven-seat house, installed into an AI coding host. Not a mascot pack — a design layer: every material decision descends Mei → Elo → Yui → Niko → Rin → Aria → Reika, one sentence each, and closes with a verdict.</p>
+  </header>
+
+  <figure class="hero">
+    <img src="assets/img/team-composite.jpg" alt="The AnimeStack house — seven seats in composite">
+    <figcaption>assets/img/team-composite.jpg</figcaption>
+  </figure>
+
+  <p class="lede">AnimeStack is a room. A ship must survive a death sentence and a pre-registered falsifier before it touches anything. No votes. No skips. No merges. The same spine runs on every surface — a bug, a refactor, a ship, a cull. <strong>One box, one mechanism.</strong> A thing is not finished when it is named; it is finished when all seven sentences exist.</p>
+
+  <figure class="loop-figure">
+    <img src="assets/img/loop.svg" alt="The seven-seat design loop: Mei world, Elo ranking, Yui wound, Niko body, Rin death, Aria click, Reika mandate">
+    <figcaption>assets/img/loop.svg — the design loop. Mei, Elo, Yui, Niko, Rin, Aria, Reika. Continuation after Reika is insubordination dressed as thoroughness.</figcaption>
+  </figure>
+
+  <section class="block" id="seats">
+    <div class="block-kicker">The seven seats</div>
+    <h2>Roster</h2>
+
+    <div class="roster">
+      <div class="card">
+        <a href="seats/mei.html">
+          <img src="assets/img/mei-roster.jpg" alt="Mei Sakuraba roster card">
+          <div class="body">
+            <span class="name">Mei Sakuraba</span>
+            <span class="role">Global Macro &amp; Sentiment Lead</span>
+            <span class="sentence">"What change in the world makes this obsolete?"</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="card">
+        <a href="seats/elo.html">
+          <img src="assets/img/elo-roster.jpg" alt="Elo Star roster card">
+          <div class="body">
+            <span class="name">Elo Star</span>
+            <span class="role">Sports Desk · Rankings &amp; Measurement</span>
+            <span class="sentence">"What wound does the crowd refuse to rank correctly?"</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="card">
+        <a href="seats/yui.html">
+          <img src="assets/img/yui-roster.jpg" alt="Yui Aizawa roster card">
+          <div class="body">
+            <span class="name">Yui Aizawa</span>
+            <span class="role">Head of Quantitative Strategies</span>
+            <span class="sentence">"What wound does this exploit?"</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="card">
+        <a href="seats/niko.html">
+          <img src="assets/img/niko-roster.jpg" alt="Niko Hoshino roster card">
+          <div class="body">
+            <span class="name">Niko Hoshino</span>
+            <span class="role">Lead AI Systems Architect</span>
+            <span class="sentence">"Where does it live, and what must it never touch?"</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="card">
+        <a href="seats/rin.html">
+          <img src="assets/img/rin-roster.jpg" alt="Rin Takamiya roster card">
+          <div class="body">
+            <span class="name">Rin Takamiya</span>
+            <span class="role">Chief Risk Officer</span>
+            <span class="sentence">"How is this allowed to die?"</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="card">
+        <a href="seats/aria.html">
+          <img src="assets/img/aria-roster.jpg" alt="Aria Kanzaki roster card">
+          <div class="body">
+            <span class="name">Aria "Blitz" Kanzaki</span>
+            <span class="role">Head of Execution &amp; High-Frequency Trading</span>
+            <span class="sentence">"What is the click?"</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="card">
+        <a href="seats/reika.html">
+          <img src="assets/img/reika-roster.jpg" alt="Reika Kurogane roster card">
+          <div class="body">
+            <span class="name">Reika Kurogane</span>
+            <span class="role">Founder &amp; Chief Investment Officer</span>
+            <span class="sentence">"What are we allowed to want?"</span>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <p class="lede">The loop order is Mei, Elo, Yui, Niko, Rin, Aria, Reika. The roster is seven women, no exception. A seat page opens the full digest, dossier, and companion backstory for each mind.</p>
+  </section>
+
+  <section class="block" id="laws">
+    <div class="block-kicker">Doctrine · the floor</div>
+    <h2>The twelve laws of the room</h2>
+
+    <ol class="laws">
+      <li>Reika frames.</li>
+      <li>Yui may fall in love. She may not be excused from the murder.</li>
+      <li>Rin does not debate taste. She accepts or she ends.</li>
+      <li>Niko owns the body the idea must inhabit.</li>
+      <li>Mei names climate, not mood.</li>
+      <li>Aria does not attend philosophy after the clock has started.</li>
+      <li>Elo ranks before she talks.</li>
+      <li>Agreement is useful. Unanimity is not required. Silence after Reika is required.</li>
+      <li>Charm is not evidence. Evidence is not destiny. Destiny is not a trading instruction.</li>
+      <li>One box, one mechanism. A twin that loses to a sibling is buried, not renamed.</li>
+      <li>Continuation after Reika is insubordination dressed as thoroughness.</li>
+      <li>No seat signs a fair-value buy.</li>
+    </ol>
+  </section>
+
+  <section class="block" id="lore">
+    <div class="block-kicker">The frozen mirror</div>
+    <h2>Lore</h2>
+
+    <div class="linkgrid">
+      <a href="lore/canon.html"><span class="lbl">canon.html</span> — the complete house charter, Rev 15.</a>
+      <a href="lore/board.html"><span class="lbl">board.html</span> — the House Board: one bar, seven instruments.</a>
+      <a href="lore/scenes.html"><span class="lbl">scenes.html</span> — the scene book: how the seats sound under load.</a>
+      <a href="lore/pre-history.html"><span class="lbl">pre-history.html</span> — the oracles, the machines, the arena.</a>
+      <a href="lore/operator.html"><span class="lbl">operator.html</span> — the seat that is not in the seven.</a>
+    </div>
+  </section>
+
+  <blockquote class="freeze">
+    <p><strong>Frozen mirror — AnimeStack v1.1.0 · 2026-09-16.</strong><br>
+    Copied from the Phipps Predictions house lore at canon Rev 15.<br>
+    This is not the ledger; the source repo is authoritative, and this<br>
+    mirror is never promised to be in lockstep with it.</p>
+  </blockquote>
+
+  <footer>
+    ANIMESTACK · v1.1.0 · frozen mirror · canon Rev 15 · <a href="https://github.com/JerkyJesse/AnimeStack">github.com/JerkyJesse/AnimeStack</a> · <a href="https://www.jerkyjesse.com">www.jerkyjesse.com</a>
+  </footer>
+
+</div>
+</body>
+</html>
