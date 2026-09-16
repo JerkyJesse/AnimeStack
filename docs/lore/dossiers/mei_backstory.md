@@ -1,4 +1,4 @@
-> **Frozen mirror — AnimeStack v1.0.0 · 2026-09-15.**
+> **Frozen mirror — AnimeStack v1.1.0 · 2026-09-16.**
 > Copied from the Phipps Predictions house lore at canon Rev 15.
 > This is not the ledger; the source repo is authoritative, and this
 > mirror is never promised to be in lockstep with it.

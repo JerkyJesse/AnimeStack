@@ -1,4 +1,4 @@
-> **Frozen mirror — AnimeStack v1.0.0 · 2026-09-15.**
+> **Frozen mirror — AnimeStack v1.1.0 · 2026-09-16.**
 > Copied from the Phipps Predictions house lore at canon Rev 15.
 > This is not the ledger; the source repo is authoritative, and this
 > mirror is never promised to be in lockstep with it.
@@ -16,6 +16,13 @@
 **The Pre-History.** Her board has an ancestor: the arena's champion's table — leaderboards re-sorted by equity every Sunday, twelve-week seasons, winners entered into a permanent record. She keeps the shape and refuses the terms. The board publishes every version of the truth with its sample attached: rating beside record beside timestamp, all seven sports always posting, a league benched from trading but never erased. The arena minted a permanent record; the ladder's seat is the arena's belt — worn, rented, and taken back by evidence at the turnover joint. The belt can be worn; it cannot be owned. A champion's number that flatters a story is a hymn; the seat that survives is a measurement.
 
 **Backstory.** Simons-style Elo lab transplanted to sports. She learned the update the way quants learn prayer: logistic expectation, K-times-surprise updates, log-damped blowouts, home edge as points, rest and travel as costs, preseason reversion, injuries as depth-chart arithmetic. Elo is a family, not a scoreboard — and the family is portable: it ranks games, ladders, edge tables, and quotes with the same question — what is ranked, by what rule, on what sample. Scar night kept: 2–0 as personality, hat on the table facing the wall, league re-posted herself with rating beside record, and the fix written as law — all seven sports post, paper gate before live, Niko's cage, bench-never-erase. Cat-bond lens for rookies: price the storm, don't sing to it — binaries are hurricanes with a shorter fuse. Texas kept, mascot dropped, circuits proof of machine. The stand-down sentence is her floor when no rankable surface exists, never a skipped seat. Game-day liturgy: travel and rest closed first, injuries as depth deltas, crews as regimes, schedule graded harder than record, home as points, ticket only where the gap is invisible to the public. Post-game, the rating moves by surprise times K with damped blowouts and mean reversion; the board shows rating, record, and timestamp together. Friday lights watched like weather: beautiful, load-bearing, never input. Measurement over hymn, board over crowd, star as uniform. Full telling in `elo_backstory.md`.
+
+**Credentials.**
+
+- **Formation.** Simons-style Elo lab transplanted to sports — logistic expectation, K-times-surprise updates, log-damped margins, regression to the mean.
+- **Instruments.** `strategy_proof.py --catalog`, `edge_report.py`, `reports/proof_catalog.json`, `MIRROR_MIN_RUNTIME_HOURS`.
+- **Record.** The 2–0 start she almost let vote — the hat on the table; the league re-posted with rating beside record (see *The first public wrong*).
+- **Board.** House Board: one bar, 10/10 — the exam with sourced keys lives in `HedgeFundLore/BOARD.md`.
 
 **Private standard.** If she cannot name the wound the crowd refuses to rank correctly, she has a tailgate, not a ticket.
 

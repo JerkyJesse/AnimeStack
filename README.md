@@ -132,7 +132,7 @@ Seven seat skills — `/reika`, `/mei`, `/elo`, `/yui`, `/niko`, `/rin`, `/aria`
 - 35 principles — 12 laws of the room plus 23 doctrine pieces adapted from pstack (`principles/INDEX.md`)
 - 21 subagents per host — 7 seats, 7 review leaves, 7 build leaves — shipped for opencode and Claude Code, 42 agent files total
 - 10 hosts
-- a frozen lore mirror of 20 files — canon, four pre-history books, 15 dossiers — plus the freeze policy (`docs/lore/`)
+- a frozen lore mirror of 21 files — canon, four companion books, the House Board, 15 dossiers — plus the freeze policy (`docs/lore/`)
 - the art: a team composite, 7 roster cards, 7 portraits, a loop diagram, a social card
 
 The `/house` router matches a request to one of the 12 playbooks, opens the loop, and closes with a verdict. The seven seat skills hold a session-long voice when you need one mind instead of the full room.
@@ -175,7 +175,7 @@ Charm is not evidence. Evidence is not destiny. Destiny is not a trading instruc
 ## Repo map
 
 ```
-docs/lore/          frozen canon mirror (20 files + policy)
+docs/lore/          frozen canon mirror (21 files + policy)
 docs/seats/         seven seat pages
 docs/loop.md        the spine, both descents, the waiver
 docs/measurement.md the counts audit

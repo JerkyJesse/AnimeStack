@@ -10,7 +10,7 @@ the table, the table is wrong.
 
 ## 1. The sample
 
-What is ranked: this repository, tag `v1.0.0`, frozen 2026-09-15.
+What is ranked: this repository, tag `v1.1.0`, frozen 2026-09-16.
 
 The claims in this pack are claims about this tree, not promises about the outcomes a
 user will get. A pack that installs cleanly on your host is a body question, not a result
@@ -23,7 +23,7 @@ the tree contains what the table says it contains, at the stated tag, on the sta
 
 ## 2. The counts table
 
-Run each command from the repo root. The expected count is the v1.0.0 truth; a command
+Run each command from the repo root. The expected count is the v1.1.0 truth; a command
 that prints anything else is a defect, and the defect is the tree's number, never the
 prose.
 
@@ -37,9 +37,9 @@ prose.
 | 10 | hosts | `grep -oE 'claude\|cursor\|codex\|factory\|opencode\|kiro\|slate\|openclaw\|hermes\|gbrain' setup \| sort -u \| wc -l` |
 | 21 | agents, opencode host | `ls agents/opencode \| wc -l` |
 | 21 | agents, claude host | `ls agents/claude \| wc -l` |
-| 5 | lore mirror files | `ls docs/lore/*.md \| grep -v README \| wc -l` (canon, oracles, machines, arena, scenes) |
+| 6 | lore mirror files | `ls docs/lore/*.md \| grep -v README \| wc -l` (canon, oracles, machines, arena, scenes, board) |
 | 15 | lore dossiers | `ls docs/lore/dossiers \| wc -l` |
-| 20 | lore total | 5 mirror files + 15 dossiers, the two rows above summed |
+| 21 | lore total | 6 mirror files + 15 dossiers, the two rows above summed |
 | 16 | art images | `ls docs/images/*.jpg docs/images/roster/*.jpg docs/images/portraits/*.jpg \| wc -l` |
 
 Notes on the rows.
@@ -63,10 +63,10 @@ The agents rows are two of twenty-one, forty-two total: one directory per host, 
 holding the same seat roster as agent files. A host that ships twenty of twenty-one is a
 defect, not a rounding error.
 
-The lore rows are two that sum to twenty: five mirror files at the top of `docs/lore`
-(canon, oracles, machines, arena, scenes), fifteen dossiers in `docs/lore/dossiers`. The
+The lore rows are two that sum to twenty-one: six mirror files at the top of `docs/lore`
+(canon, oracles, machines, arena, scenes, board), fifteen dossiers in `docs/lore/dossiers`. The
 policy page `docs/lore/README.md` is authored, not mirrored, and is not one of the
-twenty. The mirror is the frozen canon; the dossiers are the deep canon. They are kept
+twenty-one. The mirror is the frozen canon; the dossiers are the deep canon. They are kept
 separate because a dossier deepens a seat and never contradicts it, and the count is the
 proof they are both present.
 

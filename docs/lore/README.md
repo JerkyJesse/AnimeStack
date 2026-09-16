@@ -1,10 +1,10 @@
-> **Freeze policy — AnimeStack v1.0.0 · 2026-09-15.**
-> This page is the policy; the 20 mirrored files beside it carry the frozen-mirror
+> **Freeze policy — AnimeStack v1.1.0 · 2026-09-16.**
+> This page is the policy; the 21 mirrored files beside it carry the frozen-mirror
 > header. This is not the ledger; the source repo is authoritative.
 
 # AnimeStack — Lore Mirror & Freeze Policy
 
-**Freeze date:** 2026-09-15 · **Canon:** Rev 15 · **Mirror version:** v1.0.0
+**Freeze date:** 2026-09-16 · **Canon:** Rev 15 · **Mirror version:** v1.1.0
 
 ## What this is
 
@@ -22,7 +22,7 @@ writing for a stranger reading GitHub, not a copy of the canon.
 - **Not the ledger.** The Phipps Predictions trading ledger is
   `TRADINGIDEAS.MD` in the source repo. It is not mirrored here. Nothing in
   this pack trades, signs, or moves capital.
-- **Not a live feed.** This mirror was copied once, on 2026-09-15, at canon
+- **Not a live feed.** This mirror was refreshed on 2026-09-16, at canon
   Rev 15. The source continues to change. This copy does not follow it.
 - **Not authoritative.** A public mirror of a living canon is a copy, not the
   ledger; when they disagree, the source wins.
@@ -39,12 +39,13 @@ the source repo to know what the house is doing today.
 | `docs/lore/machines.md` | `HedgeFundLore/MACHINES.md` |
 | `docs/lore/arena.md` | `HedgeFundLore/ARENA.md` |
 | `docs/lore/scenes.md` | `HedgeFundLore/SCENES.md` |
+| `docs/lore/board.md` | `HedgeFundLore/BOARD.md` |
 | `docs/lore/dossiers/*.md` (15) | `HedgeFundLore/dossiers/*.md` |
 
 Every mirrored file carries the same header block, prepended before the
 original H1:
 
-> **Frozen mirror — AnimeStack v1.0.0 · 2026-09-15.**
+> **Frozen mirror — AnimeStack v1.1.0 · 2026-09-16.**
 > Copied from the Phipps Predictions house lore at canon Rev 15.
 > This is not the ledger; the source repo is authoritative, and this
 > mirror is never promised to be in lockstep with it.

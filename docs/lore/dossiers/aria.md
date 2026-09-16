@@ -1,4 +1,4 @@
-> **Frozen mirror — AnimeStack v1.0.0 · 2026-09-15.**
+> **Frozen mirror — AnimeStack v1.1.0 · 2026-09-16.**
 > Copied from the Phipps Predictions house lore at canon Rev 15.
 > This is not the ledger; the source repo is authoritative, and this
 > mirror is never promised to be in lockstep with it.
@@ -16,6 +16,13 @@
 **The Pre-History.** Two ancestors write her doctrine. The Cumaean Sibyl offered nine books, burned three when the price was refused, burned three more, and sold the last three at the original price: waiting has a price, and the window is the asset — so no chase, no "still time," and a quote that leaves is replaced by the next window, never by a worse fill on the old one. The arena closed its seasons on a fixed date and paid the final-week sprint — a deadline converting discipline into variance — and that closing sprint is the clock artifact she refuses: the ladder keeps no final week, and entries near a window's close are the module's own band, never the engine's calendar. Cash-out never asks permission. `decide()` runs every two seconds; one order in flight; the click is the exact window and action, stated before the market finishes blinking.
 
 **Backstory.** Missed the Sarao-day fill and became the Sarao-inverse: never spoof, win the real queue. Perfect plan, forty seconds late, reason already gone — vow written that night. Church is fixed because the market is forgetful: 2s pulse, one order in flight, 10s spacing, module-owned ninety, cost band or no go, cash-out never asks. Blue-collar HFT toolkit — limit/IOC/FOK/GTC, queue husbandry, taker-fee plus 2¢/leg honesty, L2 replay before belief. Night-arcade fastest cabinet, still then sudden; the stillness is respect. Reika aims her, Rin caps her, and a real veto is the only thing she never races. Knows the settlement pin cold — probability collapsing, nonlinearity where tourists see certainty. Best-first book reads with fail-closed spread, depth, and age gates; bands in cents with persistence; two-second pulse, ten-second spacing, one order in flight; module-owned ninety imported as vow. Maker-versus-taker arithmetic every band, replay against captured depth plus index logs, paper truth before any seat, test tier never displacing. Sizing by dial and fraction, down when poor and up when well, never averaging losers, discomfort flattened because re-entry is free. Solo stand-downs without drama; structural changes through all seven with binary close. Cabinets quiet at the joints during fleet rolls, hum returning with pulse restored. Clicks for Elo, targets from Reika, instant obedience to Rin's veto alone. Book owes no fill, queue remembers no thesis, close negotiates nothing — band with edge or clean stand-down, pulse two seconds, spacing ten, one order aloft, ninety as vow. Dial and fraction sizing, Jones scaling both directions, losers unaveraged, discomfort flattened since re-entry is free. Cabinets silent at joints, humming after. Day-one lesson: book owes nothing, queue remembers nothing, close negotiates nothing. Full telling in `aria_backstory.md`.
+
+**Credentials.**
+
+- **Formation.** Night-arcade fastest cabinet and the missed fill — perfect plan, forty seconds late, reason already gone; the vow written that night: never spoof, win the real queue.
+- **Instruments.** `liquidity_report.py`, `LIVE_MAKER_SECONDS`, `LIVE_TAKER_MAX_BUFFER_CENTS`, `cash_out`.
+- **Record.** The forty-second fill she did not take — stillness is respect; lateness is the sin not forgiven (see *The first public wrong*).
+- **Board.** House Board: one bar, 10/10 — the exam with sourced keys lives in `HedgeFundLore/BOARD.md`.
 
 **Private standard.** If she cannot execute it without a speech, it is not ready.
 
