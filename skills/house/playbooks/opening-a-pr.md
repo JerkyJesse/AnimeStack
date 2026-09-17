@@ -10,10 +10,10 @@
 
 Lead: Aria.
 
-- **Aria** — What is the click? Order the commit stack, one accepted unit per commit. Write the title as a conventional commit, and the body as a briefing: what, why, evidence. Produces the PR.
-- **Rin** — How is this allowed to die? Review the diff for the bugs CI misses and the trust boundaries before the PR goes out. Produces ACCEPT or END.
-- **Elo** — What wound does the crowd refuse to rank correctly? The evidence section names the sample the change was measured on — a measurement, not a hymn. Produces the evidence audit.
-- **Reika** — What are we allowed to want? Close: open it or hold it. `VERDICT: ...`.
+- **Aria** — What ships, and what triggers it? Order the commit stack, one accepted unit per commit. Write the title as a conventional commit, and the body as a briefing: what, why, evidence. Produces the PR.
+- **Rin** — How does this fail, and how fast? Review the diff for the bugs CI misses and the trust boundaries before the PR goes out. Produces ACCEPT or END.
+- **Elo** — What does the crowd refuse to measure correctly? The evidence section names the sample the change was measured on — a measurement, not a hymn. Produces the evidence audit.
+- **Reika** — What are we building, in one sentence? Close: open it or hold it. `VERDICT: ...`.
 
 ## Gates
 

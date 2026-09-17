@@ -11,11 +11,11 @@
 
 Lead: Yui.
 
-- **Yui** — What wound does this exploit? The wound is the failing repro. Reproduce as a failing test first. Ask why until the root cause is named. Fix at the root; no nil-check silencers. Produces the failing test, the root-cause sentence, and the fix.
+- **Yui** — What failure does this prevent, and what would falsify it? The failure is the failing repro. Reproduce as a failing test first. Ask why until the root cause is named. Fix at the root; no nil-check silencers. Produces the failing test, the root-cause sentence, and the fix.
 - **Niko** — Where does it live, and what must it never touch? Confirm the fix lands in the right module and touches nothing it must not. Produces the boundary check.
-- **Rin** — How is this allowed to die? Name the failure mode in ordinary words, and confirm the fix does not reopen a worse one. Produces ACCEPT or END.
-- **Aria** — What is the click? Run the tests, one accepted unit per commit. Produces the verified fix, CLICK or STAND DOWN.
-- **Reika** — What are we allowed to want? Close: ship the fix or send it back. `VERDICT: ...`.
+- **Rin** — How does this fail, and how fast? Name the failure mode in ordinary words, and confirm the fix does not reopen a worse one. Produces ACCEPT or END.
+- **Aria** — What ships, and what triggers it? Run the tests, one accepted unit per commit. Produces the verified fix, SHIP or STAND DOWN.
+- **Reika** — What are we building, in one sentence? Close: ship the fix or send it back. `VERDICT: ...`.
 
 ## Gates
 
@@ -25,7 +25,7 @@ Lead: Yui.
 
 ## Close
 
-Reika closes: `VERDICT: ...` after Rin ACCEPTs and Aria CLICKs.
+Reika closes: `VERDICT: ...` after Rin ACCEPTs and Aria SHIPs.
 
 ## Notes
 

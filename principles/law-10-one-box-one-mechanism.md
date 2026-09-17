@@ -2,7 +2,7 @@
 
 **One box, one mechanism.** A twin that loses to a sibling is buried, not renamed.
 
-**Translated.** One concern per module: a unit of code does one thing, and a second implementation of the same thing that loses to the first is deleted, not kept under a new name. (The canon speaks of trading boxes and mechanisms; the translation holds for modules and concerns.)
+**Translated.** One concern per module: a unit of code does one thing, and a second implementation of the same thing that loses to the first is deleted, not kept under a new name.
 
 **Why.** Two mechanisms in one cell produce noise and confusion about which one earned the result; a loser kept under a new name is a cull avoided, and the debt collects.
 

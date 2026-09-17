@@ -2,7 +2,7 @@
 
 35 principles: 12 laws of the room (canon §III) + 23 doctrine pieces (adapted from pstack, MIT).
 
-The laws are the room's floor — verbatim from the canon, translated into software work where the canon speaks in trading language. The doctrine pieces are re-voiced from pstack's engineering principles; each is translated, not copied. A steward owns each principle. A principle with no steward is a suggestion.
+The laws are the room's floor — verbatim from the canon, translated into software work. The doctrine pieces are re-voiced from pstack's engineering principles; each is translated, not copied. A steward owns each principle. A principle with no steward is a suggestion.
 
 ## Laws of the Room
 
@@ -19,7 +19,7 @@ The laws are the room's floor — verbatim from the canon, translated into softw
 | `law-09-charm-is-not-evidence.md` | Charm, evidence, destiny, and instruction are four separate checks. | Rin |
 | `law-10-one-box-one-mechanism.md` | One concern per module; a losing twin is buried, not renamed. | Niko |
 | `law-11-continuation-after-reika.md` | Past the close, further work is insubordination dressed as thoroughness. | Reika |
-| `law-12-yui-no-fair-value-buys.md` | No work whose value is already priced in; a stated reason or stand down. | Yui |
+| `law-12-yui-no-work-already-owed.md` | No work that was already owed; a stated failure or stand down. | Yui |
 
 ## Doctrine
 

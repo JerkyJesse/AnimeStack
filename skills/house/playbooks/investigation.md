@@ -13,9 +13,9 @@
 Lead: Mei.
 
 - **Mei** — What change in the world makes this obsolete? Read-only walkthrough: entry points, data flow, where state lives (HOW); search git log, docs, comments for the decision record (WHY); name what change kills it (CLIMATE). Produces a map and a named relationship — no fixes.
-- **Elo** — What wound does the crowd refuse to rank correctly? Audit the claims the subsystem makes about itself: which are measurements, which are hymns. Produces the ranking; with nothing rankable, the stand-down sentence.
-- **Yui** — What wound does this exploit? If the investigation surfaces a real mispricing worth building on, name it and write the falsifier. Otherwise: no wound, no build — say so.
-- **Reika** — What are we allowed to want? Close: is this worth pursuing, or is the answer "we do not need this."
+- **Elo** — What does the crowd refuse to measure correctly? Audit the claims the subsystem makes about itself: which are measurements, which are hymns. Produces the ranking; with nothing rankable, the stand-down sentence.
+- **Yui** — What failure does this prevent, and what would falsify it? If the investigation surfaces a real mispricing worth building on, name it and write the falsifier. Otherwise: no failure, no build — say so.
+- **Reika** — What are we building, in one sentence? Close: is this worth pursuing, or is the answer "we do not need this."
 
 ## Gates
 

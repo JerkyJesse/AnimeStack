@@ -9,7 +9,7 @@
 **Pattern.**
 - A session keeps discussing after the verdict instead of editing files.
 - A change that fits in one command is expanded into a design document.
-- "We can get to it later" appears where a click was owed.
+- "We can get to it later" appears where a release was owed.
 
 **Steward.** Aria.
 **Source.** `docs/lore/canon.md` §III law 6.

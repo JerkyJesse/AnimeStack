@@ -2,7 +2,7 @@
 
 The measurement lane of this pack. Every number this repo tells itself lives here,
 beside the command that checks it. A number is a measurement when it names its sample,
-pays its fees, and survives the check. A number is a hymn when it flatters a story.
+states its cost, and survives the check. A number is a hymn when it flatters a story.
 
 The house ranks before it talks. This file is the ranking, in writing, for the GitHub
 audience that does not share the room. If you run the commands and they disagree with
@@ -10,9 +10,8 @@ the table, the table is wrong.
 
 ## 1. The sample
 
-What is ranked: this repository, release `v1.2.0` (`VERSION`), 2026-09-16. The frozen
-canon mirror text inside it is v1.1.0 vintage, re-verified against the source on the
-same date.
+What is ranked: this repository, release `v1.3.0` (`VERSION`), 2026-09-16. The canon
+text inside it is this pack's own, first written for v1.3.0.
 
 The claims in this pack are claims about this tree, not promises about the outcomes a
 user will get. A pack that installs cleanly on your host is a body question, not a result
@@ -25,7 +24,7 @@ the tree contains what the table says it contains, at the stated release, on the
 
 ## 2. The counts table
 
-Run each command from the repo root. The expected count is the v1.2.0 truth; a command
+Run each command from the repo root. The expected count is the v1.3.0 truth; a command
 that prints anything else is a defect, and the defect is the tree's number, never the
 prose.
 
@@ -39,9 +38,9 @@ prose.
 | 10 | hosts | `grep -oE 'claude\|cursor\|codex\|factory\|opencode\|kiro\|slate\|openclaw\|hermes\|gbrain' setup \| sort -u \| wc -l` |
 | 21 | agents, opencode host | `ls agents/opencode \| wc -l` |
 | 21 | agents, claude host | `ls agents/claude \| wc -l` |
-| 6 | lore mirror files | `ls docs/lore/*.md \| grep -v README \| wc -l` (canon, oracles, machines, arena, scenes, board) |
+| 1 | canon file | `ls docs/lore/*.md \| grep -v README \| wc -l` (canon) |
 | 15 | lore dossiers | `ls docs/lore/dossiers \| wc -l` |
-| 21 | lore total | 6 mirror files + 15 dossiers, the two rows above summed |
+| 16 | lore total | the canon + 15 dossiers, the two rows above summed |
 | 16 | site art images | `ls assets/img/*.jpg \| wc -l` |
 | 7 | art dossier cards | `ls art/dossiers \| wc -l` |
 | 7 | art character sheets | `ls art/sheets \| wc -l` |
@@ -70,12 +69,11 @@ The agents rows are two of twenty-one, forty-two total: one directory per host, 
 holding the same seat roster as agent files. A host that ships twenty of twenty-one is a
 defect, not a rounding error.
 
-The lore rows are two that sum to twenty-one: six mirror files at the top of `docs/lore`
-(canon, oracles, machines, arena, scenes, board), fifteen dossiers in `docs/lore/dossiers`. The
-policy page `docs/lore/README.md` is authored, not mirrored, and is not one of the
-twenty-one. The mirror is the frozen canon; the dossiers are the deep canon. They are kept
-separate because a dossier deepens a seat and never contradicts it, and the count is the
-proof they are both present.
+The lore rows are two that sum to sixteen: one canon file at the top of `docs/lore`
+(`canon.md`), and fifteen dossiers in `docs/lore/dossiers`. The policy page
+`docs/lore/README.md` is authored, not canon, and is not one of the sixteen. The canon
+is the law; the dossiers are the deep lore. They are kept separate because a dossier
+deepens a seat and never contradicts it, and the count is the proof they are both present.
 
 The site-art row is the sixteen jpgs in `assets/img/` — seven portraits, seven roster cards,
 the team composite, and the social card; the loop diagram and the favicon are svg and are
@@ -96,7 +94,7 @@ as different things; seven seats, seven pages, one row.
 
 ## 3. The rule of the lane
 
-A number is a measurement when it names its sample, pays its fees, and survives being
+A number is a measurement when it names its sample, states its cost, and survives being
 checked against the tree. The sample is named (section 1). The fee is the command: if a
 count has no command that reproduces it, the count is unpaid. The check is the command
 run against the tree.

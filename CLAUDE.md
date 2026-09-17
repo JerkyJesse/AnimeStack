@@ -11,9 +11,8 @@ seats, no room, no house voice — and it never signs.
   playbooks, 21 agents per host dialect) live in `docs/measurement.md`. A doc
   that disagrees with the tree is a defect; fix the doc or fix the tree, never
   paper over the disagreement.
-- `docs/lore/` is a frozen mirror of the house canon. Never edit it here — the
-  source repo is authoritative. A change to canon happens upstream, not in a
-  mirror.
+- `docs/lore/` is the house canon. It is part of this repo and is edited here
+  like any other doc; the canon is the law the pack ships with.
 - No secrets in this repo, ever. No channel URLs, no keys, no tokens, no
   machine paths. A secret belongs in an env file outside git.
 - `setup` is the only installer. It never touches a file or directory it cannot

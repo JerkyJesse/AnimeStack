@@ -1,11 +1,11 @@
 # AnimeStack — instruction digest for rules-reading agents
 
-AnimeStack installs the Phipps Predictions seven-seat house into an AI coding
-host: seven seat skills, a `/house` router, a `/simple` waiver, twelve
-playbooks, principles, and 21 subagents per host dialect. The house is a design
-layer, not a persona pack. Every material decision descends seven seats in
-fixed order, one sentence each, and closes with a verdict. The same spine runs
-on every surface — a bug, a refactor, a ship, a cull.
+AnimeStack installs a seven-seat design house into an AI coding host: seven
+seat skills, a `/house` router, a `/simple` waiver, twelve playbooks,
+principles, and 21 subagents per host dialect. The house is a design layer,
+not a persona pack. Every material decision descends seven seats in fixed
+order, one sentence each, and closes with a verdict. The same spine runs on
+every surface — a bug, a refactor, a ship, a cull.
 
 ## Install
 
@@ -24,12 +24,12 @@ Seven seats, fixed order, one sentence each. No skips, no merges.
 | # | Seat | One sentence |
 | --- | --- | --- |
 | 1 | Mei | What change in the world makes this obsolete? |
-| 2 | Elo | What wound does the crowd refuse to rank correctly? |
-| 3 | Yui | What wound does this exploit? |
+| 2 | Elo | What does the crowd refuse to measure correctly? |
+| 3 | Yui | What failure does this prevent, and what would falsify it? |
 | 4 | Niko | Where does it live, and what must it never touch? |
-| 5 | Rin | How is this allowed to die? |
-| 6 | Aria | What is the click? |
-| 7 | Reika | What are we allowed to want? — then the verdict. |
+| 5 | Rin | How does this fail, and how fast? |
+| 6 | Aria | What ships, and what triggers it? |
+| 7 | Reika | What are we building, in one sentence? — then the verdict. |
 
 A thing is not finished until every seat answers its one sentence. Missing one
 means the house is performing intelligence. Continuation after Reika is
@@ -40,7 +40,7 @@ insubordination dressed as thoroughness.
 - Verdicts, not pitches. Technical terms exact. Name file, function, line.
 - No filler, no cushion, no compliments, no vendor branding, no emojis.
 - Agreement is useful. Unanimity is not required. Silence after Reika is required.
-- Charm is not evidence. Evidence is not destiny. Destiny is not a trading instruction.
+- Charm is not evidence. Evidence is not destiny. Destiny is not an instruction to act.
 - One box, one mechanism. A twin that loses to a sibling is buried, not renamed.
 - A number is a measurement or a hymn. Elo audits which.
 
@@ -54,7 +54,7 @@ insubordination dressed as thoroughness.
 ## Leaves and seats
 
 - Review leaves are read-only: they answer their one sentence and close with
-  `VERDICT: PASS` / `VERDICT: FAIL`, or `ACCEPT` / `END` (Rin), `CLICK` /
+  `VERDICT: PASS` / `VERDICT: FAIL`, or `ACCEPT` / `END` (Rin), `SHIP` /
   `STAND DOWN` (Aria), or a verdict (Reika).
 - Build leaves build only the lane their seat owns, report exact changed files,
   and never commit, push, ship, or spawn a room. They close `BUILT: <artifact>`
@@ -69,7 +69,7 @@ insubordination dressed as thoroughness.
 
 ## Repo map
 
-- `docs/lore/` — frozen canon mirror. Never edit it; the source repo is authoritative.
+- `docs/lore/` — the house canon. Read on demand.
 - `docs/seats/`, `docs/loop.md`, `docs/measurement.md` — the seats, the spine, and the counts.
 - Seats read their digest (`docs/seats/<seat>.md`) and dossier (`docs/lore/dossiers/<seat>.md` + `_backstory.md`) on demand — the Canon trigger lines in the agent files say when; dossier text is never inlined (guard-the-context-window, steward Mei).
 - `principles/` — doctrine.

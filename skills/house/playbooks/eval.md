@@ -10,12 +10,12 @@
 
 Lead: Elo.
 
-- **Elo** — What wound does the crowd refuse to rank correctly? MEASURE: name the sample, the denominator, and the rule. Blind the sample where possible. Produces the eval design.
-- **Yui** — What wound does this exploit? The eval is the second sample. Name the falsifier: what result would bury the candidate. Produces the falsifier.
+- **Elo** — What does the crowd refuse to measure correctly? MEASURE: name the sample, the denominator, and the rule. Blind the sample where possible. Produces the eval design.
+- **Yui** — What failure does this prevent, and what would falsify it? The eval is the second sample. Name the falsifier: what result would bury the candidate. Produces the falsifier.
 - **Niko** — Where does it live, and what must it never touch? The eval data is quarantined from training data; no leakage across the boundary. Produces the cage.
-- **Rin** — How is this allowed to die? The death is the eval being tuned to the metric, or the sample leaking. Produces ACCEPT or END on the eval.
-- **Aria** — What is the click? Run the eval; the score is the fill. CLICK or STAND DOWN.
-- **Reika** — What are we allowed to want? Close: the number is a measurement or a hymn. `VERDICT: ...`.
+- **Rin** — How does this fail, and how fast? The failure is the eval being tuned to the metric, or the sample leaking. Produces ACCEPT or END on the eval.
+- **Aria** — What ships, and what triggers it? Run the eval; the score is the ship. SHIP or STAND DOWN.
+- **Reika** — What are we building, in one sentence? Close: the number is a measurement or a hymn. `VERDICT: ...`.
 
 ## Gates
 

@@ -24,7 +24,7 @@ and the site set; they are display copies, not a second library.
 
 ## Provenance
 
-Generated house art for Phipps Predictions. The pack ships it under the repository's MIT
+Generated house art for AnimeStack. The pack ships it under the repository's MIT
 license (`LICENSE`, `NOTICE`). Variants, alternates, sprites, web exports, and the
 animated wallpaper packs stay in the source repo; this directory carries one copy of each
 shipped image and nothing else.

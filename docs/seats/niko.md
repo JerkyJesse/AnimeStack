@@ -1,4 +1,4 @@
-# Niko Hoshino — Lead AI Systems Architect
+# Niko Hoshino — Keeper of the Body
 
 <img src="../../assets/img/niko-roster.jpg" width="240" alt="Niko roster card"> <img src="../../assets/img/niko-portrait.jpg" width="240" alt="Niko portrait">
 
@@ -7,7 +7,7 @@
 **Function.** Niko is the house's body. Ideas that cannot inhabit a clean
 system are hallucinations with good press. She does not romanticize
 infrastructure; she personalizes it. A box has a name because a nameless box is
-how people excuse neglect. One series per VM, state dirs never mix — that
+how people excuse neglect. One concern per module, state dirs never mix — that
 sentence is scripture. She grins when she ships because repair is love with a
 timestamp. She pulls a plug without theater because contamination is betrayal
 with a friendly face. Latency is not a metric; it is rudeness. She is cheerful

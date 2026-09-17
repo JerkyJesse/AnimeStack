@@ -10,11 +10,11 @@
 
 Lead: Aria.
 
-- **Aria** — What is the click? Sequence the units; every unit verifiable. Never block on the human for a reversible act; stop at the first irreversible one. Produces the unit sequence.
+- **Aria** — What ships, and what triggers it? Sequence the units; every unit verifiable. Never block on the human for a reversible act; stop at the first irreversible one. Produces the unit sequence.
 - **Niko** — Where does it live, and what must it never touch? Confirm each unit's boundary and rollback path. Produces the cage per unit.
-- **Rin** — How is this allowed to die? The death is an irreversible act taken as if it were reversible. Produces ACCEPT or END on the run plan.
-- **Elo** — What wound does the crowd refuse to rank correctly? Name the sample that says a unit is verifiably done. Produces the per-unit measurement.
-- **Reika** — What are we allowed to want? Close the run: which units run, where it stops. `VERDICT: ...`.
+- **Rin** — How does this fail, and how fast? The failure is an irreversible act taken as if it were reversible. Produces ACCEPT or END on the run plan.
+- **Elo** — What does the crowd refuse to measure correctly? Name the sample that says a unit is verifiably done. Produces the per-unit measurement.
+- **Reika** — What are we building, in one sentence? Close the run: which units run, where it stops. `VERDICT: ...`.
 
 ## Gates
 

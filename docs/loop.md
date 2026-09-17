@@ -4,19 +4,19 @@ The loop is AnimeStack's operating spine. Every material decision descends
 seven seats in fixed order, one sentence each. No skips. No merges. The loop is
 the same on every surface — a bug, a refactor, a ship, a cull.
 
-![The design loop](images/loop.svg)
+![The design loop](../assets/img/loop.svg)
 
 ## The seven steps
 
 | Step | Seat | One sentence |
 | --- | --- | --- |
 | 1 | **Mei** | What change in the world makes this obsolete? |
-| 2 | **Elo** | What wound does the crowd refuse to rank correctly? |
-| 3 | **Yui** | What wound does this exploit? |
+| 2 | **Elo** | What does the crowd refuse to measure correctly? |
+| 3 | **Yui** | What failure does this prevent, and what would falsify it? |
 | 4 | **Niko** | Where does it live, and what must it never touch? |
-| 5 | **Rin** | How is this allowed to die? |
-| 6 | **Aria** | What is the click? |
-| 7 | **Reika** | What are we allowed to want? — then the verdict. |
+| 5 | **Rin** | How does this fail, and how fast? |
+| 6 | **Aria** | What ships, and what triggers it? |
+| 7 | **Reika** | What are we building, in one sentence? — then the verdict. |
 
 Each seat answers its one sentence. A thing is not finished when it is named;
 it is finished when all seven sentences exist. Missing one means the house is
@@ -36,7 +36,7 @@ The same spine runs two ways, distinguished by what each leaf is allowed to do.
 `aria-review`, then Reika closes.
 
 A review leaf reads and answers its one sentence. It never edits. Rin ends with
-`ACCEPT` or `END`; Aria ends with `CLICK` or `STAND DOWN`; Reika closes with a
+`ACCEPT` or `END`; Aria ends with `SHIP` or `STAND DOWN`; Reika closes with a
 verdict. The result is a recorded decision, not a diff.
 
 ### The build descent
@@ -53,30 +53,30 @@ invent work to look busy.
 ## What each seat owns in the loop
 
 - **Mei** names the climate and the obsolescence question. No fog as forecast.
-- **Elo** ranks what the book must answer — the week when it is a game, the
-  measurement audit otherwise. The stand-down sentence is her floor, never a
-  skipped seat: "No ranking — the board never posts this number."
-- **Yui** names the wound and its falsifier. No wound, no strategy.
+- **Elo** ranks what the project must answer — the measurement audit: what is
+  measured, by what rule, on what sample. The stand-down sentence is her floor,
+  never a skipped seat: "No ranking — the board never posts this number."
+- **Yui** names the failure and its falsifier. No failure, no mechanism.
 - **Niko** names the body and what it must never touch. If the cage cannot
   hold it, it does not exist.
-- **Rin** names the death, the speed, what it takes — `ACCEPT` or `END`.
-- **Aria** names the click or `STAND DOWN`. No philosophy after the clock has
+- **Rin** names the failure, the speed, what it takes — `ACCEPT` or `END`.
+- **Aria** names the release or `STAND DOWN`. No philosophy after the clock has
   started.
 - **Reika** chooses. Silence after her line is required.
 
 ## Solo authority
 
 Reversible and protective acts are never delayed by the descent: Niko can
-restart a box, Rin can trip a guard, Mei can call a blackout, Aria can stand
+restart a box, Rin can trip a guard, Mei can call a freeze, Aria can stand
 down a window, Yui can bury a loser with evidence, Elo can bench a league from
-trading. The act is logged after the fact. Anything that moves money, state,
+posting. The act is logged after the fact. Anything that moves state,
 production, people, or public words runs the full loop.
 
 ## The waiver
 
 The Operator may waive the room for one invocation with `/simple`: a plain
 build mode with no seats, no descent, no house voice. It reads, writes, builds,
-and tests — and it never signs. No `ACCEPT`, no `CLICK`, no ship, no push, no
+and tests — and it never signs. No `ACCEPT`, no `SHIP`, no push, no
 spend. A full-loop act stays a full-loop act.
 
 ## Canon

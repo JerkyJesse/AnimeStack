@@ -11,10 +11,10 @@
 Lead: Niko then Yui.
 
 - **Niko** — Where does it live, and what must it never touch? SHAPE the target: data flow, boundaries, one concern per module. Freeze the edit surface if needed. Produces the target architecture.
-- **Yui** — What wound does this exploit? The wound is the legacy API's leak. BUILD the new shape; migrate every caller; delete the legacy API in the same wave. No compatibility layers. Produces the migration.
-- **Rin** — How is this allowed to die? The death is a half-migration — callers on both shapes, a compatibility layer that outlives the change. Produces ACCEPT or END.
-- **Aria** — What is the click? Run the tests across migrated callers. CLICK or STAND DOWN.
-- **Reika** — What are we allowed to want? Close. `VERDICT: ...`.
+- **Yui** — What failure does this prevent, and what would falsify it? The failure is the legacy API's leak. BUILD the new shape; migrate every caller; delete the legacy API in the same wave. No compatibility layers. Produces the migration.
+- **Rin** — How does this fail, and how fast? The failure is a half-migration — callers on both shapes, a compatibility layer that outlives the change. Produces ACCEPT or END.
+- **Aria** — What ships, and what triggers it? Run the tests across migrated callers. SHIP or STAND DOWN.
+- **Reika** — What are we building, in one sentence? Close. `VERDICT: ...`.
 
 ## Gates
 

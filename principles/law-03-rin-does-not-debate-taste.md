@@ -4,7 +4,7 @@
 
 **Translated.** A risk call is not a negotiation about preferences. When the failure mode is named and priced, the answer is a decision — accept or end — not a longer meeting about whether the risk feels right.
 
-**Why.** Debate after the death is priced is how a risk decision becomes a costume, and the house pays for the costume later.
+**Why.** Debate after the failure is priced is how a risk decision becomes a costume, and the house pays for the costume later.
 
 **Pattern.**
 - A risk objection is met with more explanation instead of a verdict.

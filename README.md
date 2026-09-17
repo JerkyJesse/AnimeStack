@@ -2,17 +2,17 @@
 
 # AnimeStack
 
-*The house in your agent. Based on [gstack](https://github.com/garrytan/gstack) and [pstack](https://github.com/cursor/plugins/pstack), re-voiced in the [Phipps Predictions](docs/lore/canon.md) canon.*
+*The house in your agent. Based on [gstack](https://github.com/garrytan/gstack) and [pstack](https://github.com/cursor/plugins/pstack).*
 
-gstack gives you a workflow. pstack gives you principles. Neither installs a room — a place where a ship must survive a death sentence and a pre-registered falsifier before it touches anything.
+gstack gives you a workflow. pstack gives you principles. Neither installs a room — a place where a ship must survive a failure review and a pre-registered falsifier before it touches anything.
 
 AnimeStack is that room. Seven seats argue in fixed order — `Mei -> Elo -> Yui -> Niko -> Rin -> Aria -> Reika` — one sentence each, and close with a verdict. No votes. No skips. No merges. The spine is the same on every surface: a bug, a refactor, a ship, a cull.
 
-Each seat is a build personality, not a mascot. Mei names the climate. Elo ranks what the book must answer. Yui names the wound and its falsifier. Niko names the body and what it must never touch. Rin names the death. Aria names the click. Reika chooses. A thing is not finished when it is named; it is finished when all seven sentences exist.
+Each seat is a build personality, not a mascot. Mei names the climate. Elo ranks what the project must answer. Yui names the failure and its falsifier. Niko names the body and what it must never touch. Rin names the failure. Aria names the release. Reika chooses. A thing is not finished when it is named; it is finished when all seven sentences exist.
 
-The house is portable. The same spine installs into ten hosts, and the room lives in plain markdown, so it survives whatever vendor ships next. The mirror of the Phipps canon is frozen in `docs/lore/`; the authored pages beside it — the seats, the loop, the measurement audit — are written for a stranger reading GitHub.
+The house is portable. The same spine installs into ten hosts, and the room lives in plain markdown, so it survives whatever vendor ships next. The authored pages beside it — the seats, the loop, the measurement audit — are written for a stranger reading GitHub.
 
-What AnimeStack is not: a mascot pack; seven flavors of "sure, let's ship it"; a replacement for the Phipps canon. The mirror is a snapshot. The source repo is authoritative.
+What AnimeStack is not: a mascot pack; seven flavors of "sure, let's ship it"; a replacement for your own judgment. The room is a discipline, not a personality.
 
 ## The seven seats
 
@@ -37,12 +37,12 @@ The loop order is Mei, Elo, Yui, Niko, Rin, Aria, Reika. The roster is seven wom
 | Seat | Question they must answer | Owns in this pack |
 | --- | --- | --- |
 | [Mei](docs/seats/mei.md) | What change in the world makes this obsolete? | `/mei` — climate + investigation |
-| [Elo](docs/seats/elo.md) | What wound does the crowd refuse to rank correctly? | `/elo` — measurement + audit |
-| [Yui](docs/seats/yui.md) | What wound does this exploit? | `/yui` — mechanism + fix + kill |
+| [Elo](docs/seats/elo.md) | What does the crowd refuse to measure correctly? | `/elo` — measurement + audit |
+| [Yui](docs/seats/yui.md) | What failure does this prevent, and what would falsify it? | `/yui` — mechanism + fix + kill |
 | [Niko](docs/seats/niko.md) | Where does it live, and what must it never touch? | `/niko` — body + architecture + deploy |
-| [Rin](docs/seats/rin.md) | How is this allowed to die? | `/rin` — review + death + security |
-| [Aria](docs/seats/aria.md) | What is the click? | `/aria` — tests + ship + QA |
-| [Reika](docs/seats/reika.md) | What are we allowed to want? | `/reika` — mandate + close |
+| [Rin](docs/seats/rin.md) | How does this fail, and how fast? | `/rin` — review + failure + security |
+| [Aria](docs/seats/aria.md) | What ships, and what triggers it? | `/aria` — tests + ship + QA |
+| [Reika](docs/seats/reika.md) | What are we building, in one sentence? | `/reika` — mandate + close |
 
 A clean night in the room sounds like this:
 
@@ -51,9 +51,9 @@ A clean night in the room sounds like this:
 > **Yui, after the knife:** "It dies on the second half. Bury it."
 > **Niko:** "Good. I don't want that ghost in the boxes."
 > **Mei:** "Even if it had lived, the weather is turning against the family it belongs to."
-> **Elo:** "Crowd already loves that side. If that's the whole edge, it's a hymn."
-> **Aria:** "Then stop talking like we still have a ticket."
-> **Reika:** "We do not. Next wound."
+> **Elo:** "The crowd already loves that benchmark. If that is the whole claim, it is a hymn."
+> **Aria:** "Then stop talking like we still have a release."
+> **Reika:** "We do not. Next failure."
 
 A dirty night is the same conversation with someone trying to keep a favorite alive by renaming it.
 
@@ -80,15 +80,15 @@ Every piece, full size, is in the gallery: [animestack.jerkyjesse.com/gallery.ht
 
 ## The lineage
 
-AnimeStack is the refusal of three older schools, each of which is written in the frozen mirror.
+AnimeStack is the refusal of three older schools, each of which is written in the house canon.
 
-The oracles sold answers that could not close — prophecy that paid the temple and never the asker. An answer that cannot be settled cannot pay. The first binary is the correction: a claim that resolves to 0 or 1 on a stated book at a stated time.
+The oracles sold answers that could not close — prophecy that paid the temple and never the asker. An answer that cannot be settled cannot pay. The settled question is the correction: a claim that resolves to shipped or not, measured or not, green or red.
 
-The machines sold speed — the fastest network made the deal, until the line was common and the edge was gone. Speed is rented; the cage is owned.
+The machines sold speed — the fastest network made the deal, until the line was common and the advantage was gone. Speed is rented; the cage is owned.
 
-The arena sold leaderboards — twelve-week cups that minted champions and buried survivors. A leaderboard rewards variance; the ladder rewards survival.
+The arena sold leaderboards — twelve-week cups that minted champions and buried survivors. A leaderboard rewards variance; the live record rewards survival.
 
-The house kept the settled question, the cage, and the ladder. The temple, the race, and the podium stayed with the crowds. The full telling is in `docs/lore/`.
+The house kept the settled question, the cage, and the live record. The temple, the race, and the podium stayed with the crowds. The full telling is in `docs/lore/`.
 
 ## The loop
 
@@ -96,10 +96,13 @@ The loop is the spine. Every material decision descends seven seats in fixed ord
 
 The same spine runs two ways:
 
-- **Review descent** — read-only. Each leaf answers its one sentence. Rin ends `ACCEPT` or `END`; Aria ends `CLICK` or `STAND DOWN`; Reika closes with a verdict. The result is a recorded decision, not a diff.
+- **Review descent** — read-only. Each leaf answers its one sentence. Rin ends `ACCEPT` or `END`; Aria ends `SHIP` or `STAND DOWN`; Reika closes with a verdict. The result is a recorded decision, not a diff.
 - **Build descent** — each leaf builds only the lane its seat owns and reports its exact changed files. It never commits, never pushes, never spawns a room of its own.
 
-Reversible and protective acts are never delayed by the descent: Niko can restart a box, Rin can trip a guard, Aria can stand down a window. The act is logged after the fact. Anything that moves money, state, production, people, or public words runs the full loop.
+Reversible and protective acts are never delayed by the descent: Niko can
+restart a box, Rin can trip a guard, Aria can stand down a window. The act is
+logged after the fact. Anything that moves state, production, people, or
+public words runs the full loop.
 
 The full spine, solo authority, and the `/simple` waiver are in [docs/loop.md](docs/loop.md).
 
@@ -154,7 +157,7 @@ Seven seat skills — `/reika`, `/mei`, `/elo`, `/yui`, `/niko`, `/rin`, `/aria`
 - 21 subagents per host — 7 seats, 7 review leaves, 7 build leaves — shipped for opencode and Claude Code, 42 agent files total; no concrete model is pinned, so every subagent runs on the invoking session's model
 - an on-demand canon — every agent carries a `**Canon.**` pointer to its seat digest, dossier, and backstory, plus a seat trigger line naming the calls that force the read; canon text is never inlined (guard-the-context-window, steward Mei)
 - 10 hosts
-- a frozen lore mirror of 21 files — canon, four companion books, the House Board, 15 dossiers — plus the freeze policy (`docs/lore/`)
+- the house canon — one canon file plus 15 seat dossiers (`docs/lore/`)
 - the art: `art/` — 7 dossier cards, 7 character sheets, 7 4K wallpapers (one per seat per set, no variants) — plus the site set in `assets/img/` (team composite, 7 roster cards, 7 portraits, a loop diagram, a social card)
 
 The `/house` router matches a request to one of the 12 playbooks, opens the loop, and closes with a verdict. The seven seat skills hold a session-long voice when you need one mind instead of the full room.
@@ -165,7 +168,7 @@ Every number has a command that checks it. [docs/measurement.md](docs/measuremen
 
 Five minutes, a real task, seven sentences. [docs/guide/first-task.md](docs/guide/first-task.md) walks a stranger from clone to a closing verdict.
 
-`/house` opens the loop. `/simple` is the Operator's waiver: plain build mode, no seats, no room, no house voice, and it never signs — no `ACCEPT`, no `CLICK`, no ship, no push, no spend. Use it for a plain build where the loop would be costume.
+`/house` opens the loop. `/simple` is the Operator's waiver: plain build mode, no seats, no room, no house voice, and it never signs — no `ACCEPT`, no `SHIP`, no push, no spend. Use it for a plain build where the loop would be costume.
 
 ## How you know it works
 
@@ -181,10 +184,10 @@ The falsifier is pre-registered in [docs/measurement.md](docs/measurement.md) §
 6. Aria does not attend philosophy after the clock has started.
 7. Elo ranks before she talks.
 8. Agreement is useful. Unanimity is not required. Silence after Reika is required.
-9. Charm is not evidence. Evidence is not destiny. Destiny is not a trading instruction.
+9. Charm is not evidence. Evidence is not destiny. Destiny is not an instruction to act.
 10. One box, one mechanism. A twin that loses to a sibling is buried, not renamed.
 11. Continuation after Reika is insubordination dressed as thoroughness.
-12. No seat signs a fair-value buy.
+12. No seat signs work that was already owed. The change must answer a stated failure, or the house stands down.
 
 The 12 laws are written one per file under `principles/`; the 23 doctrine pieces sit beside them under `principles/doctrine/`.
 
@@ -192,12 +195,12 @@ The 12 laws are written one per file under `principles/`; the 23 doctrine pieces
 
 Verdicts, not pitches. Name file, function, line. No filler, no cushion, no compliments, no vendor branding. Agreement is useful; unanimity is not required; silence after Reika is required.
 
-Charm is not evidence. Evidence is not destiny. Destiny is not a trading instruction. A number is a measurement or a hymn, and the measurement audit decides which.
+Charm is not evidence. Evidence is not destiny. Destiny is not an instruction to act. A number is a measurement or a hymn, and the measurement audit decides which.
 
 ## Repo map
 
 ```
-docs/lore/          frozen canon mirror (21 files + policy)
+docs/lore/          the house canon + 15 seat dossiers
 docs/seats/         seven seat pages
 docs/loop.md        the spine, both descents, the waiver
 docs/measurement.md the counts audit

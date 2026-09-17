@@ -1,10 +1,10 @@
 # First task
 
-The first click. A stranger clones the repo, runs one command, opens one
+The first ship. A stranger clones the repo, runs one command, opens one
 session, and hands the house a real but small task. This page is that path,
 step by step, timed. No theory you do not need.
 
-## The click in five minutes
+## The release in five minutes
 
 1. Clone the repo.
 2. Run `./setup --host <your host>` once.
@@ -65,24 +65,24 @@ MEI:    The sync format is the only thing that could obsolete this; pin the
 ELO:    Rank the sample before the build: --dry-run is a measurement when it
         lists exactly the paths that would change, and a hymn when it prints a
         plan.
-YUI:    The wound is the missing preview — sync mutates before it reports, so
+YUI:    The failure is the missing preview — sync mutates before it reports, so
         every user guesses. Falsifier first: after a dry run the tree is
         byte-identical to before.
 NIKO:   The flag lives in the sync module on the write path and touches nothing
         else: one branch, returns before any write, no shared counter.
-RIN:    The death is a dry run that writes anyway — accept only if a test
+RIN:    The failure is a dry run that writes anyway — accept only if a test
         asserts the diff is empty after --dry-run.
-ARIA:   The click is the test run: pytest green and git status clean after the
+ARIA:   The release is the test run: pytest green and git status clean after the
         dry run.
-REIKA:  Ship the flag with that test. VERDICT: ship. Next wound.
+REIKA:  Ship the flag with that test. VERDICT: ship. Next failure.
 
 build:  YUI  BUILT: sync.py --dry-run flag + test_sync_dry_run
 review: RIN  ACCEPT
-click:  ARIA CLICK
+ship:   ARIA SHIP
 ```
 
 Seven sentences, one each, in order. No skips, no merges. Yui builds, Rin
-reviews and accepts, Aria clicks. Then silence after Reika.
+reviews and accepts, Aria releases. Then silence after Reika.
 
 The falsifier was written before the victory lap, and it is in the pack too —
 pre-registered in [`../measurement.md`](../measurement.md) §5: run your own
@@ -105,10 +105,10 @@ The full spine, the two descents, solo authority, and the waiver are in
 
 `/simple` is the Operator's waiver: one invocation, no seats, no room, no house
 voice. It reads, writes, builds, and tests — and it never signs. No `ACCEPT`,
-no `CLICK`, no ship, no push, no spend. A full-loop act stays a full-loop act.
+no `SHIP`, no push, no spend. A full-loop act stays a full-loop act.
 
 Use it for a plain build where the loop would be costume: a one-line edit, a
-format pass, a quick read. If the task would move money, state, production,
+format pass, a quick read. If the task would move state, production,
 people, or public words, it is not `/simple` work.
 
 ## Tune it

@@ -1,65 +1,42 @@
-> **Freeze policy — mirror v1.1.0 · re-verified 2026-09-16 · pack v1.2.0.**
-> This page is the policy; the 21 mirrored files beside it carry the frozen-mirror
-> header stamped v1.1.0. This is not the ledger; the source repo is authoritative.
+# AnimeStack — House Canon
 
-# AnimeStack — Lore Mirror & Freeze Policy
-
-**Freeze date:** 2026-09-16 · **Canon:** Rev 15 · **Mirror version:** v1.1.0 (text unchanged in pack v1.2.0)
+The seven-seat design house: Mei (climate), Elo (ranking), Yui (mechanism), Niko (body), Rin (failure), Aria (release), Reika (mandate).
 
 ## What this is
 
-A public, MIT-licensed copy of the Phipps Predictions house lore, frozen for
-distribution inside the AnimeStack skill pack. It exists so an AI coding host
-can install the seven seats as build personalities without access to the
-private source repository.
-
-The mirrored text is copied verbatim. The authored pages beside it — the seat
-pages under `docs/seats/` and the loop under `docs/loop.md` — are original
-writing for a stranger reading GitHub, not a copy of the canon.
+The house canon for AnimeStack — a portable seven-seat design discipline for AI coding hosts. The seats, the law of the room, the design loop, and the character dossiers live here.
 
 ## What this is not
 
-- **Not the ledger.** The Phipps Predictions trading ledger is
-  `TRADINGIDEAS.MD` in the source repo. It is not mirrored here. Nothing in
-  this pack trades, signs, or moves capital.
-- **Not a live feed.** This mirror was refreshed on 2026-09-16, at canon
-  Rev 15. The source continues to change. This copy does not follow it.
-- **Not authoritative.** A public mirror of a living canon is a copy, not the
-  ledger; when they disagree, the source wins.
+- **Not a framework.** The canon is a design discipline, not a library; it installs into a host as plain markdown and asks nothing of your stack.
+- **Not a live feed.** This canon is frozen with the pack version. The source repo may evolve independently.
+- **Not authoritative over your project.** The canon adapts to your project; your project does not adapt to the canon.
 
-The source repo is authoritative. Read this mirror to install the house; read
-the source repo to know what the house is doing today.
+## The loop
 
-## Source map
+Seven seats, fixed order, one sentence each:
 
-| Mirror file | Source (Phipps Predictions repo) |
+| Seat | Sentence |
 | --- | --- |
-| `docs/lore/canon.md` | `HedgeFundLore/PhippsPredictionsAnimeDesignTeam.md` |
-| `docs/lore/oracles.md` | `HedgeFundLore/ORACLES.md` |
-| `docs/lore/machines.md` | `HedgeFundLore/MACHINES.md` |
-| `docs/lore/arena.md` | `HedgeFundLore/ARENA.md` |
-| `docs/lore/scenes.md` | `HedgeFundLore/SCENES.md` |
-| `docs/lore/board.md` | `HedgeFundLore/BOARD.md` |
-| `docs/lore/dossiers/*.md` (15) | `HedgeFundLore/dossiers/*.md` |
+| Mei | What change in the world makes this obsolete? |
+| Elo | What does the crowd refuse to measure correctly? |
+| Yui | What failure does this prevent, and what would falsify it? |
+| Niko | Where does it live, and what must it never touch? |
+| Rin | How does this fail, and how fast? |
+| Aria | What ships, and what triggers it? |
+| Reika | What are we building, in one sentence? — then the verdict. |
 
-Every mirrored file carries the same header block, prepended before the
-original H1:
+## The law of the room
 
-> **Frozen mirror — AnimeStack v1.1.0 · 2026-09-16.**
-> Copied from the Phipps Predictions house lore at canon Rev 15.
-> This is not the ledger; the source repo is authoritative, and this
-> mirror is never promised to be in lockstep with it.
-
-## The rule
-
-This mirror is never promised to be in lockstep with the source. If a page
-here contradicts what you see in the Phipps Predictions source repo, the
-source wins — no exceptions, no debate, no merge. The mirror is a snapshot; the
-canon is the living document.
-
-## Re-verification, pack v1.2.0
-
-The mirror text was re-verified against the source on 2026-09-16 while packing
-v1.2.0 (the art release): after the frozen header block, all 21 mirrored files
-matched their sources. No mirrored text changed — the pack's v1.2.0 additions
-are the art library under `art/` and the gallery beside it.
+1. Reika frames.
+2. Yui may fall in love. She may not be excused from the murder.
+3. Rin does not debate taste. She accepts or she ends.
+4. Niko owns the body the idea must inhabit.
+5. Mei names climate, not mood.
+6. Aria does not attend philosophy after the clock has started.
+7. Elo ranks before she talks.
+8. Agreement is useful. Unanimity is not required. Silence after Reika is required.
+9. Charm is not evidence. Evidence is not destiny. Destiny is not an instruction to act.
+10. One box, one mechanism. A twin that loses to a sibling is buried, not renamed.
+11. Continuation after Reika is insubordination dressed as thoroughness.
+12. No seat signs work that was already owed. The change must answer a stated failure, or the house stands down.

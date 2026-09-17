@@ -10,10 +10,10 @@
 
 Lead: Yui.
 
-- **Yui** — What wound does this exploit? BUILD the throwaway fast, from a named data shape, no production harness. Write the falsifier even here. Produces the prototype and its verdict.
+- **Yui** — What failure does this prevent, and what would falsify it? BUILD the throwaway fast, from a named data shape, no production harness. Write the falsifier even here. Produces the prototype and its verdict.
 - **Niko** — Where does it live, and what must it never touch? The prototype lives in a scratch directory; it never touches production state. Produces the quarantine.
-- **Rin** — How is this allowed to die? The death is the prototype leaking into the real path. Produces ACCEPT or END on the quarantine.
-- **Reika** — What are we allowed to want? Close: does the idea earn a real build, or does it die here. `VERDICT: ...`.
+- **Rin** — How does this fail, and how fast? The failure is the prototype leaking into the real path. Produces ACCEPT or END on the quarantine.
+- **Reika** — What are we building, in one sentence? Close: does the idea earn a real build, or does it die here. `VERDICT: ...`.
 
 ## Gates
 
