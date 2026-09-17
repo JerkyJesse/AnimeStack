@@ -72,7 +72,6 @@ The pack carries the house art in [`art/`](art/) — one picture per seat per se
     <td align="center"><img src="art/dossiers/rin.jpg" width="200" alt="Rin Takamiya dossier card"></td>
     <td align="center"><img src="art/dossiers/aria.jpg" width="200" alt="Aria Kanzaki dossier card"></td>
     <td align="center"><img src="art/dossiers/reika.jpg" width="200" alt="Reika Kurogane dossier card"></td>
-    <td align="center"><img src="art/wallpapers/mei-stamped.jpg" width="200" alt="Mei Sakuraba 4K wallpaper"></td>
   </tr>
 </table>
 
