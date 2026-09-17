@@ -61,23 +61,23 @@ A dirty night is the same conversation with someone trying to keep a favorite al
 
 ## The art
 
-The pack carries the house art in [`art/`](art/) — one picture per seat per set, no variants: seven dossier cards, seven character sheets, and a 4K wallpaper each, beside the base set the site renders (portraits, roster cards, a team composite, the loop diagram, the social card).
+The pack carries the house art in [`art/`](art/) — one picture per seat per set, no variants: seven dossier cards, seven character sheets, and a 4K wallpaper each, beside the base set (portraits, roster cards, a team composite, the loop diagram, the social card).
 
 <table>
   <tr>
-    <td align="center"><img src="art/dossiers/reika.jpg" width="200" alt="Reika Kurogane dossier card"></td>
-    <td align="center"><img src="art/dossiers/yui.jpg" width="200" alt="Yui Aizawa dossier card"></td>
-    <td align="center"><img src="art/dossiers/rin.jpg" width="200" alt="Rin Takamiya dossier card"></td>
-    <td align="center"><img src="art/dossiers/niko.jpg" width="200" alt="Niko Hoshino dossier card"></td>
+    <td align="center"><img src="assets/img/reika-roster.jpg" width="200" alt="Reika Kurogane roster card"></td>
+    <td align="center"><img src="assets/img/yui-roster.jpg" width="200" alt="Yui Aizawa roster card"></td>
+    <td align="center"><img src="assets/img/rin-roster.jpg" width="200" alt="Rin Takamiya roster card"></td>
+    <td align="center"><img src="assets/img/niko-roster.jpg" width="200" alt="Niko Hoshino roster card"></td>
   </tr>
   <tr>
-    <td align="center"><img src="art/dossiers/mei.jpg" width="200" alt="Mei Sakuraba dossier card"></td>
-    <td align="center"><img src="art/dossiers/aria.jpg" width="200" alt="Aria Kanzaki dossier card"></td>
-    <td align="center"><img src="art/dossiers/elo.jpg" width="200" alt="Elo Star dossier card"></td>
+    <td align="center"><img src="assets/img/mei-roster.jpg" width="200" alt="Mei Sakuraba roster card"></td>
+    <td align="center"><img src="assets/img/aria-roster.jpg" width="200" alt="Aria Kanzaki roster card"></td>
+    <td align="center"><img src="assets/img/elo-roster.jpg" width="200" alt="Elo Star roster card"></td>
   </tr>
 </table>
 
-Every piece, full size, is in the gallery: [animestack.jerkyjesse.com/gallery.html](https://animestack.jerkyjesse.com/gallery.html). The library manifest is [art/README.md](art/README.md).
+Every piece, full size, lives in the pack at [art/](art/). The library manifest is [art/README.md](art/README.md).
 
 ## The lineage
 
@@ -213,7 +213,7 @@ docs/measurement.md the counts audit
 docs/guide/         first task
 assets/img/         site art: team composite, roster cards, portraits, loop diagram, social card
 art/                the art: dossiers, sheets, wallpapers — one per seat each
-gallery.html        the art tour (GitHub Pages)
+seats/              seat pages for the site, each with that seat's roster card (GitHub Pages)
 skills/             9 skills: 7 seats + /house + /simple
 principles/         12 laws + 23 doctrine
 agents/             21 agents per host (opencode, claude)

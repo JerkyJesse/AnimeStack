@@ -5,9 +5,9 @@ house art here:
 
 | Set | Files | What |
 | --- | --- | --- |
-| `dossiers/` | 7 | one dossier card per seat — shown on the seat pages and in the gallery |
-| `sheets/` | 7 | one character sheet per seat — shown on the seat pages and in the gallery |
-| `wallpapers/` | 7 | one 4K wallpaper per seat (stamped jpg) — shown in the gallery |
+| `dossiers/` | 7 | one dossier card per seat |
+| `sheets/` | 7 | one character sheet per seat |
+| `wallpapers/` | 7 | one 4K wallpaper per seat (stamped jpg) |
 
 The base set — portraits, roster cards, the team composite, the loop diagram, the social
 card — lives once in `assets/img/` and is what the site and the README render. The lore
@@ -18,9 +18,9 @@ Seat slugs: `reika`, `yui`, `rin`, `niko`, `mei`, `aria`, `elo` (leadership orde
 
 ## The tour
 
-[`gallery.html`](../gallery.html) is the tour: every piece above as a thumbnail, linked to
-its full-size file. The thumbnails live in `assets/thumbs/`, generated from these files
-and the site set; they are display copies, not a second library.
+The seat pages carry each seat's roster card; the full library lives in this directory.
+The thumbnails live in `assets/thumbs/`, generated from these files and the site set;
+they are display copies, not a second library.
 
 ## Provenance
 

@@ -47,7 +47,7 @@ prose.
 | 7 | art character sheets | `ls art/sheets \| wc -l` |
 | 7 | art wallpapers | `ls art/wallpapers \| wc -l` |
 | 21 | art library, total | `find art -type f -not -name 'README.md' \| wc -l` |
-| 28 | gallery thumbnails | `find assets/thumbs -type f \| wc -l` |
+| 28 | site thumbnails | `find assets/thumbs -type f \| wc -l` |
 
 Notes on the rows.
 
@@ -89,11 +89,10 @@ render these same files.
 The art library rows are the pack's own art set at the repo root, in `art/` — one picture
 per seat per set, no variants: seven dossier cards, seven character sheets, seven 4K
 wallpapers. The library total is the three rows summed, `find art -type f`, minus the
-library's own `README.md`. The gallery row counts the site's pre-rendered thumbnails under
-`assets/thumbs/` — one per library piece plus the seven primary portraits; every thumbnail
-is generated from the source picture, never the other way around, and the gallery page
-links each thumbnail to its full file. A gallery that drifts from the library is a defect;
-re-run the count before believing the tour.
+library's own `README.md`. The thumbnails row counts the site's pre-rendered thumbnails
+under `assets/thumbs/` — one per library piece plus the seven primary portraits; every
+thumbnail is generated from the source picture, never the other way around. A thumbnail
+set that drifts from the library is a defect; re-run the count before believing the tour.
 
 The seat pages and the first row are the same seven files. They are not counted twice
 as different things; seven seats, seven pages, one row.
