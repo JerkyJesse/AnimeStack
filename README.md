@@ -59,26 +59,6 @@ A clean night in the room sounds like this:
 
 A dirty night is the same conversation with someone trying to keep a favorite alive by renaming it.
 
-## The art
-
-The pack carries the house art in [`art/`](art/) — one picture per seat per set, no variants: seven dossier cards, seven character sheets, and a 4K wallpaper each, beside the base set (portraits, roster cards, a team composite, the loop diagram, the social card).
-
-<table>
-  <tr>
-    <td align="center"><img src="assets/img/reika-roster.jpg" width="200" alt="Reika Kurogane roster card"></td>
-    <td align="center"><img src="assets/img/yui-roster.jpg" width="200" alt="Yui Aizawa roster card"></td>
-    <td align="center"><img src="assets/img/rin-roster.jpg" width="200" alt="Rin Takamiya roster card"></td>
-    <td align="center"><img src="assets/img/niko-roster.jpg" width="200" alt="Niko Hoshino roster card"></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="assets/img/mei-roster.jpg" width="200" alt="Mei Sakuraba roster card"></td>
-    <td align="center"><img src="assets/img/aria-roster.jpg" width="200" alt="Aria Kanzaki roster card"></td>
-    <td align="center"><img src="assets/img/elo-roster.jpg" width="200" alt="Elo Star roster card"></td>
-  </tr>
-</table>
-
-Every piece, full size, lives in the pack at [art/](art/). The library manifest is [art/README.md](art/README.md).
-
 ## The lineage
 
 AnimeStack is the refusal of three older schools, each of which is written in the house canon.
