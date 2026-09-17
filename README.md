@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/images/team-composite.jpg" alt="The AnimeStack house"></p>
+<p align="center"><img src="assets/img/team-composite.jpg" alt="The AnimeStack house"></p>
 
 # AnimeStack
 
@@ -18,17 +18,17 @@ What AnimeStack is not: a mascot pack; seven flavors of "sure, let's ship it"; a
 
 <table>
   <tr>
-    <td align="center"><img src="docs/images/roster/reika.jpg" width="240" alt="Reika"></td>
-    <td align="center"><img src="docs/images/roster/yui.jpg" width="240" alt="Yui"></td>
-    <td align="center"><img src="docs/images/roster/niko.jpg" width="240" alt="Niko"></td>
+    <td align="center"><img src="assets/img/reika-roster.jpg" width="240" alt="Reika"></td>
+    <td align="center"><img src="assets/img/yui-roster.jpg" width="240" alt="Yui"></td>
+    <td align="center"><img src="assets/img/niko-roster.jpg" width="240" alt="Niko"></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/images/roster/rin.jpg" width="240" alt="Rin"></td>
-    <td align="center"><img src="docs/images/roster/mei.jpg" width="240" alt="Mei"></td>
-    <td align="center"><img src="docs/images/roster/aria.jpg" width="240" alt="Aria"></td>
+    <td align="center"><img src="assets/img/rin-roster.jpg" width="240" alt="Rin"></td>
+    <td align="center"><img src="assets/img/mei-roster.jpg" width="240" alt="Mei"></td>
+    <td align="center"><img src="assets/img/aria-roster.jpg" width="240" alt="Aria"></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/images/roster/elo-star.jpg" width="240" alt="Elo"></td>
+    <td align="center"><img src="assets/img/elo-roster.jpg" width="240" alt="Elo"></td>
   </tr>
 </table>
 
@@ -59,7 +59,7 @@ A dirty night is the same conversation with someone trying to keep a favorite al
 
 ## The art
 
-The pack carries the full house art library in [`art/`](art/): seven dossier cards, fourteen character sheets, fifteen sprites and nameplates, five team composites, seven alternate portraits, and a 4K wallpaper set — a still and a seamless animated loop per seat, packed for Wallpaper Engine.
+The pack carries the house art in [`art/`](art/) — one picture per seat per set, no variants: seven dossier cards, seven character sheets, and a 4K wallpaper each, beside the base set the site renders (portraits, roster cards, a team composite, the loop diagram, the social card).
 
 <table>
   <tr>
@@ -103,7 +103,7 @@ Reversible and protective acts are never delayed by the descent: Niko can restar
 
 The full spine, solo authority, and the `/simple` waiver are in [docs/loop.md](docs/loop.md).
 
-![The design loop](docs/images/loop.svg)
+![The design loop](assets/img/loop.svg)
 
 One sentence each, in order, no skips. Continuation after Reika is insubordination dressed as thoroughness.
 
@@ -155,7 +155,7 @@ Seven seat skills — `/reika`, `/mei`, `/elo`, `/yui`, `/niko`, `/rin`, `/aria`
 - an on-demand canon — every agent carries a `**Canon.**` pointer to its seat digest, dossier, and backstory, plus a seat trigger line naming the calls that force the read; canon text is never inlined (guard-the-context-window, steward Mei)
 - 10 hosts
 - a frozen lore mirror of 21 files — canon, four companion books, the House Board, 15 dossiers — plus the freeze policy (`docs/lore/`)
-- the art: the full library in `art/` — 7 dossier cards, 14 character sheets, 15 sprites and nameplates, 5 team composites, 7 alternate portraits, 7 4K wallpapers with animated loops and Wallpaper Engine packs — plus the site set (team composite, 7 roster cards, 7 portraits, a loop diagram, a social card)
+- the art: `art/` — 7 dossier cards, 7 character sheets, 7 4K wallpapers (one per seat per set, no variants) — plus the site set in `assets/img/` (team composite, 7 roster cards, 7 portraits, a loop diagram, a social card)
 
 The `/house` router matches a request to one of the 12 playbooks, opens the loop, and closes with a verdict. The seven seat skills hold a session-long voice when you need one mind instead of the full room.
 
@@ -202,8 +202,8 @@ docs/seats/         seven seat pages
 docs/loop.md        the spine, both descents, the waiver
 docs/measurement.md the counts audit
 docs/guide/         first task
-docs/images/        team composite, roster cards, portraits, loop, social card
-art/                the art library: dossiers, sheets, sprites, team, wallpapers
+assets/img/         site art: team composite, roster cards, portraits, loop diagram, social card
+art/                the art: dossiers, sheets, wallpapers — one per seat each
 gallery.html        the art tour (GitHub Pages)
 skills/             9 skills: 7 seats + /house + /simple
 principles/         12 laws + 23 doctrine

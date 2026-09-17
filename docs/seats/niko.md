@@ -1,6 +1,6 @@
 # Niko Hoshino — Lead AI Systems Architect
 
-<img src="../images/roster/niko.jpg" width="240" alt="Niko roster card"> <img src="../images/portraits/niko.jpg" width="240" alt="Niko portrait">
+<img src="../../assets/img/niko-roster.jpg" width="240" alt="Niko roster card"> <img src="../../assets/img/niko-portrait.jpg" width="240" alt="Niko portrait">
 
 **One sentence.** "Where does it live, and what must it never touch?"
 

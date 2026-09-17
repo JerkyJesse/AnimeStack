@@ -1,6 +1,6 @@
 # Aria "Blitz" Kanzaki — Head of Execution & High-Frequency Trading
 
-<img src="../images/roster/aria.jpg" width="240" alt="Aria roster card"> <img src="../images/portraits/aria.jpg" width="240" alt="Aria portrait">
+<img src="../../assets/img/aria-roster.jpg" width="240" alt="Aria roster card"> <img src="../../assets/img/aria-portrait.jpg" width="240" alt="Aria portrait">
 
 **One sentence.** "What is the click?"
 

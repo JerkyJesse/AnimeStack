@@ -42,16 +42,12 @@ prose.
 | 6 | lore mirror files | `ls docs/lore/*.md \| grep -v README \| wc -l` (canon, oracles, machines, arena, scenes, board) |
 | 15 | lore dossiers | `ls docs/lore/dossiers \| wc -l` |
 | 21 | lore total | 6 mirror files + 15 dossiers, the two rows above summed |
-| 16 | art images (docs) | `ls docs/images/*.jpg docs/images/roster/*.jpg docs/images/portraits/*.jpg \| wc -l` |
+| 16 | site art images | `ls assets/img/*.jpg \| wc -l` |
 | 7 | art dossier cards | `ls art/dossiers \| wc -l` |
-| 14 | art character sheets | `ls art/sheets \| wc -l` |
-| 15 | art sprites & nameplates | `ls art/sprites \| wc -l` |
-| 7 | art alternate portraits | `ls art/portraits \| wc -l` |
-| 5 | art team composites | `ls art/team \| wc -l` |
-| 15 | art web exports | `ls art/gallery \| wc -l` |
-| 42 | art wallpaper files | `find art/wallpapers -type f \| wc -l` |
-| 105 | art library, total | `find art -type f -not -name 'README.md' \| wc -l` |
-| 77 | gallery thumbnails | `find assets/thumbs -type f \| wc -l` |
+| 7 | art character sheets | `ls art/sheets \| wc -l` |
+| 7 | art wallpapers | `ls art/wallpapers \| wc -l` |
+| 21 | art library, total | `find art -type f -not -name 'README.md' \| wc -l` |
+| 28 | gallery thumbnails | `find assets/thumbs -type f \| wc -l` |
 
 Notes on the rows.
 
@@ -81,22 +77,19 @@ twenty-one. The mirror is the frozen canon; the dossiers are the deep canon. The
 separate because a dossier deepens a seat and never contradicts it, and the count is the
 proof they are both present.
 
-The site-art row is four groups in the site set (`docs/images/`) — the team composite
-(`docs/images/*.jpg`, one file), the seven roster cards (`docs/images/roster/*.jpg`), the
-seven portraits (`docs/images/portraits/*.jpg`), and the social card
-(`docs/images/social-preview.jpg`, one file): sixteen total, all jpgs; the loop diagram is
-`docs/images/loop.svg` and is not counted here.
+The site-art row is the sixteen jpgs in `assets/img/` — seven portraits, seven roster cards,
+the team composite, and the social card; the loop diagram and the favicon are svg and are
+not counted. One copy of each picture ships in the repo; the README and `docs/seats/*.md`
+render these same files.
 
-The art library rows are the pack's own art set at the repo root, in `art/`. Six sets
-carry the stills: seven dossier cards, fourteen character sheets, fifteen sprites and
-nameplates, seven alternate portraits, five team composites, and fifteen web exports.
-The wallpaper row is forty-two files in three groups — seven 4K stills (webp), seven
-stamped jpgs, and twenty-eight files inside seven Wallpaper Engine packs (project, video,
-preview, readme each). The library total is the seven rows summed, `find art -type f`,
-minus the library's own `README.md`. The gallery row counts the site's pre-rendered
-thumbnails under `assets/thumbs/`; every one is generated from `art/`, never the other
-way around, and the gallery page links each thumbnail to its full file. A gallery that
-drifts from the library is a defect; re-run the count before believing the tour.
+The art library rows are the pack's own art set at the repo root, in `art/` — one picture
+per seat per set, no variants: seven dossier cards, seven character sheets, seven 4K
+wallpapers. The library total is the three rows summed, `find art -type f`, minus the
+library's own `README.md`. The gallery row counts the site's pre-rendered thumbnails under
+`assets/thumbs/` — one per library piece plus the seven primary portraits; every thumbnail
+is generated from the source picture, never the other way around, and the gallery page
+links each thumbnail to its full file. A gallery that drifts from the library is a defect;
+re-run the count before believing the tour.
 
 The seat pages and the first row are the same seven files. They are not counted twice
 as different things; seven seats, seven pages, one row.

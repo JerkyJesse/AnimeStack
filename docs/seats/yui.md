@@ -1,6 +1,6 @@
 # Yui Aizawa — Head of Quantitative Strategies
 
-<img src="../images/roster/yui.jpg" width="240" alt="Yui roster card"> <img src="../images/portraits/yui.jpg" width="240" alt="Yui portrait">
+<img src="../../assets/img/yui-roster.jpg" width="240" alt="Yui roster card"> <img src="../../assets/img/yui-portrait.jpg" width="240" alt="Yui portrait">
 
 **One sentence.** "What wound does this exploit?"
 

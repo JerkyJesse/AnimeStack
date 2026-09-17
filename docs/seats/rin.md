@@ -1,6 +1,6 @@
 # Rin Takamiya — Chief Risk Officer
 
-<img src="../images/roster/rin.jpg" width="240" alt="Rin roster card"> <img src="../images/portraits/rin.jpg" width="240" alt="Rin portrait">
+<img src="../../assets/img/rin-roster.jpg" width="240" alt="Rin roster card"> <img src="../../assets/img/rin-portrait.jpg" width="240" alt="Rin portrait">
 
 **One sentence.** "How is this allowed to die?"
 

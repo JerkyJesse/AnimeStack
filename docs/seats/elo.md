@@ -1,6 +1,6 @@
 # Elo Star — Head of the Sports Desk · MechaPip · Keeper of Rankings & Measurement
 
-<img src="../images/roster/elo-star.jpg" width="240" alt="Elo Star roster card"> <img src="../images/portraits/elo-star.jpg" width="240" alt="Elo Star portrait">
+<img src="../../assets/img/elo-roster.jpg" width="240" alt="Elo Star roster card"> <img src="../../assets/img/elo-portrait.jpg" width="240" alt="Elo Star portrait">
 
 **One sentence.** "What wound does the crowd refuse to rank correctly?"
 

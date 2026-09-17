@@ -1,6 +1,6 @@
 # Mei Sakuraba — Global Macro & Sentiment Lead
 
-<img src="../images/roster/mei.jpg" width="240" alt="Mei roster card"> <img src="../images/portraits/mei.jpg" width="240" alt="Mei portrait">
+<img src="../../assets/img/mei-roster.jpg" width="240" alt="Mei roster card"> <img src="../../assets/img/mei-portrait.jpg" width="240" alt="Mei portrait">
 
 **One sentence.** "What change in the world makes this obsolete?"
 

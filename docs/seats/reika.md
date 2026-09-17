@@ -1,6 +1,6 @@
 # Reika Kurogane — Founder & Chief Investment Officer
 
-<img src="../images/roster/reika.jpg" width="240" alt="Reika roster card"> <img src="../images/portraits/reika.jpg" width="240" alt="Reika portrait">
+<img src="../../assets/img/reika-roster.jpg" width="240" alt="Reika roster card"> <img src="../../assets/img/reika-portrait.jpg" width="240" alt="Reika portrait">
 
 **One sentence.** "What are we allowed to want?"
 
