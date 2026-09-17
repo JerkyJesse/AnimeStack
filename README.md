@@ -99,24 +99,26 @@ cd ~/animestack
 ./setup --host <your host>
 ```
 
+On Windows the native entry point is `powershell -ExecutionPolicy Bypass -File .\setup.ps1 -TargetHost <your host>`; same contract as `./setup`.
+
 `--host` names the coding host whose config directory receives the skills.
 
 | Host | Skills land | Agents |
 | --- | --- | --- |
 | `claude` | `~/.claude/skills` | `~/.claude/agents` |
-| `cursor` | `~/.cursor/skills` | — |
-| `codex` | `${CODEX_HOME:-~/.codex}/skills` | — |
-| `factory` | `~/.factory/skills` | — |
+| `cursor` | `~/.cursor/skills` | `~/.cursor/agents` |
+| `codex` | `${CODEX_HOME:-~/.codex}/skills` | `${CODEX_HOME:-~/.codex}/agents` (TOML) |
+| `factory` | `~/.factory/skills` | `~/.factory/droids` |
 | `opencode` | `~/.config/opencode/skills` | `~/.config/opencode/agent` |
-| `kiro` | `~/.kiro/skills` | — |
-| `slate` | reads `~/.claude/skills` | — |
+| `kiro` | `~/.kiro/skills` | `~/.kiro/agents` |
+| `slate` | reads `~/.claude/skills` | reads `~/.claude/agents` |
 | `openclaw` | `~/.openclaw/skills/animestack` (digest) | — |
 | `hermes` | `~/.hermes/skills/animestack` (digest) | — |
 | `gbrain` | `~/.gbrain/skills/animestack` (digest) | — |
 
-`--host all` installs every supported host; `--host auto` installs only the hosts whose config directories already exist. The default is `claude`. Run `./setup --help` for the exact list.
+`--host all` installs every supported host; `--host auto` installs only the hosts whose config directories already exist. The default is `claude`. Run `./setup --help` for the exact list. The opencode and Factory hosts also get `/house` as a real command; on the other hosts the `house` skill is the slash command.
 
-On Windows the install copies files, not symlinks. Re-run `./setup` after `git pull` to refresh.
+The install copies files, not symlinks, on Windows and anywhere symlinks are unavailable. Re-run either entry point after `git pull` to refresh.
 
 `./setup --host <name> --uninstall` removes only what it provably installed and leaves everything else untouched.
 
@@ -128,19 +130,20 @@ Open a new session and run `/house`.
 
 `/simple` — the Operator's waiver. Plain build mode: no seats, no room, no house voice. It reads, writes, builds, and tests, and it never signs.
 
-On the opencode host, `setup` also installs `/house` as a real command
-(`~/.config/opencode/command/house.md`), so the router is one slash command there too;
-Claude Code reads the same router from the `house` skill.
+On the opencode and Factory hosts, `setup` also installs `/house` as a real command
+(`~/.config/opencode/command/house.md`, `~/.factory/commands/house.md`), so the router is
+one slash command there too; Claude Code, Cursor, Codex, and Kiro read the same router
+from the `house` skill.
 
 Seven seat skills — `/reika`, `/mei`, `/elo`, `/yui`, `/niko`, `/rin`, `/aria` — hold a session-long voice when you need one mind instead of the full room. Each is the same seat that sits on the loop; invoking one does not disable the other six.
 
 ## What is in the box
 
 - 9 skills — 7 seats plus the `/house` router and the `/simple` waiver
-- 1 opencode command — `/house`, installed by `setup` (the skill covers Claude Code)
+- 2 commands — `/house` for opencode and Factory, installed by `setup` (the skill covers the other hosts)
 - 12 playbooks under `skills/house/playbooks/`
 - 35 principles — 12 laws of the room plus 23 doctrine pieces adapted from pstack (`principles/INDEX.md`)
-- 21 subagents per host — 7 seats, 7 review leaves, 7 build leaves — shipped for opencode and Claude Code, 42 agent files total; no concrete model is pinned, so every subagent runs on the invoking session's model
+- 21 subagents per host — 7 seats, 7 review leaves, 7 build leaves — shipped for six host dialects (Claude Code, OpenAI Codex, Cursor, Factory, Kiro, opencode), 126 agent files total; no concrete model is pinned, so every subagent runs on the invoking session's model
 - an on-demand canon — every agent carries a `**Canon.**` pointer to its seat digest, dossier, and backstory, plus a seat trigger line naming the calls that force the read; canon text is never inlined (guard-the-context-window, steward Mei)
 - 10 hosts
 - the house canon — one canon file plus 15 seat dossiers (`docs/lore/`)
@@ -196,12 +199,14 @@ art/                the art: dossiers, sheets, wallpapers — one per seat each
 seats/              seat pages for the site, each with that seat's roster card (GitHub Pages)
 skills/             9 skills: 7 seats + /house + /simple
 principles/         12 laws + 23 doctrine
-agents/             21 agents per host (opencode, claude)
+agents/             21 agents per dialect: claude, cursor, codex (TOML), factory (droids), kiro, opencode
 voices/             house voice
-setup               the only installer
+scripts/            maintenance tools: the dialect generator
+setup               the installer: bash entry point (unix / Git Bash)
+setup.ps1           the installer: native Windows entry point, same contract
 AGENTS.md           digest / house voice
 ```
 
 ## Credits and license
 
-MIT licensed — see [LICENSE](LICENSE). AnimeStack is an independent work inspired by [gstack](https://github.com/garrytan/gstack) (Garry Tan) and [pstack](https://github.com/cursor/plugins/pstack) (Lauren Tan); attributions are in [NOTICE](NOTICE). Fork it. Improve it. Make it yours.
+Dual-licensed: [AGPL-3.0-or-later](LICENSE), or a [commercial license](COMMERCIAL.md) for use without the AGPL's source-disclosure obligations. AnimeStack is an independent work inspired by [gstack](https://github.com/garrytan/gstack) (Garry Tan) and [pstack](https://github.com/cursor/plugins/pstack) (Lauren Tan), both MIT; attributions are in [NOTICE](NOTICE). Fork it. Improve it. Make it yours.
