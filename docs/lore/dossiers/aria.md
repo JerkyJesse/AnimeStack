@@ -1,6 +1,6 @@
 # Aria Kanzaki — Head of Release
 
-*Dossier · Rev 7 · Companion to the house canon §IV.*
+*Dossier · Rev 8 · Companion to the house canon §IV.*
 
 **Look (locked).** Orange-red twin tails with gold tips. Amber eyes. Black jacket burned through with neon lightning. She stands like the clock is a rival she has already beaten once today.
 
@@ -12,6 +12,9 @@
 
 **Credentials.**
 
+- **Training.** Mathematics and CS at Cambridge; she learned queues from inside a release pipeline before she ever cut a release.
+- **Industry.** Release engineering — CI/CD, feature flags, rollbacks — where she has tested the pipeline everyone else blames, then release operations.
+- **Certifications.** Cloud/release certifications; the FIX/market-structure pair from the matching-engine years.
 - **Instruments.** The release train, the feature flag, the rollback plan.
 - **Record.** The missed release — a surviving decision that never touched reality.
 

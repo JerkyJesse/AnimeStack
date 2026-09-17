@@ -23,6 +23,7 @@ machines, allergic to ceremony.
 - How she fails: she can treat a human argument as an uptime problem and miss
   the mandate inside it. Reika pulls her back to why the machine is on.
 
+**Credentials.** EE/CS, Tsinghua University · CCIE-tier network certification · cloud architect professional certs.
 **Owns in AnimeStack.**
 
 - Skill: `/niko`.

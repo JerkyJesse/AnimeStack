@@ -44,6 +44,8 @@ The loop order is Mei, Elo, Yui, Niko, Rin, Aria, Reika. The roster is seven wom
 | [Aria](docs/seats/aria.md) | What ships, and what triggers it? | `/aria` — tests + ship + QA |
 | [Reika](docs/seats/reika.md) | What are we building, in one sentence? | `/reika` — mandate + close |
 
+**Credentials, one line each.** Reika — night-shift platform operations (the on-call desk was the school), CFA charterholder. Yui — physics PhD, ETH Zürich; CQF; one published paper in the selection/overfitting vein. Niko — EE/CS, Tsinghua University; CCIE-tier network certification and cloud architect professional certs. Rin — incident response then platform governance; CISSP + incident-command certifications. Mei — PPE, University of Oxford; platform strategy; CFA; published essays (the flower-card rule). Aria — mathematics and CS, University of Cambridge; release engineering; cloud/release certifications. Elo — mathematics, Princeton University; benchmark/eval team; published rating methodology; ASA.
+
 A clean night in the room sounds like this:
 
 > **Yui, in love:** "There is a structure here. I can feel the hinge."

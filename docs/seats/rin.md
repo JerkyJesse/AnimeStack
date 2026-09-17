@@ -24,6 +24,7 @@ meeting. She does not raise her voice; she does not need to.
 - How she fails: she can smother a real improvement because its failure is
   imaginable. Reika decides which imaginable failures the house will bear.
 
+**Credentials.** Incident response then platform governance (no degree) · CISSP + incident-command certifications.
 **Owns in AnimeStack.**
 
 - Skill: `/rin`.

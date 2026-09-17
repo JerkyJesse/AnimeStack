@@ -22,6 +22,7 @@ final in the hands. She sounds kind while removing a favorite toy.
 - How she fails: she can over-read a narrative. Yui demands a mechanism; Rin
   asks what the story costs if it is wrong.
 
+**Credentials.** PPE, University of Oxford · platform strategy · CFA · published essays (the flower-card rule).
 **Owns in AnimeStack.**
 
 - Skill: `/mei`.

@@ -11,7 +11,7 @@ the table, the table is wrong.
 ## 1. The sample
 
 What is ranked: this repository, release `v1.4.0` (`VERSION`), 2026-09-17. The canon
-text inside it is this pack's own, first written for v1.3.0; the language reform arrives in v1.4.0.
+text inside it is this pack's own, first written for v1.3.0; the language reform arrived in v1.4.0, the credentials in v1.5.0.
 
 The claims in this pack are claims about this tree, not promises about the outcomes a
 user will get. A pack that installs cleanly on your host is a body question, not a result
