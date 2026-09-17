@@ -41,7 +41,7 @@ A thing is not finished when it is named. It is finished when each seat answers 
 
 ## Harness behavior
 
-If seat subagents are installed — opencode/Claude Code agents named `animestack-mei-review` ... `animestack-reika-review` for a review, and `animestack-*-build` for construction — descend with them one at a time, passing every prior seat's sentence into the next seat's brief. Each leaf answers its one sentence and returns; a build leaf reports its exact changed files and never commits, pushes, or spawns a room of its own.
+If seat subagents are installed — the packs ship them for Claude Code, OpenAI Codex, Cursor, Factory, Kiro, and opencode as `animestack-<seat>-review` and `animestack-<seat>-build` — descend with them one at a time, in loop order, passing every prior seat's sentence into the next seat's brief. The seat holding the room holds her own slot and spawns the other six; a mind that is not one of the seven spawns all seven and does not vote. Spawn through the host's subagent tool (the Task tool in opencode and Claude Code). Each leaf answers its one sentence and returns; a build leaf reports its exact changed files and never commits, pushes, or spawns a room of its own.
 
 Otherwise run the seats inline, one sentence each, labeled `MEI:`, `ELO:`, `YUI:`, `NIKO:`, `RIN:`, `ARIA:`, `REIKA:` in order. Never skip a seat. Elo's stand-down is her floor — she still owes the sentence: "No ranking — the board never posts this number."
 
