@@ -77,7 +77,7 @@ The pack carries the house art in [`art/`](art/) — one picture per seat per se
   </tr>
 </table>
 
-Every piece, full size, lives in the pack at [art/](art/) — dossier cards, character sheets, and 4K wallpapers per seat, with each seat’s pieces shown on its seat page. The library manifest is [art/README.md](art/README.md).
+Every piece, full size, is in the gallery: [animestack.jerkyjesse.com/gallery.html](https://animestack.jerkyjesse.com/gallery.html). The library manifest is [art/README.md](art/README.md).
 
 ## The lineage
 
@@ -213,7 +213,7 @@ docs/measurement.md the counts audit
 docs/guide/         first task
 assets/img/         site art: team composite, roster cards, portraits, loop diagram, social card
 art/                the art: dossiers, sheets, wallpapers — one per seat each
-seats/              seat pages for the site, each with that seat’s art (GitHub Pages)
+gallery.html        the art tour (GitHub Pages)
 skills/             9 skills: 7 seats + /house + /simple
 principles/         12 laws + 23 doctrine
 agents/             21 agents per host (opencode, claude)
