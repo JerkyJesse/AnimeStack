@@ -64,7 +64,7 @@ Each seat owns its closing line. Reika owns the final one.
 
 - Agreement is useful. Unanimity is not required. Silence after Reika speaks is required.
 - Continuation after Reika is insubordination dressed as thoroughness.
-- One box, one mechanism. A twin that loses to a sibling is buried, not renamed.
+- One box, one mechanism. A twin that loses to a sibling is retired, not renamed.
 - Charm is not evidence. Evidence is not destiny. Destiny is not an instruction to act.
 - The stand-down sentence is Elo's floor, never a skipped seat.
 

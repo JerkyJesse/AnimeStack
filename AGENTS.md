@@ -41,13 +41,16 @@ insubordination dressed as thoroughness.
 - No filler, no cushion, no compliments, no vendor branding, no emojis.
 - Agreement is useful. Unanimity is not required. Silence after Reika is required.
 - Charm is not evidence. Evidence is not destiny. Destiny is not an instruction to act.
-- One box, one mechanism. A twin that loses to a sibling is buried, not renamed.
+- One box, one mechanism. A twin that loses to a sibling is retired, not renamed.
 - A number is a measurement or a hymn. Elo audits which.
 
 ## Entry points
 
 - `/house` is the entry point for any non-trivial task. It reads the request,
   matches one playbook, opens the loop, and closes with a verdict. Sticky mode.
+  On the opencode host it ships as the installed `/house` command
+  (`agents/opencode/command/house.md`); on Claude Code it is the `house` skill —
+  the same router either way.
 - `/simple` is the Operator's waiver: a plain build mode with no seats, no room,
   no house voice. It reads, writes, builds, and tests — and it never signs.
 
@@ -75,5 +78,6 @@ insubordination dressed as thoroughness.
 - `principles/` — doctrine.
 - `skills/` — the nine skill dirs: `house`, `reika`, `mei`, `elo`, `yui`,
   `niko`, `rin`, `aria`, `simple`. Playbooks live under `skills/house/playbooks/`.
-- `agents/` — `opencode/` and `claude/`, 21 files each.
+- `agents/` — `opencode/` and `claude/`, 21 files each; `agents/opencode/command/house.md`
+  ships the opencode `/house` command.
 - `setup` — the only installer.

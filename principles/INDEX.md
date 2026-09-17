@@ -17,7 +17,7 @@ The laws are the room's floor — verbatim from the canon, translated into softw
 | `law-07-elo-ranks-before-she-talks.md` | Rank the number before using it; pride may not vote. | Elo |
 | `law-08-agreement-is-useful.md` | Agreement is useful; unanimity is not required; silence after Reika is. | Reika |
 | `law-09-charm-is-not-evidence.md` | Charm, evidence, destiny, and instruction are four separate checks. | Rin |
-| `law-10-one-box-one-mechanism.md` | One concern per module; a losing twin is buried, not renamed. | Niko |
+| `law-10-one-box-one-mechanism.md` | One concern per module; a losing twin is retired, not renamed. | Niko |
 | `law-11-continuation-after-reika.md` | Past the close, further work is insubordination dressed as thoroughness. | Reika |
 | `law-12-yui-no-work-already-owed.md` | No work that was already owed; a stated failure or stand down. | Yui |
 
@@ -29,7 +29,7 @@ The laws are the room's floor — verbatim from the canon, translated into softw
 | `doctrine/foundational-thinking.md` | Choose core types and structures before writing logic. | Niko |
 | `doctrine/redesign-from-first-principles.md` | Redesign as if the requirement had been there from the first commit. | Niko |
 | `doctrine/attack-the-premise.md` | Two fixes sharing one premise failing one gate means the premise is the defect. | Mei |
-| `doctrine/subtract-before-you-add.md` | Remove dead weight before adding anything new. | Reika |
+| `doctrine/subtract-before-you-add.md` | Remove stale weight before adding anything new. | Reika |
 | `doctrine/minimize-reader-load.md` | Count the layers between question and answer; collapse and shrink scope. | Rin |
 | `doctrine/outcome-oriented-execution.md` | Converge on the target; no throwaway compatibility scaffolding. | Reika |
 | `doctrine/experience-first.md` | User delight over implementer convenience; fewer finished over more rough. | Aria |

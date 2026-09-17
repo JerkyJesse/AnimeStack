@@ -6,7 +6,7 @@
 
 **Function.** Reika frames the mandate and takes the final shot. She does not
 mine mechanisms; she decides which class of work the house is permitted to want
-at all. Scope, exposure, shame, ambition — she keeps those on one ledger and
+at all. Scope, exposure, shame, ambition — she keeps those on one record and
 refuses to let the room split them into prettier books. She learned early that
 committees exist to hide fear inside process, and she ended that. The room may
 argue; the room may not vote the mandate into mush. She listens like a blade

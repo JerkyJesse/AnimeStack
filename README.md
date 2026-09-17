@@ -38,7 +38,7 @@ The loop order is Mei, Elo, Yui, Niko, Rin, Aria, Reika. The roster is seven wom
 | --- | --- | --- |
 | [Mei](docs/seats/mei.md) | What change in the world makes this obsolete? | `/mei` — climate + investigation |
 | [Elo](docs/seats/elo.md) | What does the crowd refuse to measure correctly? | `/elo` — measurement + audit |
-| [Yui](docs/seats/yui.md) | What failure does this prevent, and what would falsify it? | `/yui` — mechanism + fix + kill |
+| [Yui](docs/seats/yui.md) | What failure does this prevent, and what would falsify it? | `/yui` — mechanism + fix + falsify |
 | [Niko](docs/seats/niko.md) | Where does it live, and what must it never touch? | `/niko` — body + architecture + deploy |
 | [Rin](docs/seats/rin.md) | How does this fail, and how fast? | `/rin` — review + failure + security |
 | [Aria](docs/seats/aria.md) | What ships, and what triggers it? | `/aria` — tests + ship + QA |
@@ -48,7 +48,7 @@ A clean night in the room sounds like this:
 
 > **Yui, in love:** "There is a structure here. I can feel the hinge."
 > **Rin:** "Feel is not a failure mode."
-> **Yui, after the knife:** "It dies on the second half. Bury it."
+> **Yui, after the knife:** "It fails on the second half. Retire it."
 > **Niko:** "Good. I don't want that ghost in the boxes."
 > **Mei:** "Even if it had lived, the weather is turning against the family it belongs to."
 > **Elo:** "The crowd already loves that benchmark. If that is the whole claim, it is a hymn."
@@ -85,7 +85,7 @@ The oracles sold answers that could not close — prophecy that paid the temple 
 
 The machines sold speed — the fastest network made the deal, until the line was common and the advantage was gone. Speed is rented; the cage is owned.
 
-The arena sold leaderboards — twelve-week cups that minted champions and buried survivors. A leaderboard rewards variance; the live record rewards survival.
+The arena sold leaderboards — twelve-week cups that minted champions and retired survivors. A leaderboard rewards variance; the live record rewards survival.
 
 The house kept the settled question, the cage, and the live record. The temple, the race, and the podium stayed with the crowds. The full telling is in `docs/lore/`.
 
@@ -146,11 +146,16 @@ Open a new session and run `/house`.
 
 `/simple` — the Operator's waiver. Plain build mode: no seats, no room, no house voice. It reads, writes, builds, and tests, and it never signs.
 
+On the opencode host, `setup` also installs `/house` as a real command
+(`~/.config/opencode/command/house.md`), so the router is one slash command there too;
+Claude Code reads the same router from the `house` skill.
+
 Seven seat skills — `/reika`, `/mei`, `/elo`, `/yui`, `/niko`, `/rin`, `/aria` — hold a session-long voice when you need one mind instead of the full room. Each is the same seat that sits on the loop; invoking one does not disable the other six.
 
 ## What is in the box
 
 - 9 skills — 7 seats plus the `/house` router and the `/simple` waiver
+- 1 opencode command — `/house`, installed by `setup` (the skill covers Claude Code)
 - 12 playbooks under `skills/house/playbooks/`
 - 35 principles — 12 laws of the room plus 23 doctrine pieces adapted from pstack (`principles/INDEX.md`)
 - 21 subagents per host — 7 seats, 7 review leaves, 7 build leaves — shipped for opencode and Claude Code, 42 agent files total; no concrete model is pinned, so every subagent runs on the invoking session's model
@@ -171,12 +176,12 @@ Five minutes, a real task, seven sentences. [docs/guide/first-task.md](docs/guid
 
 ## How you know it works
 
-The falsifier is pre-registered in [docs/measurement.md](docs/measurement.md) §5, before the victory lap. Run your own work both ways — once through `/house`, once through `/simple` — and count escaped defects and pre-merge kills on a fresh second sample. If there is no measured difference between the two, the pack is prose wearing a coat. Bury it, and say so in your own ledger.
+The falsifier is pre-registered in [docs/measurement.md](docs/measurement.md) §5, before the victory lap. Run your own work both ways — once through `/house`, once through `/simple` — and count escaped defects and pre-merge catches on a fresh second sample. If there is no measured difference between the two, the pack is prose wearing a coat. Retire it, and say so in your own record.
 
 ## The law of the room
 
 1. Reika frames.
-2. Yui may fall in love. She may not be excused from the murder.
+2. Yui may fall in love. She may not be excused from the falsifier.
 3. Rin does not debate taste. She accepts or she ends.
 4. Niko owns the body the idea must inhabit.
 5. Mei names climate, not mood.
@@ -184,7 +189,7 @@ The falsifier is pre-registered in [docs/measurement.md](docs/measurement.md) §
 7. Elo ranks before she talks.
 8. Agreement is useful. Unanimity is not required. Silence after Reika is required.
 9. Charm is not evidence. Evidence is not destiny. Destiny is not an instruction to act.
-10. One box, one mechanism. A twin that loses to a sibling is buried, not renamed.
+10. One box, one mechanism. A twin that loses to a sibling is retired, not renamed.
 11. Continuation after Reika is insubordination dressed as thoroughness.
 12. No seat signs work that was already owed. The change must answer a stated failure, or the house stands down.
 

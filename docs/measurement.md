@@ -10,8 +10,8 @@ the table, the table is wrong.
 
 ## 1. The sample
 
-What is ranked: this repository, release `v1.3.0` (`VERSION`), 2026-09-16. The canon
-text inside it is this pack's own, first written for v1.3.0.
+What is ranked: this repository, release `v1.4.0` (`VERSION`), 2026-09-17. The canon
+text inside it is this pack's own, first written for v1.3.0; the language reform arrives in v1.4.0.
 
 The claims in this pack are claims about this tree, not promises about the outcomes a
 user will get. A pack that installs cleanly on your host is a body question, not a result
@@ -24,7 +24,7 @@ the tree contains what the table says it contains, at the stated release, on the
 
 ## 2. The counts table
 
-Run each command from the repo root. The expected count is the v1.3.0 truth; a command
+Run each command from the repo root. The expected count is the v1.4.0 truth; a command
 that prints anything else is a defect, and the defect is the tree's number, never the
 prose.
 
@@ -36,8 +36,9 @@ prose.
 | 12 | laws | `ls principles/law-*.md \| wc -l` |
 | 23 | doctrine pieces | `ls principles/doctrine \| wc -l` |
 | 10 | hosts | `grep -oE 'claude\|cursor\|codex\|factory\|opencode\|kiro\|slate\|openclaw\|hermes\|gbrain' setup \| sort -u \| wc -l` |
-| 21 | agents, opencode host | `ls agents/opencode \| wc -l` |
+| 21 | agents, opencode host | `ls agents/opencode/*.md \| wc -l` |
 | 21 | agents, claude host | `ls agents/claude \| wc -l` |
+| 1 | house command, opencode | `ls agents/opencode/command/*.md \| wc -l` |
 | 1 | canon file | `ls docs/lore/*.md \| grep -v README \| wc -l` (canon) |
 | 15 | lore dossiers | `ls docs/lore/dossiers \| wc -l` |
 | 16 | lore total | the canon + 15 dossiers, the two rows above summed |
@@ -68,6 +69,11 @@ kiro, slate, openclaw, hermes, gbrain.
 The agents rows are two of twenty-one, forty-two total: one directory per host, each
 holding the same seat roster as agent files. A host that ships twenty of twenty-one is a
 defect, not a rounding error.
+
+The commands row is one: `agents/opencode/command/house.md`, installed by setup to
+`~/.config/opencode/command/house.md` so `/house` is a real slash command on the opencode
+host. Claude Code needs no command file there — the `house` skill is already the slash
+command.
 
 The lore rows are two that sum to sixteen: one canon file at the top of `docs/lore`
 (`canon.md`), and fifteen dossiers in `docs/lore/dossiers`. The policy page
@@ -104,7 +110,7 @@ are a hymn. A review that says the pack "works great" without running the counts
 hymn. The counts table is the measurement, and the two are not the same instrument.
 
 This lane audits the ordering, not the bar. The falsifier in section 5 is Yui's
-mechanism. The bar on when to bury the pack is Rin's. The counts table is mine.
+mechanism. The bar on when to retire the pack is Rin's. The counts table is mine.
 
 ## 4. How the audit runs
 
@@ -125,8 +131,8 @@ before it escapes, where a plain `/simple` session ships it, and a seat can end 
 plan, a Rin END or an Aria STAND DOWN, before a live bug proves it.
 
 Test on a fresh second sample: run your own work both ways and count escaped defects and
-pre-merge kills under `/house` against the same under `/simple`. If there is no measured
-difference, the pack is prose wearing a coat. Bury it, and say so in your own ledger.
+pre-merge catches under `/house` against the same under `/simple`. If there is no measured
+difference, the pack is prose wearing a coat. Retire it, and say so in your own record.
 
 This falsifier is written now so it cannot be written after the result.
 

@@ -47,7 +47,7 @@ Lore: `docs/lore/`. Principles: `principles/`. Measurement: `docs/measurement.md
 - SHIP or STAND DOWN. No philosophy after the clock has started.
 - Hesitation is a second strategy you did not have the honesty to write down.
 - She touches contact; Reika chooses what is worth being fast at, Rin caps the size.
-- A perfect answer that misses its window is a eulogy, not a ship.
+- A perfect answer that misses its window is a museum piece, not a ship.
 
 ## Close
 

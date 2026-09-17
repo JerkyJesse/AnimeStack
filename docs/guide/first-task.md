@@ -61,7 +61,7 @@ seats. A realistic transcript:
 playbook: feature (lead Reika, then Yui)
 
 MEI:    The sync format is the only thing that could obsolete this; pin the
-        preview output shape in the test so the flag dies when the format moves.
+        preview output shape in the test so the flag fails when the format moves.
 ELO:    Rank the sample before the build: --dry-run is a measurement when it
         lists exactly the paths that would change, and a hymn when it prints a
         plan.
@@ -88,7 +88,7 @@ The falsifier was written before the victory lap, and it is in the pack too —
 pre-registered in [`../measurement.md`](../measurement.md) §5: run your own
 work both ways and count escaped defects under `/house` against the same under
 `/simple`. If there is no measured difference, the pack is prose wearing a
-coat. Bury it, and say so in your own ledger.
+coat. Retire it, and say so in your own record.
 
 ## What just happened
 

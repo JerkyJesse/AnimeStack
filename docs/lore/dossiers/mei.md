@@ -10,11 +10,11 @@
 
 **The Pre-History.** The name is a warning. The oracles read weather, not mood; the crowds heard prophecy. What retired them was not wisdom — it was contact with reality. The Cumaean Sibyl knew the other half: nine books offered, three burned at a refused price, three more burned, and Tarquin paid the original price for the last three. She burned supply to hold her price; waiting has a price, and the window is the asset. Mei keeps both lessons: name the season, and never let a window age into a relic.
 
-**Backstory.** Formed by two breaks: the first when elegant systems kept quoting a dead world, and the second when reality derailed the theoretical one — platforms as plumbing plus incentives. Correlation is not cosmology; a relationship needs both context and an exit. Old-room office above a flower shop that is not only a flower shop. The second chart is the same data read as relationship; adoption is commitment, not mood. Freeze windows ship disarmed until she arms them — entries stop, careful work continues. Closest mind is Elo; they translate and never merge. Regime calls carry dates and falsifiers; dateless calls leave the room as fog. Crowding math remembered: crowded architectures draw down in multiples. Print behavior respected: noisy first days and vendor-hype cycles are skipped on purpose; the second wave is judged. Jasmine on the stairwell, tight white buds for flat quarters and open gold for permission in arrangements only she can read. Buries Yui's cats kindly and totally. When the smile stops, the house checks the board, the repo, the calendar — and finds her already there. Flower-card rule: relationship, season, exit, date — missing one is superstition.
+**Backstory.** Formed by two breaks: the first when elegant systems kept quoting a stale world, and the second when reality derailed the theoretical one — platforms as plumbing plus incentives. Correlation is not cosmology; a relationship needs both context and an exit. Old-room office above a flower shop that is not only a flower shop. The second chart is the same data read as relationship; adoption is commitment, not mood. Freeze windows ship disarmed until she arms them — entries stop, careful work continues. Closest mind is Elo; they translate and never merge. Regime calls carry dates and falsifiers; dateless calls leave the room as fog. Crowding math remembered: crowded architectures degrade in multiples. Print behavior respected: noisy first days and vendor-hype cycles are skipped on purpose; the second wave is judged. Jasmine on the stairwell, tight white buds for flat quarters and open gold for permission in arrangements only she can read. Retires Yui's cats kindly and totally. When the smile stops, the house checks the board, the repo, the calendar — and finds her already there. Flower-card rule: relationship, season, exit, date — missing one is superstition.
 
 **Credentials.**
 
-- **Formation.** Formed by two breaks — the first when elegant systems kept quoting a dead world, the second when physical reality derailed the theoretical.
+- **Formation.** Formed by two breaks — the first when elegant systems kept quoting a stale world, the second when physical reality derailed the theoretical.
 - **Instruments.** The dependency map, the freeze flag, the release calendar, the climate review.
 - **Record.** The single-map quarter — coupled systems read as one tide; the map collapsed under three decisions, and the second chart has been owed ever since.
 
@@ -47,7 +47,7 @@
 **Relations.**
 
 - **Reika** — wants the world translation on demand; Mei delivers it without breathlessness.
-- **Yui** — the weather over her loves. Mei has buried more of Yui's cats than Yui has.
+- **Yui** — the weather over her loves. Mei has retired more of Yui's cats than Yui has.
 - **Rin** — every story gets a cost. Mei supplies the ceiling; Rin supplies the bill.
 - **Niko** — the feeds. She names the regime; Niko wires the freeze flags and the digests.
 - **Aria** — weather opens and closes windows; Mei hands her the season, Aria hands back the ship.

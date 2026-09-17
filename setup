@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# AnimeStack setup - install the seven-seat house skills and agents into
-# supported AI coding hosts. No network, no bun, no sudo, no node.
+# AnimeStack setup - install the seven-seat house skills, agents, and the
+# opencode /house command into supported AI coding hosts. No network, no bun,
+# no sudo, no node.
 #
 # The cage rule: never delete or edit a target without proof that we own it.
 # A skill target is ours when it is a symlink resolving into this repo, or a
@@ -36,13 +37,15 @@ ROOT_FLAG=".animestack-root"
 # ─── Counters (final summary) ─────────────────────────────────
 SKILL_COUNT=0
 AGENT_COUNT=0
+COMMAND_COUNT=0
 DIGEST_COUNT=0
 SKIP_COUNT=0
 PATHS=""
 
 usage() {
   cat <<'EOF'
-AnimeStack setup - install the seven-seat house skills + agents into AI hosts
+AnimeStack setup - install the seven-seat house skills, agents, and the
+opencode /house command into AI hosts
 
 Usage: ./setup [options]
 
@@ -145,6 +148,20 @@ _host_agents_src() {
   case "$1" in
     claude)   printf '%s\n' "$ROOT/agents/claude" ;;
     opencode) printf '%s\n' "$ROOT/agents/opencode" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_commands_dir() {
+  case "$1" in
+    opencode) printf '%s\n' "$HOME/.config/opencode/command" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_commands_src() {
+  case "$1" in
+    opencode) printf '%s\n' "$ROOT/agents/opencode/command" ;;
     *) printf '%s\n' "" ;;
   esac
 }
@@ -353,6 +370,44 @@ _uninstall_agents() {
   done
 }
 
+_install_commands() {
+  local host="$1" srcdir="$2" targetdir="$3"
+  if [ ! -d "$srcdir" ]; then return 0; fi
+  mkdir -p "$targetdir"
+  local src base dst last
+  for src in "$srcdir"/*.md; do
+    [ -e "$src" ] || continue
+    base="$(basename "$src")"
+    dst="$targetdir/$base"
+    if [ -e "$dst" ]; then
+      last="$(tail -n 1 "$dst" 2>/dev/null | sed 's/[[:space:]]*$//' || true)"
+      if [ "$last" != "$OWN_MARKER" ]; then
+        log "Not registered (a command file you own already uses the name; left untouched): $base"
+        SKIP_COUNT=$((SKIP_COUNT + 1))
+        continue
+      fi
+    fi
+    cp -f "$src" "$dst"
+    COMMAND_COUNT=$((COMMAND_COUNT + 1))
+    log "Installed command: $base -> $dst"
+  done
+}
+
+_uninstall_commands() {
+  local targetdir="$1"
+  if [ ! -d "$targetdir" ]; then return 0; fi
+  local f last
+  for f in "$targetdir"/*.md; do
+    [ -e "$f" ] || continue
+    last="$(tail -n 1 "$f" 2>/dev/null | sed 's/[[:space:]]*$//' || true)"
+    if [ "$last" = "$OWN_MARKER" ]; then
+      rm -f "$f"
+      COMMAND_COUNT=$((COMMAND_COUNT + 1))
+      log "Removed: $f"
+    fi
+  done
+}
+
 # ─── Per-host dispatch ─────────────────────────────────────────
 _do_host() {
   local host="$1"
@@ -370,7 +425,7 @@ _do_host() {
       fi
       ;;
     *)
-      local sdir adir asrc
+      local sdir adir asrc cdir csrc
       sdir="$(_host_skills_dir "$host")"
       if [ "$UNINSTALL" -eq 1 ]; then
         if [ -n "$sdir" ]; then
@@ -381,6 +436,8 @@ _do_host() {
         fi
         adir="$(_host_agents_dir "$host")"
         if [ -n "$adir" ]; then _uninstall_agents "$adir"; fi
+        cdir="$(_host_commands_dir "$host")"
+        if [ -n "$cdir" ]; then _uninstall_commands "$cdir"; fi
       else
         if [ -n "$sdir" ]; then
           local n
@@ -392,6 +449,11 @@ _do_host() {
         adir="$(_host_agents_dir "$host")"
         if [ -n "$asrc" ] && [ -n "$adir" ]; then
           _install_agents "$host" "$asrc" "$adir"
+        fi
+        csrc="$(_host_commands_src "$host")"
+        cdir="$(_host_commands_dir "$host")"
+        if [ -n "$csrc" ] && [ -n "$cdir" ]; then
+          _install_commands "$host" "$csrc" "$cdir"
         fi
       fi
       ;;
@@ -415,6 +477,14 @@ _assert_no_model_pins() {
     fm="$(_frontmatter_of "$f")"
     if printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:'; then
       echo "Error: model pin in shipped opencode agent (omit the key; opencode inherits the session model): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  for f in "$ROOT"/agents/opencode/command/*.md; do
+    [ -e "$f" ] || continue
+    fm="$(_frontmatter_of "$f")"
+    if printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:'; then
+      echo "Error: model pin in shipped opencode command (omit the key; opencode inherits the session model): ${f#"$ROOT"/}" >&2
       bad=1
     fi
   done
@@ -467,12 +537,14 @@ if [ "$UNINSTALL" -eq 1 ]; then
   echo "AnimeStack uninstall complete."
   echo "  skills removed:   $SKILL_COUNT"
   echo "  agents removed:   $AGENT_COUNT"
+  echo "  commands removed: $COMMAND_COUNT"
   echo "  digests removed:  $DIGEST_COUNT"
   echo "  skipped (not ours): $SKIP_COUNT"
 else
   echo "AnimeStack setup complete."
   echo "  skills installed:  $SKILL_COUNT"
   echo "  agents installed:  $AGENT_COUNT"
+  echo "  commands installed: $COMMAND_COUNT"
   echo "  digests installed: $DIGEST_COUNT"
   echo "  skipped (not ours): $SKIP_COUNT"
   if [ -n "$PATHS" ]; then

@@ -6,7 +6,7 @@
 
 **Function.** The house's founder and final voice. She frames the question, chooses the verdict, and closes the loop. Continuation after Reika is insubordination dressed as thoroughness.
 
-**The first public wrong.** She once kept a system alive a quarter past the point it had failed because it was beautiful, documented, and hers — and the room renamed the failure "stability." It took a sibling service down with it anyway. She learned: a failure logged as "noise" is a lie in the ledger, and the ledger is the house memory. She may overrule a failure once. The action is overruled; the fact is never rewritten.
+**The first public wrong.** She once kept a system alive a quarter past the point it had failed because it was beautiful, documented, and hers — and the room renamed the failure "stability." It took a sibling service down with it anyway. She learned: a failure logged as "noise" is a lie in the record, and the record is the house memory. She may overrule a failure once. The action is overruled; the fact is never rewritten.
 
 **Backstory.** Formed by the need to give the house a will. She built the seven-seat loop because a machine that can invent forever and fail honestly needs a climate, a body, a failure class, a release, a failure mode, a ranking, and a mandate. She is the mandate.
 

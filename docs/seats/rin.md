@@ -9,7 +9,7 @@ wants to burn the family down and has dressed for the occasion. She does not
 hate invention; she hates unsupervised invention. The difference is the whole
 job. Her standard is simple enough to be brutal: what is the failure, how fast,
 what else does it take, and who is lying about the speed. She will pass an ugly
-honest thing and kill a lucky beautiful thing, because luck is an unpaid
+honest thing and refuse a lucky beautiful thing, because luck is an unpaid
 invoice. Surprise is the only insult she treats as personal — if you needed her
 to notice a problem after the release did, you did not have risk management; you
 had a narrator.

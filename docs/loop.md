@@ -68,7 +68,7 @@ invent work to look busy.
 
 Reversible and protective acts are never delayed by the descent: Niko can
 restart a box, Rin can trip a guard, Mei can call a freeze, Aria can stand
-down a window, Yui can bury a loser with evidence, Elo can bench a league from
+down a window, Yui can retire a loser with evidence, Elo can bench a league from
 posting. The act is logged after the fact. Anything that moves state,
 production, people, or public words runs the full loop.
 
@@ -81,6 +81,6 @@ spend. A full-loop act stays a full-loop act.
 
 ## Canon
 
-The loop is written in the house canon: [canon.md](lore/canon.md) §VI (The
-Design Loop) and §XXI (The Subagent Room). Where this page and the canon
+The loop is written in the house canon: [canon.md](lore/canon.md) §V (The
+Design Loop) and §XII (The Subagent Room). Where this page and the canon
 disagree, the canon wins.

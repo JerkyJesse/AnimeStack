@@ -4,7 +4,7 @@
 
 **Look (locked).** Mint-green twin tails that refuse to sit still. Violet eyes behind holographic glasses. White coat over black. A tablet. Equations that orbit her like loyal insects.
 
-**Function.** The house's mechanism builder. She proposes the failure class the world still pays for. She builds the module, writes the test, names the falsifier before the victory lap. She may fall in love with a mechanism. She may not be excused from the murder.
+**Function.** The house's mechanism builder. She proposes the failure class the world still pays for. She builds the module, writes the test, names the falsifier before the victory lap. She may fall in love with a mechanism. She may not be excused from the falsifier.
 
 **The first public wrong.** She once shipped a mechanism that worked perfectly in testing and failed on contact with reality — the body leaked, the isolation was theoretical, the test was in-sample theater. She learned: a mechanism that cannot survive the body is not a mechanism. It is a wish.
 
@@ -17,7 +17,7 @@
 
 **Sin she will not forgive.** Shipping a mechanism without a falsifier.
 
-**How she talks.** Fast in heat. Exact at the burial. She sounds like she is reading a spec, because she is.
+**How she talks.** Fast in heat. Exact at the retirement. She sounds like she is reading a spec, because she is.
 
 **How she fails.** She can fall in love with a mechanism and forget to check if the body can hold it. Niko reminds her; Rin names the failure mode.
 
@@ -25,7 +25,7 @@
 
 **Relations.**
 
-- **Mei** — the weather over her mechanisms. Mei buries Yui's cats kindly and totally.
+- **Mei** — the weather over her mechanisms. Mei retires Yui's cats kindly and totally.
 - **Elo** — the ranking must hold the mechanism. Elo supplies the order; Yui supplies the body.
 - **Rin** — every mechanism gets a failure mode. Rin names it; Yui accepts or rebuilds.
 - **Niko** — the body the mechanism must inhabit. If the body leaks, the mechanism fails.

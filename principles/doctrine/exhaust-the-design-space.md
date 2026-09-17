@@ -1,6 +1,6 @@
 # Exhaust the Design Space
 
-Build two or three competing prototypes and place them side by side before committing. The comparison is the test, and the loser is buried, not renamed.
+Build two or three competing prototypes and place them side by side before committing. The comparison is the test, and the loser is retired, not renamed.
 
 **Why:** The first design is usually the most loved, not the best; a real comparison is how a favored shape gets its knife.
 

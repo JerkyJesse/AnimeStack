@@ -11,7 +11,7 @@
 Lead: Elo.
 
 - **Elo** — What does the crowd refuse to measure correctly? MEASURE: name the sample, the denominator, and the rule. Blind the sample where possible. Produces the eval design.
-- **Yui** — What failure does this prevent, and what would falsify it? The eval is the second sample. Name the falsifier: what result would bury the candidate. Produces the falsifier.
+- **Yui** — What failure does this prevent, and what would falsify it? The eval is the second sample. Name the falsifier: what result would retire the candidate. Produces the falsifier.
 - **Niko** — Where does it live, and what must it never touch? The eval data is quarantined from training data; no leakage across the boundary. Produces the cage.
 - **Rin** — How does this fail, and how fast? The failure is the eval being tuned to the metric, or the sample leaking. Produces ACCEPT or END on the eval.
 - **Aria** — What ships, and what triggers it? Run the eval; the score is the ship. SHIP or STAND DOWN.
@@ -29,4 +29,4 @@ Reika closes: `VERDICT: ...` — measurement, or hymn.
 
 ## Notes
 
-A number without a named sample is a hymn. The falsifier is pre-registered before the victory lap: if the candidate only wins on the sample it was tuned to, the eval buried it.
+A number without a named sample is a hymn. The falsifier is pre-registered before the victory lap: if the candidate only wins on the sample it was tuned to, the eval retired it.

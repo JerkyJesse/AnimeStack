@@ -2,13 +2,14 @@
 
 AnimeStack is a skill pack that installs the seven-seat house into this host.
 Use `/house` for any non-trivial change: it runs the seven-seat loop and closes
-with a verdict. `/simple` is the Operator's waiver — a plain build mode with no
+with a verdict (setup installs it as a real command on the opencode host). `/simple` is the Operator's waiver — a plain build mode with no
 seats, no room, no house voice — and it never signs.
 
 ## Rules for working in this repo
 
 - Counts are facts. The canonical counts (nine skill dirs, seven seats, twelve
-  playbooks, 21 agents per host dialect) live in `docs/measurement.md`. A doc
+  playbooks, one opencode command, 21 agents per host dialect) live in
+  `docs/measurement.md`. A doc
   that disagrees with the tree is a defect; fix the doc or fix the tree, never
   paper over the disagreement.
 - `docs/lore/` is the house canon. It is part of this repo and is edited here

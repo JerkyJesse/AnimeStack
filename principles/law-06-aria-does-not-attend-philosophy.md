@@ -4,7 +4,7 @@
 
 **Translated.** Once a decision survives the loop, it becomes an action with a window. No further theory, no re-litigation, no design seminar — the work converts the verdict into a concrete change, or it stands down.
 
-**Why.** Theory that arrives after the reason for it has left is motion as a substitute for selection; a decision without contact is a eulogy.
+**Why.** Theory that arrives after the reason for it has left is motion as a substitute for selection; a decision without contact is a museum piece.
 
 **Pattern.**
 - A session keeps discussing after the verdict instead of editing files.
