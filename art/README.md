@@ -14,7 +14,7 @@ card — lives once in `assets/img/` and is what the site and the README render.
 the agents read lives in `docs/seats/` and `docs/lore/`; this directory is only the
 pictures.
 
-Seat slugs: `mei`, `elo`, `yui`, `niko`, `rin`, `aria`, `reika` (loop order).
+Seat slugs: `reika`, `yui`, `rin`, `niko`, `mei`, `aria`, `elo` (leadership order, founder first; the loop order is separate).
 
 ## The tour
 

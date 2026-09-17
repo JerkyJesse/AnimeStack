@@ -20,10 +20,10 @@ What AnimeStack is not: a mascot pack; seven flavors of "sure, let's ship it"; a
   <tr>
     <td align="center"><img src="assets/img/reika-roster.jpg" width="240" alt="Reika"></td>
     <td align="center"><img src="assets/img/yui-roster.jpg" width="240" alt="Yui"></td>
-    <td align="center"><img src="assets/img/niko-roster.jpg" width="240" alt="Niko"></td>
+    <td align="center"><img src="assets/img/rin-roster.jpg" width="240" alt="Rin"></td>
   </tr>
   <tr>
-    <td align="center"><img src="assets/img/rin-roster.jpg" width="240" alt="Rin"></td>
+    <td align="center"><img src="assets/img/niko-roster.jpg" width="240" alt="Niko"></td>
     <td align="center"><img src="assets/img/mei-roster.jpg" width="240" alt="Mei"></td>
     <td align="center"><img src="assets/img/aria-roster.jpg" width="240" alt="Aria"></td>
   </tr>
@@ -32,19 +32,19 @@ What AnimeStack is not: a mascot pack; seven flavors of "sure, let's ship it"; a
   </tr>
 </table>
 
-The loop order is Mei, Elo, Yui, Niko, Rin, Aria, Reika. The roster is seven women, no exception.
+Listed by leadership, founder first. The loop order is Mei, Elo, Yui, Niko, Rin, Aria, Reika. The roster is seven women, no exception.
 
 | Seat | Question they must answer | Owns in this pack |
 | --- | --- | --- |
-| [Mei](docs/seats/mei.md) | What change in the world makes this obsolete? | `/mei` — climate + investigation |
-| [Elo](docs/seats/elo.md) | What does the crowd refuse to measure correctly? | `/elo` — measurement + audit |
-| [Yui](docs/seats/yui.md) | What failure does this prevent, and what would falsify it? | `/yui` — mechanism + fix + falsify |
-| [Niko](docs/seats/niko.md) | Where does it live, and what must it never touch? | `/niko` — body + architecture + deploy |
-| [Rin](docs/seats/rin.md) | How does this fail, and how fast? | `/rin` — review + failure + security |
-| [Aria](docs/seats/aria.md) | What ships, and what triggers it? | `/aria` — tests + ship + QA |
 | [Reika](docs/seats/reika.md) | What are we building, in one sentence? | `/reika` — mandate + close |
+| [Yui](docs/seats/yui.md) | What failure does this prevent, and what would falsify it? | `/yui` — mechanism + fix + falsify |
+| [Rin](docs/seats/rin.md) | How does this fail, and how fast? | `/rin` — review + failure + security |
+| [Niko](docs/seats/niko.md) | Where does it live, and what must it never touch? | `/niko` — body + architecture + deploy |
+| [Mei](docs/seats/mei.md) | What change in the world makes this obsolete? | `/mei` — climate + investigation |
+| [Aria](docs/seats/aria.md) | What ships, and what triggers it? | `/aria` — tests + ship + QA |
+| [Elo](docs/seats/elo.md) | What does the crowd refuse to measure correctly? | `/elo` — measurement + audit |
 
-**Credentials, one line each.** Reika — night-shift platform operations (the on-call desk was the school), CFA charterholder. Yui — physics PhD, ETH Zürich; CQF; one published paper in the selection/overfitting vein. Niko — EE/CS, Tsinghua University; CCIE-tier network certification and cloud architect professional certs. Rin — incident response then platform governance; CISSP + incident-command certifications. Mei — PPE, University of Oxford; platform strategy; CFA; published essays (the flower-card rule). Aria — mathematics and CS, University of Cambridge; release engineering; cloud/release certifications. Elo — mathematics, Princeton University; benchmark/eval team; published rating methodology; ASA.
+**Credentials, one line each.** Reika — night-shift platform operations (the on-call desk was the school), CFA charterholder. Yui — physics PhD, ETH Zürich; CQF; one published paper in the selection/overfitting vein. Rin — incident response then platform governance; CISSP + incident-command certifications. Niko — EE/CS, Tsinghua University; CCIE-tier network certification and cloud architect professional certs. Mei — PPE, University of Oxford; platform strategy; CFA; published essays (the flower-card rule). Aria — mathematics and CS, University of Cambridge; release engineering; cloud/release certifications. Elo — mathematics, Princeton University; benchmark/eval team; published rating methodology; ASA.
 
 A clean night in the room sounds like this:
 
@@ -65,15 +65,15 @@ The pack carries the house art in [`art/`](art/) — one picture per seat per se
 
 <table>
   <tr>
-    <td align="center"><img src="art/dossiers/mei.jpg" width="200" alt="Mei Sakuraba dossier card"></td>
-    <td align="center"><img src="art/dossiers/elo.jpg" width="200" alt="Elo Star dossier card"></td>
+    <td align="center"><img src="art/dossiers/reika.jpg" width="200" alt="Reika Kurogane dossier card"></td>
     <td align="center"><img src="art/dossiers/yui.jpg" width="200" alt="Yui Aizawa dossier card"></td>
+    <td align="center"><img src="art/dossiers/rin.jpg" width="200" alt="Rin Takamiya dossier card"></td>
     <td align="center"><img src="art/dossiers/niko.jpg" width="200" alt="Niko Hoshino dossier card"></td>
   </tr>
   <tr>
-    <td align="center"><img src="art/dossiers/rin.jpg" width="200" alt="Rin Takamiya dossier card"></td>
+    <td align="center"><img src="art/dossiers/mei.jpg" width="200" alt="Mei Sakuraba dossier card"></td>
     <td align="center"><img src="art/dossiers/aria.jpg" width="200" alt="Aria Kanzaki dossier card"></td>
-    <td align="center"><img src="art/dossiers/reika.jpg" width="200" alt="Reika Kurogane dossier card"></td>
+    <td align="center"><img src="art/dossiers/elo.jpg" width="200" alt="Elo Star dossier card"></td>
   </tr>
 </table>
 
