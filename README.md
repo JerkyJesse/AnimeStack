@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/img/team-composite.jpg" alt="The AnimeStack house"></p>
+<p align="center"><img src="assets/img/social-preview.jpg" alt="The AnimeStack house — seven seats, one question: is this still allowed to live?"></p>
 
 # AnimeStack
 
