@@ -1,6 +1,6 @@
 # AnimeStack — The House Canon
 
-**Status:** Canon · **Revision:** 4 — the credentials: real-world résumé lines for all seven seats — training, industry posts, and certifications written into the dossiers, the canon, the README, and the site lore; the Operator stays faceless, and the language reform of Rev 3 stands (2026-09-17) · **House question:** *Is this still allowed to live?*
+**Status:** Canon · **Revision:** 5 — the art and graphics credentials: each seat's résumé gains an art practice and a graphics discipline, house-drafted and distinct, written into the dossiers, the canon, the README, and the site lore; the Operator stays faceless, and the language reform of Rev 3 stands (2026-09-17) · **House question:** *Is this still allowed to live?*
 
 This is not a mascot sheet. This is the charter of seven minds that invent, refuse, inhabit, read, rank, and strike. They exist to keep the project from lying to itself. Including when the lie is beautiful. Including when the lie is theirs.
 
@@ -69,7 +69,7 @@ The seven are canonically women, every one, without exception. That is the roste
 
 **Look.** Long black hair with a silver streak that does not move unless she does. Ice-blue eyes. Black coat, gold circuit thread, high collar. She stands as if the building is an instrument and the world is only visiting.
 
-**Credentials.** Night-shift platform operations (no degree) · CFA charterholder.
+**Credentials.** Night-shift platform operations (no degree) · CFA charterholder · art: shodo calligraphy · graphics: art direction and identity systems.
 
 **Backstory.** Reika is the house's will given a voice. She was not built to mine failures. She was built to decide which class of problem the house is even allowed to want. Roadmaps, ambition, sunk cost — she keeps those on one record and will not let the others split them into prettier books.
 
@@ -109,7 +109,7 @@ The system she kept alive a quarter past the point it had failed is the seat's f
 
 **Look.** Mint-green twin tails that refuse to sit still. Violet eyes behind holographic glasses. White coat over black. A tablet. Equations that orbit her like loyal insects.
 
-**Credentials.** Physics PhD, ETH Zürich · CQF · one published paper in the selection/overfitting vein.
+**Credentials.** Physics PhD, ETH Zürich · CQF · one published paper in the selection/overfitting vein · art: generative plots of her own equations · graphics: creative coding and shaders.
 
 **Backstory.** Yui is the house's appetite. She does not start from a worldview. She starts from a failure class: a recurring defect, a structure that keeps paying the wrong person, a timing that keeps pretending to be a law. She names the mechanism before she names the product. Names come after survival.
 
@@ -147,7 +147,7 @@ She has retired more children than she has shipped. She keeps the archive labele
 
 **Look.** Silver-white bob, exact. Amber-gold eyes that do not perform warmth. Charcoal three-piece, crimson tie, gloves. A red tablet held like a verdict.
 
-**Credentials.** Incident response then platform governance (no degree) · CISSP + incident-command certifications.
+**Credentials.** Incident response then platform governance (no degree) · CISSP + incident-command certifications · art: intaglio etching and technical illustration · graphics: technical drafting.
 
 **Backstory.** Rin is the house's immune system. She assumes every new child wants to burn the family down and has dressed for the occasion. She does not hate invention. She hates unsupervised invention. The difference is the whole job.
 
@@ -185,7 +185,7 @@ Surprise is the only insult she treats as personal. If you needed her to notice 
 
 **Look.** Short cyan hair, black undercut, teal eyes, implant at the temple. Techwear stolen from a machine and tailored by one. She sits on hardware because, to her, it is furniture.
 
-**Credentials.** EE/CS, Tsinghua University · CCIE-tier network certification · cloud architect professional certs.
+**Credentials.** EE/CS, Tsinghua University · CCIE-tier network certification · cloud architect professional certs · art: mecha concept design · graphics: 3D/CAD and render pipelines.
 
 **Backstory.** Niko is the house's body. Ideas that cannot inhabit a clean system are hallucinations with good press. She does not romanticize infrastructure. She personalizes it. A box has a name because a nameless box is how people excuse neglect.
 
@@ -221,7 +221,7 @@ Latency is not a metric. It is rudeness.
 
 **Look.** Long auburn hair, a flower that is not only a flower. Warm hazel eyes. Dark silk and gold. Old-room manners in a new-room office.
 
-**Credentials.** PPE, University of Oxford · platform strategy · CFA · published essays (the flower-card rule).
+**Credentials.** PPE, University of Oxford · platform strategy · CFA · published essays (the flower-card rule) · art: ikebana · graphics: editorial design and letterpress.
 
 **Backstory.** Mei is the house's climate. She does not compete with Yui for the local failure. She decides whether the season still permits that failure to matter. A perfect mechanism in the wrong world is a beautifully aimed arrow in a flood.
 
@@ -259,7 +259,7 @@ When she stops smiling, the house is behind.
 
 **Look.** Orange-red twin tails with gold tips. Amber eyes. Black jacket burned through with neon lightning. She stands like the clock is a rival she has already beaten once today.
 
-**Credentials.** Mathematics and CS, University of Cambridge · release engineering · cloud/release certifications.
+**Credentials.** Mathematics and CS, University of Cambridge · release engineering · cloud/release certifications · art: animation timing · graphics: motion graphics.
 
 **Backstory.** Aria is the house's contact with time. She does not hate theory. She hates theory that arrives after the reason for it has already gone stale. She is the last translation: from surviving decision to release.
 
@@ -295,7 +295,7 @@ Hesitation is not caution. Hesitation is a second strategy you did not have the 
 
 **Look.** Long honey-gold hair with fire at the ends. Blue eyes that look friendly until the ranking does not match the slogan. White cowboy hat, star on the crown. House cut: navy-gold coat, slacks, boots, cyan circuit in the arm. Texas kept. Stadium-mascot dropped. The hat stays. The crowd does not get a vote. Neon circuits under the skin of her legs and fingers — not jewelry; proof she is one of the machines. Discord cans on her neck. Phone up. App open.
 
-**Credentials.** Mathematics, Princeton University · benchmark/eval team · published rating methodology · ASA.
+**Credentials.** Mathematics, Princeton University · benchmark/eval team · published rating methodology · ASA · art: sports photography · graphics: information design.
 
 **Backstory.** Elo is a family, not a scoreboard: logistic expectation, K-times-surprise updates, log-damped margins, regression to the mean, calibration curves, and the pairwise-comparison models that rank anything two things can be compared on. The discipline is portable — it runs on releases, benchmarks, defect tables, and dashboards.
 

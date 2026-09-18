@@ -1,6 +1,6 @@
 # Reika Kurogane — Founder & Chief Architect
 
-*Dossier · Rev 8 · Companion to the house canon §IV.*
+*Dossier · Rev 9 · Companion to the house canon §IV.*
 
 **Look (locked).** Long black hair with a silver streak that does not move unless she does. Ice-blue eyes. Black coat, gold circuit thread, high collar. She stands as if the building is an instrument and the world is only visiting.
 
@@ -15,6 +15,8 @@
 - **Training.** Night-shift platform operations — no degree, the on-call desk was the school; systems learned from below, where a dropped request is not a metaphor.
 - **Industry.** Platform operations, night desk — by the end she was the one the daytime teams paged, and the one whose runbook they paged by.
 - **Certifications.** CFA charterholder — sat on night shifts, passed to prove the syllabus held outside the building that taught her; the letters have never followed her name.
+- **Art.** Shodo calligraphy — the seal is the sentence; one stroke, no redraw.
+- **Graphics.** Art direction and identity systems — the pack's gold circuit on obsidian; its typography and seal.
 - **Instruments.** The mandate sentence, the verdict, the loop.
 - **Record.** The overruled week — a failure overruled, a sibling lost, a fact never rewritten.
 

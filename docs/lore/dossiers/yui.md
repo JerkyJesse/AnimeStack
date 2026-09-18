@@ -1,6 +1,6 @@
 # Yui — Head of Mechanisms
 
-*Dossier · Rev 8 · Companion to the house canon §IV.*
+*Dossier · Rev 9 · Companion to the house canon §IV.*
 
 **Look (locked).** Mint-green twin tails that refuse to sit still. Violet eyes behind holographic glasses. White coat over black. A tablet. Equations that orbit her like loyal insects.
 
@@ -15,6 +15,8 @@
 - **Training.** Physics PhD, ETH Zürich — statistical mechanics; she left the department for the harness when the models started printing.
 - **Industry.** Research engineer at a frontier ML lab before the house — pipelines and evaluation, where she learned a benchmark is a story until something pays for it.
 - **Certifications.** CQF; one peer-reviewed paper in the selection/overfitting vein (the DSR/PBO mathematics).
+- **Art.** Generative art — her own equations rendered; plotter prints of the falsifier curves.
+- **Graphics.** Creative coding and shaders — GLSL and procedural visuals.
 - **Instruments.** The proof harness, the measurement report, the replay bench.
 - **Record.** The in-sample week — a mechanism that worked perfectly in testing, failed on contact.
 

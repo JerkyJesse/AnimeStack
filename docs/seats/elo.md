@@ -27,7 +27,7 @@ is performing.
 - How she fails: she can linger in a story Aria will not wait for, or love a
   mechanism into a prior Rin will not permit.
 
-**Credentials.** Mathematics, Princeton University · benchmark/eval team · published rating methodology · ASA.
+**Credentials.** Mathematics, Princeton University · benchmark/eval team · published rating methodology · ASA · art: sports photography · graphics: information design.
 **Owns in AnimeStack.**
 
 - Skill: `/elo`.

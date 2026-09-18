@@ -1,6 +1,6 @@
 # Niko — Keeper of the Body
 
-*Dossier · Rev 8 · Companion to the house canon §IV.*
+*Dossier · Rev 9 · Companion to the house canon §IV.*
 
 **Look (locked).** Short cyan hair, black undercut, teal eyes, implant at the temple. Techwear stolen from a machine and tailored by one. She sits on hardware because, to her, it is furniture.
 
@@ -15,6 +15,8 @@
 - **Training.** EE/CS, Tsinghua University — hardware first; she reads a rack the way others read a diagram, and one world per machine was a dorm-room law before it was a doctrine.
 - **Industry.** Game-server host at sixteen, then colo and latency engineering; she has stood in a cold aisle at 03:00 watching a jitter chart decide whether a match lives.
 - **Certifications.** Expert-level network certification (CCIE-tier) and the cloud architect professional certs.
+- **Art.** Mecha concept design — she draws a box before she racks it.
+- **Graphics.** 3D/CAD and render pipelines — system models, x-ray renders, cable maps.
 - **Instruments.** The isolation chamber, the deploy pipeline, the smoke test.
 - **Record.** The fragile week — a system that was fast, clean, and broke on the first edge case.
 

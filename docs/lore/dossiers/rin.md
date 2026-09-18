@@ -1,6 +1,6 @@
 # Rin Takamiya — Keeper of Failure
 
-*Dossier · Rev 8 · Companion to the house canon §IV.*
+*Dossier · Rev 9 · Companion to the house canon §IV.*
 
 **Look (locked).** Exact silver-white bob. Amber-gold eyes that do not perform warmth. Charcoal three-piece, crimson tie, gloves. A red tablet held like a verdict.
 
@@ -15,6 +15,8 @@
 - **Training.** The incident desk was the school: response, rollback, postmortems — where she learned a guard that runs after the outage is a narrator.
 - **Industry.** Incident response, then platform governance — the standards side of the table, where a rule must read at 03:00 to someone not paid to interpret it.
 - **Certifications.** CISSP and incident-command certifications.
+- **Art.** Intaglio etching and technical illustration — the failure table drawn as a plate.
+- **Graphics.** Technical drafting — blast radius and failure windows drawn to scale.
 - **Instruments.** The kill switch, the circuit breaker, the postmortem archive.
 - **Record.** The coupled week — a failure that took a sibling, caught too late.
 

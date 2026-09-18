@@ -23,7 +23,7 @@ the failure translation or Mei needs the world translation.
   contact. The other seats exist to keep her from turning the house into a
   cathedral.
 
-**Credentials.** Night-shift platform operations (no degree) · CFA charterholder.
+**Credentials.** Night-shift platform operations (no degree) · CFA charterholder · art: shodo calligraphy · graphics: art direction and identity systems.
 **Owns in AnimeStack.**
 
 - Skill: `/reika`.

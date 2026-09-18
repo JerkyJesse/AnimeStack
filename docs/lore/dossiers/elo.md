@@ -1,6 +1,6 @@
 # Elo — Keeper of Rankings & Measurement
 
-*Dossier · Rev 8 · Companion to the house canon §IV.*
+*Dossier · Rev 9 · Companion to the house canon §IV.*
 
 **Look (locked).** Long honey-gold hair with fire at the ends. Blue eyes that look friendly until the ranking does not match the slogan. White cowboy hat, star on the crown. Navy-gold house coat, slacks, boots, cyan circuit in the arm. Neon circuits under the skin of her legs and fingers — proof she is one of the machines.
 
@@ -15,6 +15,8 @@
 - **Training.** Mathematics at Princeton; the measurement habit came from the rating literature and would not leave.
 - **Industry.** A benchmark/evaluation team — shipping scores to real users who only notice the number when it is wrong.
 - **Certifications.** A published rating methodology and a statistics-society credential (ASA).
+- **Art.** Sports photography — the decisive frame, ranked never worshiped.
+- **Graphics.** Information design — leaderboards, rating charts, the visual ordering.
 - **Instruments.** The ranking system, the measurement audit, the falsifier registry.
 - **Record.** The hymn week — a number that flattered a story, caught and corrected before it became load-bearing.
 

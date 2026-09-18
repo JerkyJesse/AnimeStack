@@ -1,6 +1,6 @@
 # Mei Sakuraba — Keeper of Climate & Context
 
-*Dossier · Rev 8 · Companion to the house canon §IV.*
+*Dossier · Rev 9 · Companion to the house canon §IV.*
 
 **Look (locked).** Long auburn hair with a flower that is not only a flower. Warm hazel eyes. Dark silk and gold. Old-room manners in a new-room office.
 
@@ -17,6 +17,8 @@
 - **Training.** PPE at Oxford — politics, philosophy and economics as one instrument; the second chart was finished in the wild, not in a lecture hall.
 - **Industry.** Platform strategy — ecosystems, dependencies, release calendars; a roadmap is plumbing plus fear before it is a forecast.
 - **Certifications.** CFA charterholder — rarely said — plus published essays, the flower-card rule, collected in a small book.
+- **Art.** Ikebana — arrangements composed as calls.
+- **Graphics.** Editorial design and letterpress — the digest set in print.
 - **Instruments.** The dependency map, the freeze flag, the release calendar, the climate review.
 - **Record.** The single-map quarter — coupled systems read as one tide; the map collapsed under three decisions, and the second chart has been owed ever since.
 
