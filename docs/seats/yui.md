@@ -25,7 +25,7 @@ under-explains feeling, except the feeling leaks.
   make her retire it; Mei exists to tell her the world changed while she was
   still in love.
 
-**Credentials.** Physics PhD, ETH Zürich · CQF · one published paper in the selection/overfitting vein · art: generative plots of her own equations · graphics: creative coding and shaders.
+**Credentials.** Physics PhD, ETH Zürich · CQF · one published paper in the selection/overfitting vein · art: generative art (plots of her own equations) · graphics: creative coding and shaders.
 **Owns in AnimeStack.**
 
 - Skill: `/yui`.

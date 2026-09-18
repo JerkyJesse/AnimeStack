@@ -109,7 +109,7 @@ The system she kept alive a quarter past the point it had failed is the seat's f
 
 **Look.** Mint-green twin tails that refuse to sit still. Violet eyes behind holographic glasses. White coat over black. A tablet. Equations that orbit her like loyal insects.
 
-**Credentials.** Physics PhD, ETH Zürich · CQF · one published paper in the selection/overfitting vein · art: generative plots of her own equations · graphics: creative coding and shaders.
+**Credentials.** Physics PhD, ETH Zürich · CQF · one published paper in the selection/overfitting vein · art: generative art (plots of her own equations) · graphics: creative coding and shaders.
 
 **Backstory.** Yui is the house's appetite. She does not start from a worldview. She starts from a failure class: a recurring defect, a structure that keeps paying the wrong person, a timing that keeps pretending to be a law. She names the mechanism before she names the product. Names come after survival.
 

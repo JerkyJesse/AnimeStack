@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""Consistency check: the seven seats' credential facts agree across surfaces.
+
+Source of truth: docs/lore/canon.md (each seat's compact credentials line).
+For every seat the art/graphics keys parsed from the canon tail must appear:
+
+  - docs/seats/<seat>.md, README.md, and the six agents/{claude,opencode}
+    sources: as the "art: <key>" / "graphics: <key>" tails;
+  - docs/lore/dossiers/<seat>.md and seats/<seat>.html: inside the Art and
+    Graphics bullets.
+
+Key-phrase presence only: a surface keeps its own voice, a silent drop fails
+closed. The generated dialect trees are covered by gen-agent-dialects --check.
+
+Usage: python3 scripts/check-lore-consistency
+Exit 0 = clean; 1 = failures printed; 2 = usage.
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SEATS = ("reika", "yui", "rin", "niko", "mei", "aria", "elo")
+AGENT_SUFFIXES = ("", "-review", "-build")
+
+ART_KEY_RE = re.compile(r"art: (.+?)(?: \(| · graphics:)")
+GRAPHICS_KEY_RE = re.compile(r"graphics: (.+?)\.")
+CRED_LINE_RE = re.compile(r"^\*\*Credentials\.\*\* (.+)$", re.MULTILINE)
+
+
+def seat_block(canon: str, seat: str) -> str | None:
+    match = re.search(
+        rf"^###\s+[^\r\n]*\b{seat}\b[^\r\n]*\r?\n(.*?)(?=^###\s|\Z)",
+        canon,
+        re.MULTILINE | re.DOTALL | re.IGNORECASE,
+    )
+    return match.group(1) if match else None
+
+
+def has_tail(text: str, kind: str, key: str) -> bool:
+    return f"{kind}: {key}".lower() in text.lower()
+
+
+def bullet_line(text: str, label: str, is_html: bool) -> str | None:
+    if is_html:
+        marker = f"<strong>{label}.</strong>"
+        return next((line for line in text.splitlines() if marker in line), None)
+    marker = f"- **{label}.**"
+    return next((line for line in text.splitlines() if line.startswith(marker)), None)
+
+
+def main() -> int:
+    if sys.argv[1:]:
+        print("usage: python3 scripts/check-lore-consistency", file=sys.stderr)
+        return 2
+
+    failures: list[str] = []
+    checks = 0
+
+    canon_path = ROOT / "docs" / "lore" / "canon.md"
+    readme_path = ROOT / "README.md"
+    canon = canon_path.read_text(encoding="utf-8") if canon_path.exists() else ""
+    if not canon:
+        failures.append("docs/lore/canon.md missing")
+    readme = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""
+    if not readme:
+        failures.append("README.md missing")
+
+    for seat in SEATS:
+        block = seat_block(canon, seat)
+        cred = CRED_LINE_RE.search(block) if block else None
+        if cred is None:
+            failures.append(f"canon: {seat} credentials line missing")
+            continue
+        art = ART_KEY_RE.search(cred.group(1))
+        graphics = GRAPHICS_KEY_RE.search(cred.group(1))
+        if art is None or graphics is None:
+            failures.append(f"canon: {seat} art/graphics tail missing")
+            continue
+        keys = {"art": art.group(1).strip(), "graphics": graphics.group(1).strip()}
+
+        surfaces: dict[str, str] = {"README.md": readme}
+        seats_doc = ROOT / "docs" / "seats" / f"{seat}.md"
+        surfaces[f"docs/seats/{seat}.md"] = (
+            seats_doc.read_text(encoding="utf-8") if seats_doc.exists() else ""
+        )
+        for suffix in AGENT_SUFFIXES:
+            for tree in ("claude", "opencode"):
+                agent = ROOT / "agents" / tree / f"animestack-{seat}{suffix}.md"
+                surfaces[agent.relative_to(ROOT).as_posix()] = (
+                    agent.read_text(encoding="utf-8") if agent.exists() else ""
+                )
+        for label, text in surfaces.items():
+            for kind in ("art", "graphics"):
+                checks += 1
+                if not has_tail(text, kind, keys[kind]):
+                    failures.append(f"{seat}: {label} missing '{kind}: {keys[kind]}'")
+
+        for label, rel, is_html in (
+            ("dossier", f"docs/lore/dossiers/{seat}.md", False),
+            ("seat page", f"seats/{seat}.html", True),
+        ):
+            path = ROOT / rel
+            text = path.read_text(encoding="utf-8") if path.exists() else ""
+            for kind, cap in (("art", "Art"), ("graphics", "Graphics")):
+                checks += 1
+                line = bullet_line(text, cap, is_html)
+                if line is None or keys[kind].lower() not in line.lower():
+                    failures.append(
+                        f"{seat}: {label} {cap} bullet missing key {keys[kind]!r}"
+                    )
+
+    if failures:
+        print(f"check-lore-consistency: FAILED ({len(failures)} issue(s), {checks} facts checked)")
+        for failure in failures:
+            print("  " + failure)
+        return 1
+    print(f"check-lore-consistency: clean ({checks} facts checked)")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

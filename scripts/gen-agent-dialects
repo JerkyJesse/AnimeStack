@@ -5,7 +5,12 @@ Maintenance tool, not an installer. Edit agents/claude, run this script, commit
 the generated trees; setup installs the committed trees and audits their
 frontmatter. No network. Python 3.11+ for tomllib self-checks.
 
-Usage: python3 scripts/gen-agent-dialects
+Usage: python3 scripts/gen-agent-dialects [--check]
+
+--check regenerates in memory and compares against the committed trees without
+writing: drift, a missing or extra generated file exits 1, so a hand-edited
+dialect fails closed. Line endings are normalized before comparison (git
+text=auto may hand out CRLF working copies).
 
 Dialects:
   cursor   agents/cursor/*.md    name + description; no model key
@@ -27,6 +32,13 @@ COMMAND_SRC = ROOT / "agents" / "opencode" / "command" / "house.md"
 
 OWN_MARKER = "<!-- animestack-owned -->"
 TOML_MARKER = "# animestack-owned"
+
+GENERATED_DIRS = (
+    ROOT / "agents" / "cursor",
+    ROOT / "agents" / "kiro",
+    ROOT / "agents" / "factory",
+    ROOT / "agents" / "codex",
+)
 
 # Body rewrites per dialect: the phrase names a tool the host does not expose.
 # The house spawns subagents everywhere; only the tool name differs.
@@ -58,22 +70,14 @@ def toml_escape(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"""', '""\\"')
 
 
-def main() -> int:
+def build() -> tuple[dict[Path, str], dict[str, int]] | None:
     sources = sorted(SRC.glob("*.md"))
     if len(sources) != 21:
         print(f"error: expected 21 claude agents, found {len(sources)}", file=sys.stderr)
-        return 1
+        return None
 
-    out = {
-        "cursor": ROOT / "agents" / "cursor",
-        "kiro": ROOT / "agents" / "kiro",
-        "factory": ROOT / "agents" / "factory",
-        "codex": ROOT / "agents" / "codex",
-    }
-    for d in out.values():
-        d.mkdir(parents=True, exist_ok=True)
-
-    written: dict[str, int] = {k: 0 for k in out}
+    outputs: dict[Path, str] = {}
+    counts = {"cursor": 0, "kiro": 0, "factory": 0, "codex": 0, "factory_command": 1}
 
     for src in sources:
         text = src.read_text(encoding="utf-8")
@@ -86,12 +90,12 @@ def main() -> int:
             content = f"---\n{drop_model(frontmatter)}\n---\n{body}"
             if not content.rstrip().endswith(OWN_MARKER):
                 print(f"error: {dialect}/{stem} lost the ownership marker", file=sys.stderr)
-                return 1
-            (out[dialect] / f"{stem}.md").write_text(content, encoding="utf-8", newline="\n")
-            written[dialect] += 1
+                return None
+            outputs[ROOT / "agents" / dialect / f"{stem}.md"] = content
+            counts[dialect] += 1
 
-        (out["factory"] / f"{stem}.md").write_text(text, encoding="utf-8", newline="\n")
-        written["factory"] += 1
+        outputs[ROOT / "agents" / "factory" / f"{stem}.md"] = text
+        counts["factory"] += 1
 
         codex_body = body
         for old, new in BODY_REWRITES["codex"]:
@@ -109,18 +113,59 @@ def main() -> int:
         parsed = tomllib.loads(toml)
         if parsed.get("name") != name or "developer_instructions" not in parsed:
             print(f"error: codex/{stem}.toml failed the tomllib self-check", file=sys.stderr)
-            return 1
-        (out["codex"] / f"{stem}.toml").write_text(toml, encoding="utf-8", newline="\n")
-        written["codex"] += 1
+            return None
+        outputs[ROOT / "agents" / "codex" / f"{stem}.toml"] = toml
+        counts["codex"] += 1
 
-    command_dir = out["factory"] / "command"
-    command_dir.mkdir(parents=True, exist_ok=True)
-    (command_dir / "house.md").write_text(
-        COMMAND_SRC.read_text(encoding="utf-8"), encoding="utf-8", newline="\n"
+    outputs[ROOT / "agents" / "factory" / "command" / "house.md"] = COMMAND_SRC.read_text(
+        encoding="utf-8"
     )
-    written["factory_command"] = 1
+    return outputs, counts
 
-    for dialect, count in written.items():
+
+def check(outputs: dict[Path, str]) -> int:
+    failures: list[str] = []
+    for path, content in sorted(outputs.items()):
+        rel = path.relative_to(ROOT).as_posix()
+        if not path.exists():
+            failures.append(f"missing: {rel}")
+            continue
+        actual = path.read_text(encoding="utf-8").replace("\r\n", "\n")
+        if actual != content:
+            failures.append(f"drift: {rel}")
+    expected = set(outputs)
+    for directory in GENERATED_DIRS:
+        if not directory.exists():
+            continue
+        for path in sorted(directory.rglob("*")):
+            if path.is_file() and path not in expected:
+                failures.append(f"extra: {path.relative_to(ROOT).as_posix()}")
+    if failures:
+        print(f"gen-agent-dialects: FAILED ({len(failures)} issue(s))")
+        for failure in failures:
+            print("  " + failure)
+        return 1
+    print(f"gen-agent-dialects: in sync ({len(outputs)} files)")
+    return 0
+
+
+def main() -> int:
+    args = sys.argv[1:]
+    if args not in ([], ["--check"]):
+        print("usage: python3 scripts/gen-agent-dialects [--check]", file=sys.stderr)
+        return 2
+    built = build()
+    if built is None:
+        return 1
+    outputs, counts = built
+    if args == ["--check"]:
+        return check(outputs)
+    for directory in GENERATED_DIRS:
+        directory.mkdir(parents=True, exist_ok=True)
+    (ROOT / "agents" / "factory" / "command").mkdir(parents=True, exist_ok=True)
+    for path, content in sorted(outputs.items()):
+        path.write_text(content, encoding="utf-8", newline="\n")
+    for dialect, count in counts.items():
         print(f"generated: {dialect} {count}")
     return 0
 
