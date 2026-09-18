@@ -72,8 +72,8 @@ def toml_escape(value: str) -> str:
 
 def build() -> tuple[dict[Path, str], dict[str, int]] | None:
     sources = sorted(SRC.glob("*.md"))
-    if len(sources) != 21:
-        print(f"error: expected 21 claude agents, found {len(sources)}", file=sys.stderr)
+    if len(sources) != 7:
+        print(f"error: expected 7 claude agents, found {len(sources)}", file=sys.stderr)
         return None
 
     outputs: dict[Path, str] = {}

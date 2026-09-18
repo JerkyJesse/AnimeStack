@@ -10,8 +10,8 @@ the table, the table is wrong.
 
 ## 1. The sample
 
-What is ranked: this repository, release `v1.8.0` (`VERSION`), 2026-09-18. The canon
-text inside it is this pack's own, first written for v1.3.0; the language reform arrived in v1.4.0, the credentials in v1.5.0, the six-dialect agent coverage in v1.6.0, the art and graphics credentials in v1.7.0, and the one-file opencode room in v1.8.0.
+What is ranked: this repository, release `v1.9.0` (`VERSION`), 2026-09-18. The canon
+text inside it is this pack's own, first written for v1.3.0; the language reform arrived in v1.4.0, the credentials in v1.5.0, the six-dialect agent coverage in v1.6.0, the art and graphics credentials in v1.7.0, the one-file opencode room in v1.8.0, and the one-file-everywhere autonomy collapse in v1.9.0.
 
 The claims in this pack are claims about this tree, not promises about the outcomes a
 user will get. A pack that installs cleanly on your host is a body question, not a result
@@ -24,7 +24,7 @@ the tree contains what the table says it contains, at the stated release, on the
 
 ## 2. The counts table
 
-Run each command from the repo root. The expected count is the v1.8.0 truth; a command
+Run each command from the repo root. The expected count is the v1.9.0 truth; a command
 that prints anything else is a defect, and the defect is the tree's number, never the
 prose.
 
@@ -36,13 +36,13 @@ prose.
 | 12 | laws | `ls principles/law-*.md \| wc -l` |
 | 23 | doctrine pieces | `ls principles/doctrine \| wc -l` |
 | 10 | hosts | `grep -oE 'claude\|cursor\|codex\|factory\|opencode\|kiro\|slate\|openclaw\|hermes\|gbrain' setup \| sort -u \| wc -l` |
-| 7 | agents, opencode host | `ls agents/opencode/*.md \| wc -l` (one seat file per seat; leaf role auto-picked) |
-| 21 | agents, claude host | `ls agents/claude \| wc -l` |
-| 21 | agents, cursor host | `ls agents/cursor/*.md \| wc -l` |
-| 21 | agents, factory host | `ls agents/factory/*.md \| wc -l` |
-| 21 | agents, codex host | `ls agents/codex/*.toml \| wc -l` |
-| 21 | agents, kiro host | `ls agents/kiro/*.md \| wc -l` |
-| 112 | agent files, all dialects | `find agents -maxdepth 2 -type f \( -name '*.md' -o -name '*.toml' \) \| wc -l` |
+| 7 | agents, claude host | `ls agents/claude \| wc -l` (one seat file per seat; role picked from the brief) |
+| 7 | agents, cursor host | `ls agents/cursor/*.md \| wc -l` |
+| 7 | agents, factory host | `ls agents/factory/*.md \| wc -l` |
+| 7 | agents, codex host | `ls agents/codex/*.toml \| wc -l` |
+| 7 | agents, kiro host | `ls agents/kiro/*.md \| wc -l` |
+| 7 | agents, opencode host | `ls agents/opencode/*.md \| wc -l` |
+| 42 | agent files, all dialects | `find agents -maxdepth 2 -type f \( -name '*.md' -o -name '*.toml' \) \| wc -l` |
 | 1 | house command, opencode | `ls agents/opencode/command/*.md \| wc -l` |
 | 1 | house command, factory | `ls agents/factory/command/*.md \| wc -l` |
 | 2 | commands, all hosts | `find agents -path '*/command/*.md' \| wc -l` |
@@ -73,11 +73,10 @@ heading. `grep -c '^### ' README.md` is a hymn: it counts headings, not hosts. U
 setup list; it prints 10. The ten names are claude, cursor, codex, factory, opencode,
 kiro, slate, openclaw, hermes, gbrain.
 
-The agents rows: five dialects ship twenty-one files each (7 seats + 7 review +
-7 build) and opencode ships seven seat files - one file per seat, the leaf role
-auto-picked from the brief - one hundred twelve agent files total. Codex ships
-TOML custom agents; the others ship markdown. A host that ships the wrong roster
-is a defect, not a rounding error.
+The agents rows: every dialect ships seven seat files - one file per seat, the
+seat, review, and build roles in one file, picked from the brief - forty-two
+agent files total. Codex ships TOML custom agents; the others ship markdown. A
+host that ships the wrong roster is a defect, not a rounding error.
 
 The commands rows count two: `agents/opencode/command/house.md` and
 `agents/factory/command/house.md`, installed by setup to

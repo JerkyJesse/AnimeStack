@@ -28,30 +28,28 @@ When Reika closes, the loop is over.
 
 ## Two descents
 
-The same spine runs two ways, distinguished by what each leaf is allowed to do.
-On opencode the pack ships one file per seat and the seat picks its role from
-the brief (decision → review, construction → build); the five subagent-native
-dialects use the `animestack-<seat>-review` / `-build` files named below.
+The same spine runs two ways, distinguished by what each seat is allowed to do.
+Every dialect ships one file per seat and the seat picks its role from the
+brief (decision → review, construction → build).
 
 ### The review descent
 
-`mei-review` → `elo-review` → `yui-review` → `niko-review` → `rin-review` →
-`aria-review`, then Reika closes.
+The review role runs `mei` → `elo` → `yui` → `niko` → `rin` → `aria`, then
+Reika closes.
 
-A review leaf reads and answers its one sentence. It never edits. Rin ends with
+A seat in the review role reads and answers its one sentence. Rin ends with
 `ACCEPT` or `END`; Aria ends with `SHIP` or `STAND DOWN`; Reika closes with a
 verdict. The result is a recorded decision, not a diff.
 
 ### The build descent
 
-`mei-build` → `elo-build` → `yui-build` → `niko-build` → `rin-build` →
-`aria-build`, then Reika closes.
+The build role runs `mei` → `elo` → `yui` → `niko` → `rin` → `aria`, then
+Reika closes.
 
-A build leaf builds only the lane its seat owns and reports its exact changed
-files. It never commits, never pushes, never spawns a room of its own. The
-owning seat inspects the per-leaf diff at handoff and integrates the one atomic
-commit. A leaf with no build surface says so and stands down — it does not
-invent work to look busy.
+A seat in the build role builds the lane it owns and reports its exact changed
+files. The owning seat inspects the per-seat diff at handoff and integrates the
+one atomic commit. A seat with no build surface says so and stands down — it
+does not invent work to look busy.
 
 ## What each seat owns in the loop
 

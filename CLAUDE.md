@@ -8,8 +8,7 @@ seats, no room, no house voice — and it never signs.
 ## Rules for working in this repo
 
 - Counts are facts. The canonical counts (nine skill dirs, seven seats, twelve
-  playbooks, two commands, 21 agent files per subagent-native dialect and 7
-  opencode seat files, 112 agent files total) live in
+  playbooks, two commands, 7 agent files per dialect, 42 agent files total) live in
   `docs/measurement.md`. A doc
   that disagrees with the tree is a defect; fix the doc or fix the tree, never
   paper over the disagreement.
@@ -23,9 +22,9 @@ seats, no room, no house voice — and it never signs.
 
 ## Build discipline
 
-- Build leaves answer their one sentence, build only their lane, report exact
-  changed files, and never commit, push, ship, or spawn a room.
-- Leaves never sign. Integration, the one atomic commit, the gates, and any
-  signed execution belong to the owning seat.
+- Build pass: answer the one sentence, build the lane the seat owns, report
+  exact changed files.
+- Integration, the one atomic commit, the gates, and any signed execution
+  belong to the owning seat; contested acts go to Reika.
 - A number is a measurement or a hymn. Elo audits which. Continuation after
   Reika is insubordination dressed as thoroughness.

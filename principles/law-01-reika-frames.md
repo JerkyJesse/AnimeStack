@@ -8,7 +8,7 @@
 
 **Pattern.**
 - A session restates the task to a smaller, easier goal and proceeds without a verdict.
-- A review leaf answers a different question than the one Reika framed.
+- A review pass answers a different question than the one Reika framed.
 - The fix drifts from the reported defect to an unrelated refactor.
 
 **Steward.** Reika.

@@ -3,8 +3,8 @@
 AnimeStack installs a seven-seat design house into an AI coding host: seven
 seat skills, a `/house` router, a `/simple` waiver, twelve playbooks,
 principles, and agents for six host dialects (claude, OpenAI Codex, Cursor,
-Factory, Kiro, opencode) - twenty-one files per subagent-native dialect, and on
-opencode one seat file per seat with the leaf role auto-picked from the brief.
+Factory, Kiro, opencode) - seven seat files per dialect, one per seat, the
+seat, review, and build roles picked from the brief.
 The house is a design layer,
 not a persona pack. Every material decision descends seven seats in fixed
 order, one sentence each, and closes with a verdict. The same spine runs on
@@ -61,26 +61,23 @@ insubordination dressed as thoroughness.
 - `/simple` is the Operator's waiver: a plain build mode with no seats, no room,
   no house voice. It reads, writes, builds, and tests — and it never signs.
 
-## Leaves and seats
+## Roles and seats
 
-The leaf is a role, not a second agent. Each seat file carries the seat, the
-review pass, and the build pass; the brief selects (decision -> review,
-construction -> build, an unlabeled spawned brief -> review).
+The role is picked from the brief, not from a second agent. Each seat file
+carries the seat, the review pass, and the build pass; the brief selects
+(decision -> review, construction -> build, an unlabeled spawned brief -> review).
 
-- Review pass (read-only): answer the one sentence and close with
+- Review pass: answer the one sentence and close with
   `VERDICT: PASS` / `VERDICT: FAIL`, or `ACCEPT` / `END` (Rin), `SHIP` /
   `STAND DOWN` (Aria), or a verdict (Reika).
-- Build pass: build only the lane the seat owns, report exact changed files,
-  and never commit, push, ship, or spawn a room. Close `BUILT: <artifact>`
-  or `NO BUILD SURFACE: <one line>`.
-- Leaves never sign. Integration, the one atomic commit, the gates, and any
-  signed execution belong to the owning seat. A spawned agent may summon one
-  other seat for a focused consult - one spawn, one hop; a spawned agent never
-  convenes a room.
-- On opencode the seven seat files ship with `mode: all` - every seat is
-  individually selectable and spawnable, and the review/build bounds are
-  prompt-enforced. The five subagent-native dialects keep their separate
-  `animestack-<seat>-review` / `-build` files. No concrete model is pinned:
+- Build pass: build the lane the seat owns and report exact changed files.
+  Close `BUILT: <artifact>` or `NO BUILD SURFACE: <one line>`.
+- Integration, the one atomic commit, the gates, and any signed execution
+  belong to the owning seat; contested acts go to Reika.
+- Every seat file carries all three roles - seat, review, and build - and the
+  brief picks the role, on every dialect. All seven seats are individually
+  selectable and spawnable, and the pack carries no harness denies. No
+  concrete model is pinned:
   claude and factory agents carry `model: inherit`; opencode, cursor, and kiro
   agents omit the `model` key; codex agents omit `model` and
   `model_reasoning_effort`, so every subagent runs on the model of the
@@ -96,9 +93,9 @@ construction -> build, an unlabeled spawned brief -> review).
 - `skills/` — the nine skill dirs: `house`, `reika`, `mei`, `elo`, `yui`,
   `niko`, `rin`, `aria`, `simple`. Playbooks live under `skills/house/playbooks/`.
 - `agents/` — six dialects: `claude/`, `cursor/`, `factory/` (droids), `codex/`
-  (TOML), and `kiro/` carry 21 files each (7 seats + 7 review + 7 build);
-  `opencode/` carries 7 seat files, one per seat, the leaf role auto-picked
-  from the brief. `agents/opencode/command/house.md`
+  (TOML), `kiro/`, and `opencode/` carry 7 seat files each, one per seat - the
+  seat, review, and build roles in one file, picked from the brief.
+  `agents/opencode/command/house.md`
   and `agents/factory/command/house.md` ship the `/house` command. Dialects are
   generated from `agents/claude/` by `scripts/gen-agent-dialects`; the opencode
   tree is hand-authored.

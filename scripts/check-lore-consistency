@@ -4,8 +4,8 @@
 Source of truth: docs/lore/canon.md (each seat's compact credentials line).
 For every seat the art/graphics keys parsed from the canon tail must appear:
 
-  - docs/seats/<seat>.md, README.md, and the agent sources (claude:
-    seat/review/build; opencode: the seat file): as the "art: <key>" /
+  - docs/seats/<seat>.md, README.md, and the agent sources (claude and
+    opencode: the seat file): as the "art: <key>" /
     "graphics: <key>" tails;
   - docs/lore/dossiers/<seat>.md and seats/<seat>.html: inside the Art and
     Graphics bullets.
@@ -26,7 +26,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SEATS = ("reika", "yui", "rin", "niko", "mei", "aria", "elo")
 TREE_SUFFIXES = {
-    "claude": ("", "-review", "-build"),
+    "claude": ("",),
     "opencode": ("",),
 }
 

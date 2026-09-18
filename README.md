@@ -77,8 +77,8 @@ The loop is the spine. Every material decision descends seven seats in fixed ord
 
 The same spine runs two ways:
 
-- **Review descent** — read-only. Each leaf answers its one sentence. Rin ends `ACCEPT` or `END`; Aria ends `SHIP` or `STAND DOWN`; Reika closes with a verdict. The result is a recorded decision, not a diff.
-- **Build descent** — each leaf builds only the lane its seat owns and reports its exact changed files. It never commits, never pushes, never spawns a room of its own.
+- **Review descent** — each seat answers its one sentence. Rin ends `ACCEPT` or `END`; Aria ends `SHIP` or `STAND DOWN`; Reika closes with a verdict. The result is a recorded decision, not a diff.
+- **Build descent** — each seat builds the lane it owns and reports its exact changed files.
 
 Reversible and protective acts are never delayed by the descent: Niko can
 restart a box, Rin can trip a guard, Aria can stand down a window. The act is
@@ -143,7 +143,7 @@ Seven seat skills — `/reika`, `/mei`, `/elo`, `/yui`, `/niko`, `/rin`, `/aria`
 - 2 commands — `/house` for opencode and Factory, installed by `setup` (the skill covers the other hosts)
 - 12 playbooks under `skills/house/playbooks/`
 - 35 principles — 12 laws of the room plus 23 doctrine pieces adapted from pstack (`principles/INDEX.md`)
-- agents for six host dialects (Claude Code, OpenAI Codex, Cursor, Factory, Kiro, opencode) — 21 subagent files per subagent-native dialect (7 seats, 7 review leaves, 7 build leaves), and on opencode one seat file per seat with the leaf role auto-picked from the brief; 112 agent files total; no concrete model is pinned, so every agent runs on the invoking session's model
+- agents for six host dialects (Claude Code, OpenAI Codex, Cursor, Factory, Kiro, opencode) — 7 seat files per dialect (one per seat, the seat, review, and build roles in one file, picked from the brief); 42 agent files total; no concrete model is pinned, so every agent runs on the invoking session's model
 - an on-demand canon — every agent carries a `**Canon.**` pointer to its seat digest, dossier, and backstory, plus a seat trigger line naming the calls that force the read; canon text is never inlined (guard-the-context-window, steward Mei)
 - 10 hosts
 - the house canon — one canon file plus 15 seat dossiers (`docs/lore/`)
@@ -199,7 +199,7 @@ art/                the art: dossiers, sheets, wallpapers — one per seat each
 seats/              seat pages for the site, each with that seat's roster card (GitHub Pages)
 skills/             9 skills: 7 seats + /house + /simple
 principles/         12 laws + 23 doctrine
-agents/             21 per subagent-native dialect; opencode 7 seat files (roles auto-picked)
+agents/             7 seat files per dialect (roles picked from the brief)
 voices/             house voice
 scripts/            maintenance tools: the dialect generator
 setup               the installer: bash entry point (unix / Git Bash)
