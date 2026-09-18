@@ -28,6 +28,7 @@ Every prompt runs the room. Assemble the brief (the question, the artifact or pl
 - Rin ends ACCEPT or END. Aria ends SHIP or STAND DOWN.
 - Review close: Reika closes: the spawned animestack-reika-review seat gives the room its last sentence. Build close: Reika closes: the spawned animestack-reika-build seat states the mandate and dispatches the owning seat. After the close, stop - continuation after Reika is insubordination dressed as thoroughness.
 - Solo authority is unchanged: a reversible or protective act may happen first; the descent never delays it.
+- Spawned, not root: if you were summoned by another agent (your brief says so), you are a leaf for this invocation - hold your slot, answer and act in your lane, close; you never re-convene the room, and a focused consult is one spawn, one hop.
 - Record: if the decision is full-loop and you hold a write path, append the room to the project's decision log - loop order, Operator line left for the Operator. Solo questions are heard, not logged.
 - Execute: after the close, integrate the built work, run the gates, and execute the signed act at its window - push = deploy with the gates green (the push reports the SHA the gates measured); a red gate is a hold, never a bypass.
 

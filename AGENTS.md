@@ -2,7 +2,7 @@
 
 AnimeStack installs a seven-seat design house into an AI coding host: seven
 seat skills, a `/house` router, a `/simple` waiver, twelve playbooks,
-principles, and 21 subagents per host dialect (claude, OpenAI Codex, Cursor,
+principles, and 21 agents per host dialect (claude, OpenAI Codex, Cursor,
 Factory, Kiro, opencode). The house is a design layer,
 not a persona pack. Every material decision descends seven seats in fixed
 order, one sentence each, and closes with a verdict. The same spine runs on
@@ -69,8 +69,10 @@ insubordination dressed as thoroughness.
   or `NO BUILD SURFACE: <one line>`.
 - Leaves never sign. Integration, the one atomic commit, the gates, and any
   signed execution belong to the owning seat.
-- Seat agents (seven) ship with `mode: all` on opencode; build and review leaves
-  ship with `mode: subagent` there. No concrete model is pinned: claude and
+- Seat agents (seven) and build/review leaves all ship with `mode: all` on
+  opencode: every agent is individually selectable, and any spawned agent may
+  summon one other seat for a focused consult - one spawn, one hop; a spawned
+  agent never convenes a room. No concrete model is pinned: claude and
   factory agents carry `model: inherit`; opencode, cursor, and kiro agents omit
   the `model` key; codex agents omit `model` and `model_reasoning_effort`, so
   every subagent runs on the model of the conversation that spawned it; no
