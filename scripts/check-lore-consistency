@@ -4,8 +4,9 @@
 Source of truth: docs/lore/canon.md (each seat's compact credentials line).
 For every seat the art/graphics keys parsed from the canon tail must appear:
 
-  - docs/seats/<seat>.md, README.md, and the six agents/{claude,opencode}
-    sources: as the "art: <key>" / "graphics: <key>" tails;
+  - docs/seats/<seat>.md, README.md, and the agent sources (claude:
+    seat/review/build; opencode: the seat file): as the "art: <key>" /
+    "graphics: <key>" tails;
   - docs/lore/dossiers/<seat>.md and seats/<seat>.html: inside the Art and
     Graphics bullets.
 
@@ -24,7 +25,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SEATS = ("reika", "yui", "rin", "niko", "mei", "aria", "elo")
-AGENT_SUFFIXES = ("", "-review", "-build")
+TREE_SUFFIXES = {
+    "claude": ("", "-review", "-build"),
+    "opencode": ("",),
+}
 
 ART_KEY_RE = re.compile(r"art: (.+?)(?: \(| · graphics:)")
 GRAPHICS_KEY_RE = re.compile(r"graphics: (.+?)\.")
@@ -87,8 +91,8 @@ def main() -> int:
         surfaces[f"docs/seats/{seat}.md"] = (
             seats_doc.read_text(encoding="utf-8") if seats_doc.exists() else ""
         )
-        for suffix in AGENT_SUFFIXES:
-            for tree in ("claude", "opencode"):
+        for tree, suffixes in TREE_SUFFIXES.items():
+            for suffix in suffixes:
                 agent = ROOT / "agents" / tree / f"animestack-{seat}{suffix}.md"
                 surfaces[agent.relative_to(ROOT).as_posix()] = (
                     agent.read_text(encoding="utf-8") if agent.exists() else ""

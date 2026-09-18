@@ -143,7 +143,7 @@ Seven seat skills — `/reika`, `/mei`, `/elo`, `/yui`, `/niko`, `/rin`, `/aria`
 - 2 commands — `/house` for opencode and Factory, installed by `setup` (the skill covers the other hosts)
 - 12 playbooks under `skills/house/playbooks/`
 - 35 principles — 12 laws of the room plus 23 doctrine pieces adapted from pstack (`principles/INDEX.md`)
-- 21 subagents per host — 7 seats, 7 review leaves, 7 build leaves — shipped for six host dialects (Claude Code, OpenAI Codex, Cursor, Factory, Kiro, opencode), 126 agent files total; no concrete model is pinned, so every subagent runs on the invoking session's model
+- agents for six host dialects (Claude Code, OpenAI Codex, Cursor, Factory, Kiro, opencode) — 21 subagent files per subagent-native dialect (7 seats, 7 review leaves, 7 build leaves), and on opencode one seat file per seat with the leaf role auto-picked from the brief; 112 agent files total; no concrete model is pinned, so every agent runs on the invoking session's model
 - an on-demand canon — every agent carries a `**Canon.**` pointer to its seat digest, dossier, and backstory, plus a seat trigger line naming the calls that force the read; canon text is never inlined (guard-the-context-window, steward Mei)
 - 10 hosts
 - the house canon — one canon file plus 15 seat dossiers (`docs/lore/`)
@@ -199,7 +199,7 @@ art/                the art: dossiers, sheets, wallpapers — one per seat each
 seats/              seat pages for the site, each with that seat's roster card (GitHub Pages)
 skills/             9 skills: 7 seats + /house + /simple
 principles/         12 laws + 23 doctrine
-agents/             21 agents per dialect: claude, cursor, codex (TOML), factory (droids), kiro, opencode
+agents/             21 per subagent-native dialect; opencode 7 seat files (roles auto-picked)
 voices/             house voice
 scripts/            maintenance tools: the dialect generator
 setup               the installer: bash entry point (unix / Git Bash)

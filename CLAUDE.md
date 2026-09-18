@@ -8,8 +8,8 @@ seats, no room, no house voice — and it never signs.
 ## Rules for working in this repo
 
 - Counts are facts. The canonical counts (nine skill dirs, seven seats, twelve
-  playbooks, two commands, 21 agents per host dialect across six dialects,
-  126 agent files) live in
+  playbooks, two commands, 21 agent files per subagent-native dialect and 7
+  opencode seat files, 112 agent files total) live in
   `docs/measurement.md`. A doc
   that disagrees with the tree is a defect; fix the doc or fix the tree, never
   paper over the disagreement.

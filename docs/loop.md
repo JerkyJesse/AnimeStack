@@ -29,6 +29,9 @@ When Reika closes, the loop is over.
 ## Two descents
 
 The same spine runs two ways, distinguished by what each leaf is allowed to do.
+On opencode the pack ships one file per seat and the seat picks its role from
+the brief (decision → review, construction → build); the five subagent-native
+dialects use the `animestack-<seat>-review` / `-build` files named below.
 
 ### The review descent
 

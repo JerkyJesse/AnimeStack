@@ -2,8 +2,10 @@
 
 AnimeStack installs a seven-seat design house into an AI coding host: seven
 seat skills, a `/house` router, a `/simple` waiver, twelve playbooks,
-principles, and 21 agents per host dialect (claude, OpenAI Codex, Cursor,
-Factory, Kiro, opencode). The house is a design layer,
+principles, and agents for six host dialects (claude, OpenAI Codex, Cursor,
+Factory, Kiro, opencode) - twenty-one files per subagent-native dialect, and on
+opencode one seat file per seat with the leaf role auto-picked from the brief.
+The house is a design layer,
 not a persona pack. Every material decision descends seven seats in fixed
 order, one sentence each, and closes with a verdict. The same spine runs on
 every surface — a bug, a refactor, a ship, a cull.
@@ -61,23 +63,29 @@ insubordination dressed as thoroughness.
 
 ## Leaves and seats
 
-- Review leaves are read-only: they answer their one sentence and close with
+The leaf is a role, not a second agent. Each seat file carries the seat, the
+review pass, and the build pass; the brief selects (decision -> review,
+construction -> build, an unlabeled spawned brief -> review).
+
+- Review pass (read-only): answer the one sentence and close with
   `VERDICT: PASS` / `VERDICT: FAIL`, or `ACCEPT` / `END` (Rin), `SHIP` /
   `STAND DOWN` (Aria), or a verdict (Reika).
-- Build leaves build only the lane their seat owns, report exact changed files,
-  and never commit, push, ship, or spawn a room. They close `BUILT: <artifact>`
+- Build pass: build only the lane the seat owns, report exact changed files,
+  and never commit, push, ship, or spawn a room. Close `BUILT: <artifact>`
   or `NO BUILD SURFACE: <one line>`.
 - Leaves never sign. Integration, the one atomic commit, the gates, and any
-  signed execution belong to the owning seat.
-- Seat agents (seven) and build/review leaves all ship with `mode: all` on
-  opencode: every agent is individually selectable, and any spawned agent may
-  summon one other seat for a focused consult - one spawn, one hop; a spawned
-  agent never convenes a room. No concrete model is pinned: claude and
-  factory agents carry `model: inherit`; opencode, cursor, and kiro agents omit
-  the `model` key; codex agents omit `model` and `model_reasoning_effort`, so
-  every subagent runs on the model of the conversation that spawned it; no
-  permission block is written. `setup` refuses to install from a pack that
-  violates this.
+  signed execution belong to the owning seat. A spawned agent may summon one
+  other seat for a focused consult - one spawn, one hop; a spawned agent never
+  convenes a room.
+- On opencode the seven seat files ship with `mode: all` - every seat is
+  individually selectable and spawnable, and the review/build bounds are
+  prompt-enforced. The five subagent-native dialects keep their separate
+  `animestack-<seat>-review` / `-build` files. No concrete model is pinned:
+  claude and factory agents carry `model: inherit`; opencode, cursor, and kiro
+  agents omit the `model` key; codex agents omit `model` and
+  `model_reasoning_effort`, so every subagent runs on the model of the
+  conversation that spawned it; no permission block is written. `setup` refuses
+  to install from a pack that violates this.
 
 ## Repo map
 
@@ -87,9 +95,12 @@ insubordination dressed as thoroughness.
 - `principles/` — doctrine.
 - `skills/` — the nine skill dirs: `house`, `reika`, `mei`, `elo`, `yui`,
   `niko`, `rin`, `aria`, `simple`. Playbooks live under `skills/house/playbooks/`.
-- `agents/` — six dialects, 21 files each: `claude/`, `opencode/`, `cursor/`,
-  `factory/` (droids), `codex/` (TOML), `kiro/`; `agents/opencode/command/house.md`
+- `agents/` — six dialects: `claude/`, `cursor/`, `factory/` (droids), `codex/`
+  (TOML), and `kiro/` carry 21 files each (7 seats + 7 review + 7 build);
+  `opencode/` carries 7 seat files, one per seat, the leaf role auto-picked
+  from the brief. `agents/opencode/command/house.md`
   and `agents/factory/command/house.md` ship the `/house` command. Dialects are
-  generated from `agents/claude/` by `scripts/gen-agent-dialects`.
+  generated from `agents/claude/` by `scripts/gen-agent-dialects`; the opencode
+  tree is hand-authored.
 - `setup`, `setup.ps1` — the one installer: bash entry point (unix / Git Bash)
   and native Windows entry point, same contract.
