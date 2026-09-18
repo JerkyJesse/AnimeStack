@@ -1,5 +1,6 @@
 * text=auto
 setup text eol=lf
+setup.ps1 text eol=crlf
 *.svg text eol=lf
 *.png binary
 *.jpg binary

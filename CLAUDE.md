@@ -8,7 +8,8 @@ seats, no room, no house voice — and it never signs.
 ## Rules for working in this repo
 
 - Counts are facts. The canonical counts (nine skill dirs, seven seats, twelve
-  playbooks, one opencode command, 21 agents per host dialect) live in
+  playbooks, two commands, 21 agents per host dialect across six dialects,
+  126 agent files) live in
   `docs/measurement.md`. A doc
   that disagrees with the tree is a defect; fix the doc or fix the tree, never
   paper over the disagreement.
@@ -16,7 +17,8 @@ seats, no room, no house voice — and it never signs.
   like any other doc; the canon is the law the pack ships with.
 - No secrets in this repo, ever. No channel URLs, no keys, no tokens, no
   machine paths. A secret belongs in an env file outside git.
-- `setup` is the only installer. It never touches a file or directory it cannot
+- `setup` and `setup.ps1` are the one installer, two entry points (bash /
+  native Windows). It never touches a file or directory it cannot
   prove it owns, and it is the single path that registers skills and agents.
 
 ## Build discipline

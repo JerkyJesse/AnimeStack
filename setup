@@ -1,18 +1,19 @@
 #!/usr/bin/env bash
 # AnimeStack setup - install the seven-seat house skills, agents, and the
-# opencode /house command into supported AI coding hosts. No network, no bun,
-# no sudo, no node.
+# opencode and factory /house commands into supported AI coding hosts. No
+# network, no bun, no sudo, no node.
 #
 # The cage rule: never delete or edit a target without proof that we own it.
 # A skill target is ours when it is a symlink resolving into this repo, or a
 # directory carrying the .animestack-owned marker. An agent file is ours when
 # its last line is the ownership marker. Everything else is left untouched.
 #
-# The model rule: no shipped agent names a concrete model. opencode agents
-# omit the `model` key (opencode runs an unset subagent on the invoking
-# session's model); claude agents carry `model: inherit` (Claude Code's
-# same-model-as-the-conversation form). Setup refuses to install from
-# a pack that violates this.
+# The model rule: no shipped agent names a concrete model. claude and factory
+# agents carry `model: inherit` (the host's same-model-as-the-conversation
+# form); opencode, cursor, and kiro agents omit the `model` key (the host
+# inherits the session model); codex agents omit `model` and
+# `model_reasoning_effort` (codex inherits the spawning session's model by
+# default). Setup refuses to install from a pack that violates this.
 set -e
 
 ROOT="$(cd "$(dirname "$0")" && pwd -P)"
@@ -31,6 +32,7 @@ ALL_HOSTS="claude cursor codex factory opencode kiro slate openclaw hermes gbrai
 AUTO_HOSTS="claude cursor codex factory opencode kiro openclaw hermes gbrain"
 
 OWN_MARKER="<!-- animestack-owned -->"
+TOML_MARKER="# animestack-owned"
 OWN_FLAG=".animestack-owned"
 ROOT_FLAG=".animestack-root"
 
@@ -45,7 +47,7 @@ PATHS=""
 usage() {
   cat <<'EOF'
 AnimeStack setup - install the seven-seat house skills, agents, and the
-opencode /house command into AI hosts
+opencode and factory /house commands into AI hosts
 
 Usage: ./setup [options]
 
@@ -139,7 +141,11 @@ _host_skills_dir() {
 _host_agents_dir() {
   case "$1" in
     claude)   printf '%s\n' "$HOME/.claude/agents" ;;
+    cursor)   printf '%s\n' "$HOME/.cursor/agents" ;;
+    codex)    printf '%s\n' "${CODEX_HOME:-$HOME/.codex}/agents" ;;
+    factory)  printf '%s\n' "$HOME/.factory/droids" ;;
     opencode) printf '%s\n' "$HOME/.config/opencode/agent" ;;
+    kiro)     printf '%s\n' "$HOME/.kiro/agents" ;;
     *) printf '%s\n' "" ;;
   esac
 }
@@ -147,13 +153,18 @@ _host_agents_dir() {
 _host_agents_src() {
   case "$1" in
     claude)   printf '%s\n' "$ROOT/agents/claude" ;;
+    cursor)   printf '%s\n' "$ROOT/agents/cursor" ;;
+    codex)    printf '%s\n' "$ROOT/agents/codex" ;;
+    factory)  printf '%s\n' "$ROOT/agents/factory" ;;
     opencode) printf '%s\n' "$ROOT/agents/opencode" ;;
+    kiro)     printf '%s\n' "$ROOT/agents/kiro" ;;
     *) printf '%s\n' "" ;;
   esac
 }
 
 _host_commands_dir() {
   case "$1" in
+    factory)  printf '%s\n' "$HOME/.factory/commands" ;;
     opencode) printf '%s\n' "$HOME/.config/opencode/command" ;;
     *) printf '%s\n' "" ;;
   esac
@@ -161,6 +172,7 @@ _host_commands_dir() {
 
 _host_commands_src() {
   case "$1" in
+    factory)  printf '%s\n' "$ROOT/agents/factory/command" ;;
     opencode) printf '%s\n' "$ROOT/agents/opencode/command" ;;
     *) printf '%s\n' "" ;;
   esac
@@ -306,18 +318,29 @@ EOF
   log "Installed digest: $host -> $target"
 }
 
+# Ownership marker for an agent file: markdown agents end with the HTML
+# comment, codex TOML agents end with a TOML comment (TOML has no HTML
+# comments). A file is ours only when its last line is the right marker.
+_own_marker_for() {
+  case "$1" in
+    *.toml) printf '%s\n' "$TOML_MARKER" ;;
+    *) printf '%s\n' "$OWN_MARKER" ;;
+  esac
+}
+
 _install_agents() {
   local host="$1" srcdir="$2" targetdir="$3"
   if [ ! -d "$srcdir" ]; then return 0; fi
   mkdir -p "$targetdir"
-  local src base dst last
-  for src in "$srcdir"/*.md; do
-    [ -e "$src" ] || continue
+  local src base dst last marker
+  for src in "$srcdir"/*; do
+    [ -f "$src" ] || continue
     base="$(basename "$src")"
     dst="$targetdir/$base"
+    marker="$(_own_marker_for "$dst")"
     if [ -e "$dst" ]; then
       last="$(tail -n 1 "$dst" 2>/dev/null | sed 's/[[:space:]]*$//' || true)"
-      if [ "$last" != "$OWN_MARKER" ]; then
+      if [ "$last" != "$marker" ]; then
         log "Not registered (an agent file you own already uses the name; left untouched): $base"
         SKIP_COUNT=$((SKIP_COUNT + 1))
         continue
@@ -358,11 +381,12 @@ _uninstall_digest() {
 _uninstall_agents() {
   local targetdir="$1"
   if [ ! -d "$targetdir" ]; then return 0; fi
-  local f last
-  for f in "$targetdir"/*.md; do
-    [ -e "$f" ] || continue
+  local f last marker
+  for f in "$targetdir"/*; do
+    [ -f "$f" ] || continue
+    marker="$(_own_marker_for "$f")"
     last="$(tail -n 1 "$f" 2>/dev/null | sed 's/[[:space:]]*$//' || true)"
-    if [ "$last" = "$OWN_MARKER" ]; then
+    if [ "$last" = "$marker" ]; then
       rm -f "$f"
       AGENT_COUNT=$((AGENT_COUNT + 1))
       log "Removed: $f"
@@ -461,11 +485,10 @@ _do_host() {
 }
 
 # ─── Model-pin gate ────────────────────────────────────────────
-# No shipped agent names a concrete model: opencode agents omit the `model`
-# key (opencode runs an unset subagent on the invoking session's model) and
-# claude agents carry `model: inherit` (Claude Code's
-# same-model-as-the-conversation form). A pack that violates this never
-# touches a host.
+# No shipped agent names a concrete model: claude and factory agents carry
+# `model: inherit`; opencode, cursor, and kiro agents omit the `model` key;
+# codex agents omit `model` and `model_reasoning_effort`. A pack that
+# violates this never touches a host.
 _frontmatter_of() {
   tr -d '\r' < "$1" | sed -n '2,/^---$/p'
 }
@@ -485,6 +508,41 @@ _assert_no_model_pins() {
     fm="$(_frontmatter_of "$f")"
     if printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:'; then
       echo "Error: model pin in shipped opencode command (omit the key; opencode inherits the session model): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  for f in "$ROOT"/agents/cursor/*.md "$ROOT"/agents/kiro/*.md; do
+    [ -e "$f" ] || continue
+    fm="$(_frontmatter_of "$f")"
+    if printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:'; then
+      echo "Error: model pin in shipped agent (omit the key; the host inherits the session model): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  for f in "$ROOT"/agents/factory/*.md; do
+    [ -e "$f" ] || continue
+    fm="$(_frontmatter_of "$f")"
+    n_model="$(printf '%s\n' "$fm" | grep -Ec '^[[:space:]]*model[[:space:]]*:')" || true
+    if [ "$n_model" -ne 1 ]; then
+      echo "Error: shipped factory droid needs exactly one 'model: inherit' line (found $n_model): ${f#"$ROOT"/}" >&2
+      bad=1
+    elif ! printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:[[:space:]]*inherit[[:space:]]*$'; then
+      echo "Error: concrete model pin in shipped factory droid (only 'model: inherit' is allowed): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  for f in "$ROOT"/agents/factory/command/*.md; do
+    [ -e "$f" ] || continue
+    fm="$(_frontmatter_of "$f")"
+    if printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:'; then
+      echo "Error: model pin in shipped factory command (omit the key; the host inherits the session model): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  for f in "$ROOT"/agents/codex/*.toml; do
+    [ -e "$f" ] || continue
+    if grep -Eq '^[[:space:]]*model(_reasoning_effort)?[[:space:]]*=' "$f"; then
+      echo "Error: model pin in shipped codex agent (omit model and model_reasoning_effort; codex inherits the spawning session's model): ${f#"$ROOT"/}" >&2
       bad=1
     fi
   done

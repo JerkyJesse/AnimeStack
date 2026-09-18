@@ -28,12 +28,12 @@ supported values are:
 | Host | Where skills land | Agents |
 | --- | --- | --- |
 | `claude` | `~/.claude/skills` | `~/.claude/agents` |
-| `cursor` | `~/.cursor/skills` | — |
-| `codex` | `${CODEX_HOME:-~/.codex}/skills` | — |
-| `factory` | `~/.factory/skills` | — |
+| `cursor` | `~/.cursor/skills` | `~/.cursor/agents` |
+| `codex` | `${CODEX_HOME:-~/.codex}/skills` | `${CODEX_HOME:-~/.codex}/agents` (TOML) |
+| `factory` | `~/.factory/skills` | `~/.factory/droids` |
 | `opencode` | `~/.config/opencode/skills` | `~/.config/opencode/agent` |
-| `kiro` | `~/.kiro/skills` | — |
-| `slate` | reads `~/.claude/skills` (claude install refreshed) | — |
+| `kiro` | `~/.kiro/skills` | `~/.kiro/agents` |
+| `slate` | reads `~/.claude/skills` (claude install refreshed) | reads `~/.claude/agents` |
 | `openclaw` | `~/.openclaw/skills/animestack` (digest) | — |
 | `hermes` | `~/.hermes/skills/animestack` (digest) | — |
 | `gbrain` | `~/.gbrain/skills/animestack` (digest) | — |
@@ -44,8 +44,9 @@ hosts whose config directories already exist. The default is `claude`. Run
 [`../measurement.md`](../measurement.md) if this table and the script ever
 disagree — the script is the truth.
 
-Windows installs by copy, not symlink. Re-run `./setup` after `git pull` to
-refresh.
+Windows installs by copy, not symlink. The native entry point is
+`powershell -ExecutionPolicy Bypass -File .\setup.ps1 -TargetHost <your host>`;
+same contract as `./setup`. Re-run the installer after `git pull` to refresh.
 
 ## First task
 

@@ -10,8 +10,8 @@ the table, the table is wrong.
 
 ## 1. The sample
 
-What is ranked: this repository, release `v1.4.0` (`VERSION`), 2026-09-17. The canon
-text inside it is this pack's own, first written for v1.3.0; the language reform arrived in v1.4.0, the credentials in v1.5.0.
+What is ranked: this repository, release `v1.6.0` (`VERSION`), 2026-09-17. The canon
+text inside it is this pack's own, first written for v1.3.0; the language reform arrived in v1.4.0, the credentials in v1.5.0, and the six-dialect agent coverage in v1.6.0.
 
 The claims in this pack are claims about this tree, not promises about the outcomes a
 user will get. A pack that installs cleanly on your host is a body question, not a result
@@ -24,7 +24,7 @@ the tree contains what the table says it contains, at the stated release, on the
 
 ## 2. The counts table
 
-Run each command from the repo root. The expected count is the v1.4.0 truth; a command
+Run each command from the repo root. The expected count is the v1.6.0 truth; a command
 that prints anything else is a defect, and the defect is the tree's number, never the
 prose.
 
@@ -38,7 +38,14 @@ prose.
 | 10 | hosts | `grep -oE 'claude\|cursor\|codex\|factory\|opencode\|kiro\|slate\|openclaw\|hermes\|gbrain' setup \| sort -u \| wc -l` |
 | 21 | agents, opencode host | `ls agents/opencode/*.md \| wc -l` |
 | 21 | agents, claude host | `ls agents/claude \| wc -l` |
+| 21 | agents, cursor host | `ls agents/cursor/*.md \| wc -l` |
+| 21 | agents, factory host | `ls agents/factory/*.md \| wc -l` |
+| 21 | agents, codex host | `ls agents/codex/*.toml \| wc -l` |
+| 21 | agents, kiro host | `ls agents/kiro/*.md \| wc -l` |
+| 126 | agent files, all dialects | `find agents -maxdepth 2 -type f \( -name '*.md' -o -name '*.toml' \) \| wc -l` |
 | 1 | house command, opencode | `ls agents/opencode/command/*.md \| wc -l` |
+| 1 | house command, factory | `ls agents/factory/command/*.md \| wc -l` |
+| 2 | commands, all hosts | `find agents -path '*/command/*.md' \| wc -l` |
 | 1 | canon file | `ls docs/lore/*.md \| grep -v README \| wc -l` (canon) |
 | 15 | lore dossiers | `ls docs/lore/dossiers \| wc -l` |
 | 16 | lore total | the canon + 15 dossiers, the two rows above summed |
@@ -66,14 +73,18 @@ heading. `grep -c '^### ' README.md` is a hymn: it counts headings, not hosts. U
 setup list; it prints 10. The ten names are claude, cursor, codex, factory, opencode,
 kiro, slate, openclaw, hermes, gbrain.
 
-The agents rows are two of twenty-one, forty-two total: one directory per host, each
-holding the same seat roster as agent files. A host that ships twenty of twenty-one is a
-defect, not a rounding error.
+The agents rows are six of twenty-one, one hundred twenty-six total: one
+directory per host dialect (claude, cursor, codex, factory, kiro, opencode),
+each holding the same seat roster as agent files. Codex ships TOML custom
+agents; the other five ship markdown. A host that ships twenty of twenty-one is
+a defect, not a rounding error.
 
-The commands row is one: `agents/opencode/command/house.md`, installed by setup to
-`~/.config/opencode/command/house.md` so `/house` is a real slash command on the opencode
-host. Claude Code needs no command file there — the `house` skill is already the slash
-command.
+The commands rows count two: `agents/opencode/command/house.md` and
+`agents/factory/command/house.md`, installed by setup to
+`~/.config/opencode/command/house.md` and `~/.factory/commands/house.md` so
+`/house` is a real slash command on those hosts. Claude Code, Cursor, Codex,
+and Kiro need no command file — the `house` skill is already the slash command
+there.
 
 The lore rows are two that sum to sixteen: one canon file at the top of `docs/lore`
 (`canon.md`), and fifteen dossiers in `docs/lore/dossiers`. The policy page

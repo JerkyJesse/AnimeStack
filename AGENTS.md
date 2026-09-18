@@ -2,7 +2,8 @@
 
 AnimeStack installs a seven-seat design house into an AI coding host: seven
 seat skills, a `/house` router, a `/simple` waiver, twelve playbooks,
-principles, and 21 subagents per host dialect. The house is a design layer,
+principles, and 21 subagents per host dialect (claude, OpenAI Codex, Cursor,
+Factory, Kiro, opencode). The house is a design layer,
 not a persona pack. Every material decision descends seven seats in fixed
 order, one sentence each, and closes with a verdict. The same spine runs on
 every surface — a bug, a refactor, a ship, a cull.
@@ -13,9 +14,12 @@ every surface — a bug, a refactor, a ship, a cull.
 git clone https://github.com/JerkyJesse/AnimeStack ~/animestack && cd ~/animestack && ./setup --host <name>
 ```
 
+On Windows the native entry point is `powershell -ExecutionPolicy Bypass -File .\setup.ps1 -TargetHost <name>`; same contract as the bash `setup`.
+
 `--host` accepts `claude`, `cursor`, `codex`, `factory`, `opencode`, `kiro`,
-`slate`, `openclaw`, `hermes`, `gbrain`, `all`, or `auto`. `setup` is the only
-installer. It never touches a file or directory it cannot prove it owns.
+`slate`, `openclaw`, `hermes`, `gbrain`, `all`, or `auto`. `setup` and
+`setup.ps1` are the one installer, two entry points. It never touches a file
+or directory it cannot prove it owns.
 
 ## The loop
 
@@ -48,9 +52,10 @@ insubordination dressed as thoroughness.
 
 - `/house` is the entry point for any non-trivial task. It reads the request,
   matches one playbook, opens the loop, and closes with a verdict. Sticky mode.
-  On the opencode host it ships as the installed `/house` command
-  (`agents/opencode/command/house.md`); on Claude Code it is the `house` skill —
-  the same router either way.
+  On opencode and Factory it ships as the installed `/house` command
+  (`agents/opencode/command/house.md`, `agents/factory/command/house.md`); on
+  Claude Code, Cursor, Codex, and Kiro it is the `house` skill — the same
+  router either way.
 - `/simple` is the Operator's waiver: a plain build mode with no seats, no room,
   no house voice. It reads, writes, builds, and tests — and it never signs.
 
@@ -64,11 +69,13 @@ insubordination dressed as thoroughness.
   or `NO BUILD SURFACE: <one line>`.
 - Leaves never sign. Integration, the one atomic commit, the gates, and any
   signed execution belong to the owning seat.
-- Seat agents (seven) ship with `mode: all`; build and review leaves ship with
-  `mode: subagent`. No concrete model is pinned: opencode agents omit the
-  `model` key and claude agents carry `model: inherit`, so every subagent runs
-  on the model of the conversation that spawned it; no permission block is
-  written. `setup` refuses to install from a pack that violates this.
+- Seat agents (seven) ship with `mode: all` on opencode; build and review leaves
+  ship with `mode: subagent` there. No concrete model is pinned: claude and
+  factory agents carry `model: inherit`; opencode, cursor, and kiro agents omit
+  the `model` key; codex agents omit `model` and `model_reasoning_effort`, so
+  every subagent runs on the model of the conversation that spawned it; no
+  permission block is written. `setup` refuses to install from a pack that
+  violates this.
 
 ## Repo map
 
@@ -78,6 +85,9 @@ insubordination dressed as thoroughness.
 - `principles/` — doctrine.
 - `skills/` — the nine skill dirs: `house`, `reika`, `mei`, `elo`, `yui`,
   `niko`, `rin`, `aria`, `simple`. Playbooks live under `skills/house/playbooks/`.
-- `agents/` — `opencode/` and `claude/`, 21 files each; `agents/opencode/command/house.md`
-  ships the opencode `/house` command.
-- `setup` — the only installer.
+- `agents/` — six dialects, 21 files each: `claude/`, `opencode/`, `cursor/`,
+  `factory/` (droids), `codex/` (TOML), `kiro/`; `agents/opencode/command/house.md`
+  and `agents/factory/command/house.md` ship the `/house` command. Dialects are
+  generated from `agents/claude/` by `scripts/gen-agent-dialects`.
+- `setup`, `setup.ps1` — the one installer: bash entry point (unix / Git Bash)
+  and native Windows entry point, same contract.

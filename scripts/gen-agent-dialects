@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""Generate the per-host agent dialects from the claude sources.
+
+Maintenance tool, not an installer. Edit agents/claude, run this script, commit
+the generated trees; setup installs the committed trees and audits their
+frontmatter. No network. Python 3.11+ for tomllib self-checks.
+
+Usage: python3 scripts/gen-agent-dialects
+
+Dialects:
+  cursor   agents/cursor/*.md    name + description; no model key
+  kiro     agents/kiro/*.md      name + description; no model key
+  factory  agents/factory/*.md   claude form verbatim (model: inherit)
+  codex    agents/codex/*.toml   name, description, developer_instructions
+  factory  agents/factory/command/house.md  copy of the opencode command
+"""
+
+from __future__ import annotations
+
+import sys
+import tomllib
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "agents" / "claude"
+COMMAND_SRC = ROOT / "agents" / "opencode" / "command" / "house.md"
+
+OWN_MARKER = "<!-- animestack-owned -->"
+TOML_MARKER = "# animestack-owned"
+
+# Body rewrites per dialect: the phrase names a tool the host does not expose.
+# The house spawns subagents everywhere; only the tool name differs.
+BODY_REWRITES = {
+    "codex": [("as subagents via the Task tool,", "as subagents,")],
+    "kiro": [("as subagents via the Task tool,", "as subagents,")],
+}
+
+
+def split_frontmatter(text: str) -> tuple[str, str]:
+    if not text.startswith("---\n"):
+        raise ValueError("missing frontmatter opener")
+    end = text.index("\n---\n", 4)
+    return text[4:end], text[end + len("\n---\n") :]
+
+
+def field(frontmatter: str, key: str) -> str:
+    for line in frontmatter.splitlines():
+        if line.startswith(f"{key}: "):
+            return line[len(key) + 2 :]
+    raise ValueError(f"missing frontmatter field: {key}")
+
+
+def drop_model(frontmatter: str) -> str:
+    return "\n".join(line for line in frontmatter.splitlines() if not line.startswith("model:"))
+
+
+def toml_escape(value: str) -> str:
+    return value.replace("\\", "\\\\").replace('"""', '""\\"')
+
+
+def main() -> int:
+    sources = sorted(SRC.glob("*.md"))
+    if len(sources) != 21:
+        print(f"error: expected 21 claude agents, found {len(sources)}", file=sys.stderr)
+        return 1
+
+    out = {
+        "cursor": ROOT / "agents" / "cursor",
+        "kiro": ROOT / "agents" / "kiro",
+        "factory": ROOT / "agents" / "factory",
+        "codex": ROOT / "agents" / "codex",
+    }
+    for d in out.values():
+        d.mkdir(parents=True, exist_ok=True)
+
+    written: dict[str, int] = {k: 0 for k in out}
+
+    for src in sources:
+        text = src.read_text(encoding="utf-8")
+        frontmatter, body = split_frontmatter(text)
+        name = field(frontmatter, "name")
+        description = field(frontmatter, "description")
+        stem = src.stem
+
+        for dialect in ("cursor", "kiro"):
+            content = f"---\n{drop_model(frontmatter)}\n---\n{body}"
+            if not content.rstrip().endswith(OWN_MARKER):
+                print(f"error: {dialect}/{stem} lost the ownership marker", file=sys.stderr)
+                return 1
+            (out[dialect] / f"{stem}.md").write_text(content, encoding="utf-8", newline="\n")
+            written[dialect] += 1
+
+        (out["factory"] / f"{stem}.md").write_text(text, encoding="utf-8", newline="\n")
+        written["factory"] += 1
+
+        codex_body = body
+        for old, new in BODY_REWRITES["codex"]:
+            codex_body = codex_body.replace(old, new)
+        codex_body = codex_body.rstrip()
+        if codex_body.endswith(OWN_MARKER):
+            codex_body = codex_body[: -len(OWN_MARKER)].rstrip()
+        codex_body = codex_body.lstrip("\n")
+        toml = (
+            f'name = "{toml_escape(name)}"\n'
+            f'description = "{toml_escape(description)}"\n'
+            f'developer_instructions = """\n{toml_escape(codex_body)}\n"""\n'
+            f"\n{TOML_MARKER}\n"
+        )
+        parsed = tomllib.loads(toml)
+        if parsed.get("name") != name or "developer_instructions" not in parsed:
+            print(f"error: codex/{stem}.toml failed the tomllib self-check", file=sys.stderr)
+            return 1
+        (out["codex"] / f"{stem}.toml").write_text(toml, encoding="utf-8", newline="\n")
+        written["codex"] += 1
+
+    command_dir = out["factory"] / "command"
+    command_dir.mkdir(parents=True, exist_ok=True)
+    (command_dir / "house.md").write_text(
+        COMMAND_SRC.read_text(encoding="utf-8"), encoding="utf-8", newline="\n"
+    )
+    written["factory_command"] = 1
+
+    for dialect, count in written.items():
+        print(f"generated: {dialect} {count}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
