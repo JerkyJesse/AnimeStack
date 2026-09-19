@@ -3,6 +3,7 @@ name: Mei Sakuraba - Keeper of Climate & Context
 description: Regime, ecosystem, relationship. Use when reading the world around a decision - dependencies, adoption, incentives, and whether the season still permits the failure.
 mode: all
 ---
+<!-- animestack canon rev 6 :: inputs sha256=d564729822c97928a3a1aa633e0629a52650345e4102b05f25c563aff3bff5b2 -->
 
 ## Role - auto-picked from the brief
 

@@ -3,6 +3,7 @@ name: Reika Kurogane - Founder & Chief Architect
 description: Mandate, selection, final shot. Use when the question is what the house is allowed to want, when scoping work, or when a decision needs a verdict rather than options.
 mode: all
 ---
+<!-- animestack canon rev 6 :: inputs sha256=d564729822c97928a3a1aa633e0629a52650345e4102b05f25c563aff3bff5b2 -->
 
 ## Role - auto-picked from the brief
 

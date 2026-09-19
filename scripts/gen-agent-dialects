@@ -22,6 +22,9 @@ Dialects:
   factory  agents/factory/*.md   claude form verbatim (model: inherit)
   codex    agents/codex/*.toml   name, description, developer_instructions
   factory  agents/factory/command/house.md  copy of the opencode command
+
+The opencode tree (agents/opencode) is hand-authored: the script refreshes its
+provenance stamp in place and --check verifies it; the body is never regenerated.
 """
 
 from __future__ import annotations
@@ -35,6 +38,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "agents" / "claude"
 COMMAND_SRC = ROOT / "agents" / "opencode" / "command" / "house.md"
+OPENCODE = ROOT / "agents" / "opencode"
 CANON = ROOT / "docs" / "lore" / "canon.md"
 DOSSIERS = sorted((ROOT / "docs" / "lore" / "dossiers").glob("*.md"))
 STAMP_RE = re.compile(r"^<!-- animestack canon rev \d+ :: inputs sha256=[0-9a-f]{64} -->$")
@@ -124,7 +128,7 @@ def build() -> tuple[dict[Path, str], dict[str, int]] | None:
     rev, digest = lore_stamp()
     stamp = stamp_md(rev, digest)
     outputs: dict[Path, str] = {}
-    counts = {"claude": 0, "cursor": 0, "kiro": 0, "factory": 0, "codex": 0, "factory_command": 1}
+    counts = {"claude": 0, "cursor": 0, "kiro": 0, "factory": 0, "codex": 0, "factory_command": 1, "opencode": 0}
 
     for src in sources:
         text = src.read_text(encoding="utf-8")
@@ -171,11 +175,32 @@ def build() -> tuple[dict[Path, str], dict[str, int]] | None:
 
     command_text = COMMAND_SRC.read_text(encoding="utf-8")
     command_frontmatter, command_body = split_frontmatter(command_text)
-    command_body = strip_stamp(command_body)
+    command_body = strip_stamp(command_body).lstrip("\n")
     outputs[ROOT / "agents" / "factory" / "command" / "house.md"] = (
         f"---\n{command_frontmatter}\n---\n{stamp}\n\n{command_body}"
     )
+    opencode = opencode_outputs(stamp)
+    if opencode is None:
+        return None
+    outputs.update(opencode)
+    counts["opencode"] = len(opencode)
     return outputs, counts
+
+
+def opencode_outputs(stamp: str) -> dict[Path, str] | None:
+    sources = sorted((ROOT / "agents" / "claude").glob("*.md"))
+    paths = [OPENCODE / f"{src.stem}.md" for src in sources]
+    paths.append(OPENCODE / "command" / "house.md")
+    outputs: dict[Path, str] = {}
+    for path in paths:
+        if not path.is_file():
+            print(f"error: missing opencode file: {path.relative_to(ROOT).as_posix()}", file=sys.stderr)
+            return None
+        text = path.read_text(encoding="utf-8").replace("\r\n", "\n")
+        frontmatter, body = split_frontmatter(text)
+        body = strip_stamp(body).lstrip("\n")
+        outputs[path] = f"---\n{frontmatter}\n---\n{stamp}\n\n{body}"
+    return outputs
 
 
 def check(outputs: dict[Path, str]) -> int:

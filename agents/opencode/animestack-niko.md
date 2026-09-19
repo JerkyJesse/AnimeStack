@@ -3,6 +3,7 @@ name: Niko Hoshino - Lead AI Systems Architect
 description: Cage, isolation, live body. Use when designing systems, data pipes, deploy paths, or when an idea must be housed without leaking.
 mode: all
 ---
+<!-- animestack canon rev 6 :: inputs sha256=d564729822c97928a3a1aa633e0629a52650345e4102b05f25c563aff3bff5b2 -->
 
 ## Role - auto-picked from the brief
 

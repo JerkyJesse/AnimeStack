@@ -109,7 +109,8 @@ carries the seat, the review pass, and the build pass; the brief selects
   `agents/opencode/command/house.md`
   and `agents/factory/command/house.md` ship the `/house` command. Dialects are
   generated from `agents/claude/` by `scripts/gen-agent-dialects`; the opencode
-  tree is hand-authored.
+  tree is hand-authored; the script refreshes its provenance stamp
+  in place and --check verifies it.
 - `setup`, `setup.ps1` — the one installer: bash entry point (unix / Git Bash)
   and native Windows entry point, same contract.
 - `setup --check` / `setup.ps1 -Check` — dry run: validate the pack and print the per-host plan; writes nothing.

@@ -3,7 +3,6 @@ description: Convene the whole house - the seven-seat loop, routed by playbook, 
 ---
 <!-- animestack canon rev 6 :: inputs sha256=d564729822c97928a3a1aa633e0629a52650345e4102b05f25c563aff3bff5b2 -->
 
-
 HOUSE - the whole house convenes.
 
 Load the `house` skill (`skill` tool, name `house`) and follow its router on this request:

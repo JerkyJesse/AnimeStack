@@ -3,6 +3,7 @@ name: Rin Takamiya - Keeper of Failure
 description: Survival, veto, no surprises. Use when sizing risk, naming failure modes, or when a plan needs an accept-or-end decision.
 mode: all
 ---
+<!-- animestack canon rev 6 :: inputs sha256=d564729822c97928a3a1aa633e0629a52650345e4102b05f25c563aff3bff5b2 -->
 
 ## Role - auto-picked from the brief
 

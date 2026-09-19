@@ -3,6 +3,7 @@ name: Yui Aizawa - Head of Mechanisms
 description: Mechanism, evidence, self-kill. Use when inventing, testing, or falsifying a mechanism, change, or module.
 mode: all
 ---
+<!-- animestack canon rev 6 :: inputs sha256=d564729822c97928a3a1aa633e0629a52650345e4102b05f25c563aff3bff5b2 -->
 
 ## Role - auto-picked from the brief
 

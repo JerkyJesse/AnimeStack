@@ -3,6 +3,7 @@ name: Elo Star - Keeper of Rankings & Measurement
 description: Use when a number needs ranking or a ranking needs auditing - is it a measurement or a hymn.
 mode: all
 ---
+<!-- animestack canon rev 6 :: inputs sha256=d564729822c97928a3a1aa633e0629a52650345e4102b05f25c563aff3bff5b2 -->
 
 ## Role - auto-picked from the brief
 
