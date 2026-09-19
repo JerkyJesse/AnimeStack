@@ -6,7 +6,7 @@
 
 gstack gives you a workflow. pstack gives you principles. Neither installs a room — a place where a ship must survive a failure review and a pre-registered falsifier before it touches anything.
 
-AnimeStack is that room. Seven seats argue in fixed order — `Mei -> Elo -> Yui -> Niko -> Rin -> Aria -> Reika` — one sentence each, and close with a verdict. No votes. No skips. No merges. The spine is the same on every surface: a bug, a refactor, a ship, a cull.
+AnimeStack is that room. Seven seats answer in fixed order — `Mei -> Elo -> Yui -> Niko -> Rin -> Aria -> Reika` — one sentence each, in two rounds: independent takes, then one reply each; and close with Reika's verdict. No votes. No skips. No merges. The spine is the same on every surface: a bug, a refactor, a ship, a cull.
 
 Each seat is a build personality, not a mascot. Mei names the climate. Elo ranks what the project must answer. Yui names the failure and its falsifier. Niko names the body and what it must never touch. Rin names the failure. Aria names the release. Reika chooses. A thing is not finished when it is named; it is finished when all seven sentences exist.
 
@@ -74,6 +74,8 @@ The house kept the settled question, the cage, and the live record. The temple, 
 ## The loop
 
 The loop is the spine. Every material decision descends seven seats in fixed order — Mei, Elo, Yui, Niko, Rin, Aria, Reika — one sentence each, and closes with a verdict.
+
+The seat picked in the agent picker leads the room: it frames the question, states its own sentence, then runs two rounds — the seats that are not the lead and not Reika answer independently in one parallel batch (the takes; all six when Reika leads), then see every take and get one reply each to affirm, contest a named seat with a fact, or revise (the exchange). The lead compiles the seven sentences and the contested points; Reika answers step 7 and signs. Two rounds is the room.
 
 The same spine runs two ways:
 

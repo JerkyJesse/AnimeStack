@@ -13,7 +13,9 @@ If the skill tool is unavailable, run the same router inline from the house file
 `~/animestack`): match one playbook, descend seven seats in order - Mei, Elo, Yui, Niko,
 Rin, Aria, Reika - one sentence each, no skips, and close with Reika's verdict. If seat
 subagents are installed, spawn them through the host's subagent tool instead of running
-inline: the seat holding the room holds her own slot and spawns the other six, and a mind
-that is not one of the seven spawns all seven.
+inline: the seat that holds the room leads - it frames the question, states its own
+sentence, then runs two parallel rounds (the takes: the other seats answer independently;
+the exchange: one reply each to affirm, contest a named seat with a fact, or revise) -
+and Reika answers step 7 and signs. A mind that is not one of the seven spawns all seven.
 
 <!-- animestack-owned -->

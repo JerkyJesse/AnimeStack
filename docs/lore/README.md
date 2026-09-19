@@ -26,6 +26,10 @@ Seven seats, fixed order, one sentence each:
 | Aria | What ships, and what triggers it? |
 | Reika | What are we building, in one sentence? — then the verdict. |
 
+In the harness the selected seat leads: the seats answer independently, then get
+one reply each to affirm, contest a named seat with a fact, or revise, before
+Reika answers step 7 and signs.
+
 ## The law of the room
 
 1. Reika frames.

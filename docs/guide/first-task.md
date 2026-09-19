@@ -83,7 +83,10 @@ ship:   ARIA SHIP
 ```
 
 Seven sentences, one each, in order. No skips, no merges. Yui builds, Rin
-reviews and accepts, Aria releases. Then silence after Reika.
+reviews and accepts, Aria releases. Then silence after Reika. With seat agents
+installed the selected seat leads and the room runs in two rounds — independent
+takes (parallel), then one reply each to affirm, contest a named seat with a
+fact, or revise (the exchange); this transcript is the inline fallback.
 
 The falsifier was written before the victory lap, and it is in the pack too —
 pre-registered in [`../measurement.md`](../measurement.md) §5: run your own
@@ -94,9 +97,10 @@ coat. Retire it, and say so in your own record.
 ## What just happened
 
 The loop is the spine. Every material decision descends seven seats in fixed
-order — Mei, Elo, Yui, Niko, Rin, Aria, Reika — one sentence each. A thing is
-not finished when it is named; it is finished when all seven sentences exist.
-Missing one means the house is performing intelligence.
+order — Mei, Elo, Yui, Niko, Rin, Aria, Reika — one sentence each. The selected
+seat leads the room; Reika answers step 7 and signs. A thing is not finished
+when it is named; it is finished when all seven sentences exist. Missing one
+means the house is performing intelligence.
 
 The full spine, the two descents, solo authority, and the waiver are in
 [`../loop.md`](../loop.md). The ring is drawn in

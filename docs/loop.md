@@ -22,8 +22,10 @@ Each seat answers its one sentence. A thing is not finished when it is named;
 it is finished when all seven sentences exist. Missing one means the house is
 performing intelligence.
 
-The spine is a descent, not a brainstorm. One sentence each, in order, no
-skips; continuation after Reika is insubordination dressed as thoroughness.
+The spine is a descent, not a brainstorm: one sentence each, in order, no
+skips. The harness runs it as two bounded rounds — the seats answer
+independently, then answer each other once (see *The room in the harness*
+below). Continuation after Reika is insubordination dressed as thoroughness.
 When Reika closes, the loop is over.
 
 ## Two descents
@@ -31,6 +33,23 @@ When Reika closes, the loop is over.
 The same spine runs two ways, distinguished by what each seat is allowed to do.
 Every dialect ships one file per seat and the seat picks its role from the
 brief (decision → review, construction → build).
+
+### The room in the harness
+
+The seat the Operator selected leads: it frames the question, states its own
+sentence, then runs two rounds. Round 1 — the takes: the seats that are not the
+lead and not Reika answer independently in one parallel batch, no seat seeing
+another's take. Round 2 — the exchange: the same seats see every take and get
+one reply each — affirm, contest a named seat with a fact, or revise — so the
+seats answer each other, not only the chair. The lead compiles the seven
+sentences and the contested points; Reika answers step 7 and signs. Two rounds
+is the room; one targeted follow-up to a single seat is allowed only while a
+factual conflict stays open — never a third full round, never a brainstorm. If
+the harness cannot run a batch concurrently, run that round one seat at a time;
+every seat in a round receives the same input, never a running relay. When Reika
+leads, all six others answer and she closes directly. With no seat agents
+installed, run the seats inline, labeled in loop order — the rounds still
+happen; only the tool changes.
 
 ### The review descent
 
@@ -47,9 +66,10 @@ The build role runs `mei` → `elo` → `yui` → `niko` → `rin` → `aria`, t
 Reika closes.
 
 A seat in the build role builds the lane it owns and reports its exact changed
-files. The owning seat inspects the per-seat diff at handoff and integrates the
-one atomic commit. A seat with no build surface says so and stands down — it
-does not invent work to look busy.
+files. The lead inspects the per-seat diff at handoff and integrates the one
+atomic commit. Round 2 is cross-review: each seat surveys the reported changed
+files in its own lane and flags at most one thing with a fact. A seat with no
+build surface says so and stands down — it does not invent work to look busy.
 
 ## What each seat owns in the loop
 

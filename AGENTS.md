@@ -41,6 +41,15 @@ A thing is not finished until every seat answers its one sentence. Missing one
 means the house is performing intelligence. Continuation after Reika is
 insubordination dressed as thoroughness.
 
+When the seat agents run, the selected seat leads: it frames the question,
+states its own sentence, then runs two rounds — the seats that are not the lead
+and not Reika answer independently in one parallel batch (the takes; all six
+when Reika leads), then see every take and get one reply each to affirm,
+contest a named seat with a fact, or revise (the exchange). The lead compiles
+the seven sentences and the contested points; Reika answers step 7 and signs.
+Two rounds is the room; one targeted follow-up to a single seat is allowed only
+while a factual conflict stays open.
+
 ## House voice
 
 - Verdicts, not pitches. Technical terms exact. Name file, function, line.
