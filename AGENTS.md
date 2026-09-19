@@ -96,9 +96,11 @@ carries the seat, the review pass, and the build pass; the brief selects
 ## Repo map
 
 - `docs/lore/` — the house canon. Read on demand.
+- `docs/board.md` + `scripts/check-board` — the seat credential: seven fourteen-question exams; every key carries a source anchor resolved against the live tree (`python scripts/check-board`).
 - `docs/seats/`, `docs/loop.md`, `docs/measurement.md` — the seats, the spine, and the counts.
 - Seats read their digest (`docs/seats/<seat>.md`) and dossier (`docs/lore/dossiers/<seat>.md` + `_backstory.md`) on demand — the Canon trigger lines in the agent files say when; dossier text is never inlined (guard-the-context-window, steward Mei).
 - `principles/` — doctrine.
+- `scripts/` — the gates: `gen-agent-dialects --check`, `check-lore-consistency`, `check-board`, `check-contract`.
 - `skills/` — the nine skill dirs: `house`, `reika`, `mei`, `elo`, `yui`,
   `niko`, `rin`, `aria`, `simple`. Playbooks live under `skills/house/playbooks/`.
 - `agents/` — six dialects: `claude/`, `cursor/`, `factory/` (droids), `codex/`
@@ -110,3 +112,4 @@ carries the seat, the review pass, and the build pass; the brief selects
   tree is hand-authored.
 - `setup`, `setup.ps1` — the one installer: bash entry point (unix / Git Bash)
   and native Windows entry point, same contract.
+- `setup --check` / `setup.ps1 -Check` — dry run: validate the pack and print the per-host plan; writes nothing.

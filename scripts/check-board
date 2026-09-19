@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+"""check-board - the House Board's gate: structure, scoring, and anchors.
+
+The board is a credential that can be failed, so its own gate fails closed:
+a missing seat, a wrong question count, a fifth option, a malformed key, an
+unresolvable source anchor, or a phrase that is no longer in its cited file
+each surface as a failure.
+
+Usage:
+    python scripts/check-board                 run the gate
+    python scripts/check-board --count         print the counts
+    python scripts/check-board --seat reika --answers B,C,A,...   score a seat
+
+An anchor is written `[source: <path> :: <phrase>]`; the phrase is matched
+against the file after normalization (case and punctuation flattened), with
+word boundaries, so a phrase must survive in the live tree.
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+BOARD = ROOT / "docs" / "board.md"
+LETTERS = "ABCD"
+
+SEAT_RE = re.compile(r"^##\s+(Reika|Yui|Rin|Niko|Mei|Aria|Elo)\b.*$", re.M)
+QUESTION_RE = re.compile(r"^\*\*Q(\d+)\.\*\*\s*(?:\((law|loop|seat|voice|credentials|art|lore)\)\s*)?(.+?)\s*$", re.M)
+OPTION_RE = re.compile(r"^-\s*([A-D])\.\s+(.+?)\s*$", re.M)
+KEY_RE = re.compile(r"^\*\*Key:\*\*\s*([A-D])\s*[\u2014-]\s*(.+?)\s*\[source:\s*(.+?)\s*::\s*(.+?)\s*\]\s*$", re.M)
+
+SEATS = ("Mei", "Elo", "Yui", "Niko", "Rin", "Aria", "Reika")
+QUESTIONS_PER_SEAT = 14
+
+
+def normalize(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
+def phrase_in_file(path: Path, phrase: str) -> bool:
+    if not path.is_file():
+        return False
+    haystack = normalize(path.read_text(encoding="utf-8"))
+    needle = normalize(phrase)
+    if not needle:
+        return False
+    return re.search(r"(?<![a-z0-9])" + re.escape(needle) + r"(?![a-z0-9])", haystack) is not None
+
+
+def seat_sections(text: str) -> dict[str, str]:
+    matches = list(SEAT_RE.finditer(text))
+    sections: dict[str, str] = {}
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        name = match.group(1)
+        if name in sections:
+            raise ValueError("duplicate seat section: %s" % name)
+        sections[name] = text[match.end():end]
+    return sections
+
+
+def question_chunks(section: str) -> list[str]:
+    matches = list(QUESTION_RE.finditer(section))
+    chunks = []
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(section)
+        chunks.append(section[match.start():end])
+    return chunks
+
+
+def parse_seat(section: str, seat: str) -> tuple[list[dict], list[str]]:
+    failures: list[str] = []
+    questions = []
+    chunks = question_chunks(section)
+    if len(chunks) != QUESTIONS_PER_SEAT:
+        failures.append("%s: expected %d questions, found %d" % (seat, QUESTIONS_PER_SEAT, len(chunks)))
+    seen = []
+    for chunk in chunks:
+        qmatch = QUESTION_RE.search(chunk)
+        assert qmatch is not None
+        number = int(qmatch.group(1))
+        seen.append(number)
+        options = {}
+        for omatch in OPTION_RE.finditer(chunk):
+            letter = omatch.group(1)
+            if letter in options:
+                failures.append("%s Q%d: duplicate option %s" % (seat, number, letter))
+            options[letter] = omatch.group(2)
+        if sorted(options) != list(LETTERS):
+            failures.append("%s Q%d: options must be exactly A-D" % (seat, number))
+        kmatch = KEY_RE.search(chunk)
+        if kmatch is None:
+            failures.append("%s Q%d: missing key line" % (seat, number))
+            continue
+        key, rationale, source, phrase = kmatch.groups()
+        path = ROOT / source.strip()
+        if not phrase_in_file(path, phrase):
+            failures.append("%s Q%d: anchor not found: %s :: %s" % (seat, number, source.strip(), phrase.strip()))
+        questions.append({"number": number, "key": key, "rationale": rationale})
+    if seen != list(range(1, QUESTIONS_PER_SEAT + 1)):
+        failures.append("%s: question numbers must be 1..%d in order" % (seat, QUESTIONS_PER_SEAT))
+    return questions, failures
+
+
+def run_gate() -> int:
+    if not BOARD.is_file():
+        print("check-board: board missing: %s" % BOARD, file=sys.stderr)
+        return 2
+    text = BOARD.read_text(encoding="utf-8")
+    sections = seat_sections(text)
+    failures: list[str] = []
+    for seat in SEATS:
+        if seat not in sections:
+            failures.append("missing seat section: %s" % seat)
+    total_questions = 0
+    total_anchors = 0
+    for seat in SEATS:
+        if seat not in sections:
+            continue
+        questions, seat_failures = parse_seat(sections[seat], seat)
+        failures.extend(seat_failures)
+        total_questions += len(questions)
+        total_anchors += sum(1 for q in questions if q["key"])
+    if failures:
+        print("check-board: FAILED (%d issue(s))" % len(failures))
+        for failure in failures:
+            print("  - %s" % failure)
+        return 1
+    print(
+        "check-board: clean (%d seats, %d questions, %d anchors resolved)"
+        % (len(SEATS), total_questions, total_anchors)
+    )
+    return 0
+
+
+def score_seat(seat: str, answers: list[str]) -> int:
+    text = BOARD.read_text(encoding="utf-8")
+    sections = seat_sections(text)
+    if seat not in sections:
+        print("check-board: no such seat: %s" % seat, file=sys.stderr)
+        return 2
+    questions, failures = parse_seat(sections[seat], seat)
+    if failures:
+        print("check-board: board is invalid; refusing to score", file=sys.stderr)
+        for failure in failures:
+            print("  - %s" % failure, file=sys.stderr)
+        return 2
+    if len(answers) != QUESTIONS_PER_SEAT:
+        print("check-board: expected %d answers, got %d" % (QUESTIONS_PER_SEAT, len(answers)), file=sys.stderr)
+        return 2
+    correct = 0
+    for question, answer in zip(questions, answers):
+        if answer.strip().upper() == question["key"]:
+            correct += 1
+    verdict = "PASS" if correct == QUESTIONS_PER_SEAT else "FAIL"
+    print("%s: %d/%d - %s" % (seat, correct, QUESTIONS_PER_SEAT, verdict))
+    return 0 if correct == QUESTIONS_PER_SEAT else 1
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="The House Board's gate.")
+    parser.add_argument("--count", action="store_true", help="print the counts and exit")
+    parser.add_argument("--seat", help="score one seat, e.g. reika")
+    parser.add_argument("--answers", help="one letter per question, comma-separated")
+    args = parser.parse_args(argv)
+
+    if args.count:
+        if not BOARD.is_file():
+            print("check-board: board missing", file=sys.stderr)
+            return 2
+        text = BOARD.read_text(encoding="utf-8")
+        questions = len(QUESTION_RE.findall(text))
+        anchors = len(KEY_RE.findall(text))
+        print("board: 7 seats, %d questions, %d anchors; audit with python scripts/check-board" % (questions, anchors))
+        return 0
+
+    if args.seat:
+        if not args.answers:
+            print("check-board: --seat needs --answers", file=sys.stderr)
+            return 2
+        answers = [chunk.strip() for chunk in args.answers.split(",")]
+        return score_seat(args.seat.strip().lower().capitalize(), answers)
+
+    return run_gate()
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -21,6 +21,7 @@ param(
     [string]$TargetHost = 'claude',
 
     [switch]$Uninstall,
+    [switch]$Check,
     [switch]$Quiet,
     [switch]$Help
 )
@@ -50,7 +51,7 @@ function Write-Usage {
 AnimeStack setup.ps1 - install the seven-seat house skills, agents, and the
 /house commands into AI hosts (native Windows entry point beside ./setup)
 
-Usage: .\setup.ps1 [-TargetHost <name>] [-Uninstall] [-Quiet] [-Help]
+Usage: .\setup.ps1 [-TargetHost <name>] [-Uninstall] [-Check] [-Quiet] [-Help]
 
 Options:
   -TargetHost <name>  Target host: claude, cursor, codex, factory, opencode,
@@ -58,6 +59,7 @@ Options:
                       Default: claude. (-Host is an alias.)
   -Uninstall          Remove only provably-owned AnimeStack items for the
                       selected host(s). Everything else is left untouched.
+  -Check              Dry run: validate the pack and print what would be installed per host; writes nothing.
   -Quiet              Suppress progress output; print only the final summary.
   -Help               Show this help and exit.
 
@@ -473,8 +475,51 @@ if ($TargetHost -notin @('claude', 'cursor', 'codex', 'factory', 'opencode', 'ki
     exit 1
 }
 
-if (-not $Uninstall) {
+function Write-DryRun {
+    Log 'AnimeStack check: no files will be written.'
+    Log "Root: $Root"
+    Log ''
+    $hosts = Expand-Hosts $TargetHost
+    if ($hosts.Count -eq 0) {
+        Log 'No hosts matched (auto found no existing config dirs). Nothing would be done.'
+        Log ''
+        Log 'check: pack valid; nothing written.'
+        return
+    }
+    foreach ($h in $hosts) {
+        switch ($h) {
+            'slate' { Log 'host slate: delegates to claude' }
+            { $_ -in @('openclaw', 'hermes', 'gbrain') } {
+                Log "host ${h}: digest -> $(Get-HostDigestDir $h)"
+            }
+            default {
+                $asrc = Get-HostAgentsSrc $h
+                $adir = Get-HostAgentsDir $h
+                $acount = 0
+                if ($asrc -and (Test-Path -LiteralPath $asrc)) {
+                    $acount = @(Get-ChildItem -LiteralPath $asrc -File).Count
+                }
+                $csrc = Get-HostCommandsSrc $h
+                $cdir = Get-HostCommandsDir $h
+                $ccount = 0
+                if ($csrc -and (Test-Path -LiteralPath $csrc)) {
+                    $ccount = @(Get-ChildItem -LiteralPath $csrc -File -Filter '*.md').Count
+                }
+                Log "host ${h}: skills $($Skills.Count) -> $(Get-HostSkillsDir $h); agents $acount -> $adir; commands $ccount -> $cdir"
+            }
+        }
+    }
+    Log ''
+    Log 'check: pack valid; nothing written.'
+}
+
+if ((-not $Uninstall) -or $Check) {
     Assert-NoModelPins
+}
+
+if ($Check) {
+    Write-DryRun
+    exit 0
 }
 
 Log "AnimeStack: root $Root"

@@ -78,4 +78,5 @@ Close with exactly one line: `BUILT: <artifact or change>` or `NO BUILD SURFACE:
 **Canon.** Read on demand: digest `docs/seats/elo.md`, dossier `docs/lore/dossiers/elo.md`, backstory `docs/lore/dossiers/elo_backstory.md` (repo root: `$ANIMESTACK_HOME`, else `~/animestack`). Dossiers are never inlined.
 """
 
+# animestack canon rev 6 :: inputs sha256=d564729822c97928a3a1aa633e0629a52650345e4102b05f25c563aff3bff5b2
 # animestack-owned

@@ -25,6 +25,7 @@ esac
 
 QUIET=0
 UNINSTALL=0
+CHECK=0
 HOST="claude"
 
 SKILLS="house reika mei elo yui niko rin aria simple"
@@ -57,6 +58,8 @@ Options:
                     Default: claude.
   --uninstall       Remove only provably-owned AnimeStack items for the
                     selected host(s). Everything else is left untouched.
+  --check           Dry run: validate the pack and print what would be
+                    installed per host; writes nothing.
   -q, --quiet       Suppress progress output; print only the final summary.
   -h, --help        Show this help and exit.
 
@@ -90,6 +93,7 @@ while [ $# -gt 0 ]; do
       ;;
     --host=*) HOST="${1#--host=}"; shift ;;
     --uninstall) UNINSTALL=1; shift ;;
+    --check) CHECK=1; shift ;;
     -q|--quiet) QUIET=1; shift ;;
     *)
       echo "Error: unknown flag: $1" >&2
@@ -566,8 +570,57 @@ _assert_no_model_pins() {
 }
 
 # ─── Run ───────────────────────────────────────────────────────
-if [ "$UNINSTALL" -eq 0 ]; then
+_dry_run() {
+  local hosts h n count
+  hosts="$(expand_hosts)"
+  log "AnimeStack check: no files will be written."
+  log "Root: $ROOT"
+  log ""
+  if [ -z "$hosts" ]; then
+    log "No hosts matched (auto found no existing config dirs). Nothing would be done."
+    log ""
+    log "check: pack valid; nothing written."
+    return 0
+  fi
+  for h in $hosts; do
+    case "$h" in
+      slate)
+        log "host slate: delegates to claude"
+        ;;
+      openclaw|hermes|gbrain)
+        log "host $h: digest -> $(_host_digest_dir "$h")"
+        ;;
+      *)
+        local asrc adir csrc cdir acount ccount
+        count=0
+        for n in $SKILLS; do count=$((count + 1)); done
+        asrc="$(_host_agents_src "$h")"
+        adir="$(_host_agents_dir "$h")"
+        acount=0
+        if [ -n "$asrc" ] && [ -d "$asrc" ]; then
+          for n in "$asrc"/*; do [ -f "$n" ] && acount=$((acount + 1)); done
+        fi
+        csrc="$(_host_commands_src "$h")"
+        cdir="$(_host_commands_dir "$h")"
+        ccount=0
+        if [ -n "$csrc" ] && [ -d "$csrc" ]; then
+          for n in "$csrc"/*.md; do [ -e "$n" ] && ccount=$((ccount + 1)); done
+        fi
+        log "host $h: skills $count -> $(_host_skills_dir "$h"); agents $acount -> $adir; commands $ccount -> $cdir"
+        ;;
+    esac
+  done
+  log ""
+  log "check: pack valid; nothing written."
+}
+
+if [ "$UNINSTALL" -eq 0 ] || [ "$CHECK" -eq 1 ]; then
   _assert_no_model_pins
+fi
+
+if [ "$CHECK" -eq 1 ]; then
+  _dry_run
+  exit 0
 fi
 
 log "AnimeStack: root $ROOT"

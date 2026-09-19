@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+"""check-contract - the pack's shipped-agent contract, checked in CI.
+
+The installer refuses a pack that violates its rules; this gate makes the same
+rules visible and local. It checks all six dialect trees - six seats x seven
+files, plus the two house commands - for the role trio, the seat signature,
+the close grammar, the ownership marker, and the model rule.
+
+Usage: python scripts/check-contract
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+AGENTS = ROOT / "agents"
+
+DIALECTS = {
+    "claude": "md",
+    "cursor": "md",
+    "factory": "md",
+    "kiro": "md",
+    "opencode": "md",
+    "codex": "toml",
+}
+
+SEATS = {
+    "mei": "What change in the world makes this obsolete?",
+    "elo": "What does the crowd refuse to measure correctly?",
+    "yui": "What failure does this prevent, and what would falsify it?",
+    "niko": "Where does it live, and what must it never touch?",
+    "rin": "How does this fail, and how fast?",
+    "aria": "What ships, and what triggers it?",
+    "reika": "What are we building, in one sentence?",
+}
+
+CLOSES = {
+    "mei": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "elo": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "yui": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "niko": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "rin": ("VERDICT: ACCEPT", "VERDICT: END"),
+    "aria": ("VERDICT: SHIP", "VERDICT: STAND DOWN"),
+    "reika": ("close with the verdict in your own voice",),
+}
+
+ROLE_MARKERS = ("## Role and autonomy", "## Role - auto-picked from the brief")
+
+MD_SECTIONS = (
+    "## Seat protocol",
+    "## Room protocol",
+    "## Review protocol",
+    "## Build protocol",
+)
+
+MODEL_INHERIT = {"claude", "factory"}
+
+
+def read(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def check_agent(dialect: str, ext: str, seat: str, failures: list[str]) -> None:
+    path = AGENTS / dialect / ("animestack-%s.%s" % (seat, ext))
+    if not path.is_file():
+        failures.append("missing agent: %s" % path.relative_to(ROOT))
+        return
+    text = read(path)
+    if not any(marker in text for marker in ROLE_MARKERS):
+        failures.append("%s: missing the role section" % path.relative_to(ROOT))
+    for section in MD_SECTIONS:
+        if section not in text:
+            failures.append("%s: missing %r" % (path.relative_to(ROOT), section))
+    sentence = SEATS[seat]
+    if sentence not in text:
+        failures.append("%s: missing the one sentence: %r" % (path.relative_to(ROOT), sentence))
+    for close in CLOSES[seat]:
+        if close not in text:
+            failures.append("%s: missing close token %r" % (path.relative_to(ROOT), close))
+    marker = "<!-- animestack-owned -->" if ext == "md" else "# animestack-owned"
+    lines = [line for line in text.splitlines() if line.strip()]
+    if not lines or lines[-1].strip() != marker:
+        failures.append("%s: last line is not the ownership marker" % path.relative_to(ROOT))
+    if ext == "md":
+        if "permission:" in text or ": deny" in text:
+            failures.append("%s: carries a permission block or deny row" % path.relative_to(ROOT))
+        model_lines = [line for line in text.splitlines() if re.match(r"^model\s*:", line)]
+        if dialect in MODEL_INHERIT:
+            if model_lines != ["model: inherit"]:
+                failures.append("%s: must carry exactly one 'model: inherit'" % path.relative_to(ROOT))
+        elif model_lines:
+            failures.append("%s: must omit the model key" % path.relative_to(ROOT))
+    else:
+        if re.search(r"(?m)^\s*model(_reasoning_effort)?\s*=", text):
+            failures.append("%s: must omit model keys" % path.relative_to(ROOT))
+        if "deny" in text:
+            failures.append("%s: carries a deny row" % path.relative_to(ROOT))
+
+
+def run_gate() -> int:
+    failures: list[str] = []
+    total = 0
+    for dialect, ext in DIALECTS.items():
+        directory = AGENTS / dialect
+        if not directory.is_dir():
+            failures.append("missing dialect: %s" % dialect)
+            continue
+        present = sorted(
+            path.name for path in directory.glob("animestack-*") if path.is_file()
+        )
+        expected = sorted("animestack-%s.%s" % (seat, ext) for seat in SEATS)
+        if present != expected:
+            failures.append("%s: roster mismatch: %s" % (dialect, ", ".join(present) or "empty"))
+        for seat in SEATS:
+            check_agent(dialect, ext, seat, failures)
+            total += 1
+    for command in (AGENTS / "opencode" / "command" / "house.md", AGENTS / "factory" / "command" / "house.md"):
+        if not command.is_file():
+            failures.append("missing command: %s" % command.relative_to(ROOT))
+        elif "house" not in read(command):
+            failures.append("%s: no house router text" % command.relative_to(ROOT))
+    if failures:
+        print("check-contract: FAILED (%d issue(s))" % len(failures))
+        for failure in failures:
+            print("  - %s" % failure)
+        return 1
+    print("check-contract: clean (%d agents across %d dialects, 2 commands)" % (total, len(DIALECTS)))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(run_gate())

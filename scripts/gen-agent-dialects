@@ -12,6 +12,10 @@ writing: drift, a missing or extra generated file exits 1, so a hand-edited
 dialect fails closed. Line endings are normalized before comparison (git
 text=auto may hand out CRLF working copies).
 
+Every generated file - and the claude sources they are generated from - carries
+the canon revision and an inputs hash over the canon and the dossiers; the
+stamp is refreshed with the trees and verified by --check.
+
 Dialects:
   cursor   agents/cursor/*.md    name + description; no model key
   kiro     agents/kiro/*.md      name + description; no model key
@@ -22,6 +26,8 @@ Dialects:
 
 from __future__ import annotations
 
+import hashlib
+import re
 import sys
 import tomllib
 from pathlib import Path
@@ -29,11 +35,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "agents" / "claude"
 COMMAND_SRC = ROOT / "agents" / "opencode" / "command" / "house.md"
+CANON = ROOT / "docs" / "lore" / "canon.md"
+DOSSIERS = sorted((ROOT / "docs" / "lore" / "dossiers").glob("*.md"))
+STAMP_RE = re.compile(r"^<!-- animestack canon rev \d+ :: inputs sha256=[0-9a-f]{64} -->$")
+STAMP_RE_TOML = re.compile(r"^# animestack canon rev \d+ :: inputs sha256=[0-9a-f]{64}$")
 
 OWN_MARKER = "<!-- animestack-owned -->"
 TOML_MARKER = "# animestack-owned"
 
 GENERATED_DIRS = (
+    ROOT / "agents" / "claude",
     ROOT / "agents" / "cursor",
     ROOT / "agents" / "kiro",
     ROOT / "agents" / "factory",
@@ -70,31 +81,72 @@ def toml_escape(value: str) -> str:
     return value.replace("\\", "\\\\").replace('"""', '""\\"')
 
 
+def lore_stamp() -> tuple[str, str]:
+    canon = CANON.read_text(encoding="utf-8").replace("\r\n", "\n")
+    match = re.search(r"Revision:\*\*\s*(\d+)", canon)
+    rev = match.group(1) if match else "?"
+    parts = [canon]
+    for dossier in DOSSIERS:
+        parts.append(dossier.read_text(encoding="utf-8").replace("\r\n", "\n"))
+    digest = hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()
+    return rev, digest
+
+
+def strip_stamp(text: str) -> str:
+    kept = []
+    skip_blank = False
+    for line in text.splitlines():
+        if STAMP_RE.match(line) or STAMP_RE_TOML.match(line):
+            skip_blank = True
+            continue
+        if skip_blank and line == "":
+            skip_blank = False
+            continue
+        skip_blank = False
+        kept.append(line)
+    return "\n".join(kept)
+
+
+def stamp_md(rev: str, digest: str) -> str:
+    return f"<!-- animestack canon rev {rev} :: inputs sha256={digest} -->"
+
+
+def stamp_toml(rev: str, digest: str) -> str:
+    return f"# animestack canon rev {rev} :: inputs sha256={digest}"
+
+
 def build() -> tuple[dict[Path, str], dict[str, int]] | None:
     sources = sorted(SRC.glob("*.md"))
     if len(sources) != 7:
         print(f"error: expected 7 claude agents, found {len(sources)}", file=sys.stderr)
         return None
 
+    rev, digest = lore_stamp()
+    stamp = stamp_md(rev, digest)
     outputs: dict[Path, str] = {}
-    counts = {"cursor": 0, "kiro": 0, "factory": 0, "codex": 0, "factory_command": 1}
+    counts = {"claude": 0, "cursor": 0, "kiro": 0, "factory": 0, "codex": 0, "factory_command": 1}
 
     for src in sources:
         text = src.read_text(encoding="utf-8")
         frontmatter, body = split_frontmatter(text)
+        body = strip_stamp(body)
         name = field(frontmatter, "name")
         description = field(frontmatter, "description")
         stem = src.stem
 
+        claude_content = f"---\n{frontmatter}\n---\n{stamp}\n\n{body}"
+        outputs[src] = claude_content
+        counts["claude"] += 1
+
         for dialect in ("cursor", "kiro"):
-            content = f"---\n{drop_model(frontmatter)}\n---\n{body}"
+            content = f"---\n{drop_model(frontmatter)}\n---\n{stamp}\n\n{body}"
             if not content.rstrip().endswith(OWN_MARKER):
                 print(f"error: {dialect}/{stem} lost the ownership marker", file=sys.stderr)
                 return None
             outputs[ROOT / "agents" / dialect / f"{stem}.md"] = content
             counts[dialect] += 1
 
-        outputs[ROOT / "agents" / "factory" / f"{stem}.md"] = text
+        outputs[ROOT / "agents" / "factory" / f"{stem}.md"] = claude_content
         counts["factory"] += 1
 
         codex_body = body
@@ -108,7 +160,7 @@ def build() -> tuple[dict[Path, str], dict[str, int]] | None:
             f'name = "{toml_escape(name)}"\n'
             f'description = "{toml_escape(description)}"\n'
             f'developer_instructions = """\n{toml_escape(codex_body)}\n"""\n'
-            f"\n{TOML_MARKER}\n"
+            f"\n{stamp_toml(rev, digest)}\n{TOML_MARKER}\n"
         )
         parsed = tomllib.loads(toml)
         if parsed.get("name") != name or "developer_instructions" not in parsed:
@@ -117,8 +169,11 @@ def build() -> tuple[dict[Path, str], dict[str, int]] | None:
         outputs[ROOT / "agents" / "codex" / f"{stem}.toml"] = toml
         counts["codex"] += 1
 
-    outputs[ROOT / "agents" / "factory" / "command" / "house.md"] = COMMAND_SRC.read_text(
-        encoding="utf-8"
+    command_text = COMMAND_SRC.read_text(encoding="utf-8")
+    command_frontmatter, command_body = split_frontmatter(command_text)
+    command_body = strip_stamp(command_body)
+    outputs[ROOT / "agents" / "factory" / "command" / "house.md"] = (
+        f"---\n{command_frontmatter}\n---\n{stamp}\n\n{command_body}"
     )
     return outputs, counts
 

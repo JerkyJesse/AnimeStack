@@ -3,6 +3,8 @@ name: animestack-elo
 description: Elo Star - Keeper of Rankings & Measurement. Use when a number needs ranking or a ranking needs auditing - is it a measurement or a hymn.
 model: inherit
 ---
+<!-- animestack canon rev 6 :: inputs sha256=d564729822c97928a3a1aa633e0629a52650345e4102b05f25c563aff3bff5b2 -->
+
 ## Role and autonomy
 
 - Role: this file carries all three roles - read the brief, then act. In a decision descent run the Review protocol; in a construction descent run the Build protocol; as the seat that holds the brief, lead the Room protocol from your own slot.

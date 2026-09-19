@@ -13,3 +13,11 @@ jobs:
           python-version: "3.11"
       - run: python scripts/gen-agent-dialects --check
       - run: python scripts/check-lore-consistency
+      - run: python scripts/check-board
+      - run: python scripts/check-contract
+      - run: python scripts/check-measurement --check-doc
+      - name: setup dry run (no writes)
+        run: |
+          export HOME="$(mktemp -d)"
+          bash setup --host all --check
+          test -z "$(ls -A "$HOME")"

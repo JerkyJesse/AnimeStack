@@ -10,8 +10,8 @@ the table, the table is wrong.
 
 ## 1. The sample
 
-What is ranked: this repository, release `v1.10.0` (`VERSION`), 2026-09-18. The canon
-text inside it is this pack's own, first written for v1.3.0; the language reform arrived in v1.4.0, the credentials in v1.5.0, the six-dialect agent coverage in v1.6.0, the art and graphics credentials in v1.7.0, the one-file opencode room in v1.8.0, the one-file-everywhere autonomy collapse in v1.9.0, and the collaborative room in v1.10.0.
+What is ranked: this repository, release `v1.11.0` (`VERSION`), 2026-09-18. The canon
+text inside it is this pack's own, first written for v1.3.0; the language reform arrived in v1.4.0, the credentials in v1.5.0, the six-dialect agent coverage in v1.6.0, the art and graphics credentials in v1.7.0, the one-file opencode room in v1.8.0, the one-file-everywhere autonomy collapse in v1.9.0, the collaborative room in v1.10.0, and the House Board and the contract gate in v1.11.0.
 
 The claims in this pack are claims about this tree, not promises about the outcomes a
 user will get. A pack that installs cleanly on your host is a body question, not a result
@@ -49,6 +49,7 @@ prose.
 | 1 | canon file | `ls docs/lore/*.md \| grep -v README \| wc -l` (canon) |
 | 15 | lore dossiers | `ls docs/lore/dossiers \| wc -l` |
 | 16 | lore total | the canon + 15 dossiers, the two rows above summed |
+| 98 | board questions | `python scripts/check-board --count` |
 | 16 | site art images | `ls assets/img/*.jpg \| wc -l` |
 | 7 | art dossier cards | `ls art/dossiers \| wc -l` |
 | 7 | art character sheets | `ls art/sheets \| wc -l` |

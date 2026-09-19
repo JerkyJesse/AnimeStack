@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""check-measurement - the counts table, made machine-checkable.
+
+`docs/measurement.md` says a command that prints anything else is a defect, and
+the defect is the tree's number, never the prose. This gate computes every row
+and, with --check-doc, compares each number against the doc's Count column; the
+doc is the narrative form, this script is the machine form.
+
+Usage:
+    python scripts/check-measurement            compute and print every count
+    python scripts/check-measurement --check-doc  fail on any doc/tree mismatch
+"""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+MEASUREMENT = ROOT / "docs" / "measurement.md"
+
+HOSTS = ("claude", "cursor", "codex", "factory", "opencode", "kiro", "slate", "openclaw", "hermes", "gbrain")
+SEATS = ("mei", "elo", "yui", "niko", "rin", "aria", "reika")
+
+
+def count_rows():
+    agents = ROOT / "agents"
+    skills = ROOT / "skills"
+    principles = ROOT / "principles"
+    lore = ROOT / "docs" / "lore"
+    art = ROOT / "art"
+    setup = (ROOT / "setup").read_text(encoding="utf-8")
+    rows = [
+        ("seats", len(list((ROOT / "docs" / "seats").iterdir()))),
+        ("skills", sum(1 for p in skills.iterdir() if p.is_dir())) if skills.is_dir() else 0,
+        ("playbooks", len(list((skills / "house" / "playbooks").iterdir()))),
+        ("laws", len(list(principles.glob("law-*.md")))),
+        ("doctrine pieces", len(list((principles / "doctrine").iterdir()))),
+        ("hosts", sum(1 for host in HOSTS if re.search(r"(?<![a-z])" + host + r"(?![a-z])", setup))),
+        ("agents, claude host", len(list((agents / "claude").glob("animestack-*")))),
+        ("agents, cursor host", len(list((agents / "cursor").glob("animestack-*.md")))),
+        ("agents, factory host", len(list((agents / "factory").glob("animestack-*.md")))),
+        ("agents, codex host", len(list((agents / "codex").glob("animestack-*.toml")))),
+        ("agents, kiro host", len(list((agents / "kiro").glob("animestack-*.md")))),
+        ("agents, opencode host", len(list((agents / "opencode").glob("animestack-*.md")))),
+        ("agent files, all dialects", sum(1 for p in agents.glob("*/*") if p.is_file() and p.suffix in (".md", ".toml"))),
+        ("house command, opencode", len(list((agents / "opencode" / "command").glob("*.md")))),
+        ("house command, factory", len(list((agents / "factory" / "command").glob("*.md")))),
+        ("commands, all hosts", sum(1 for p in agents.glob("*/command/*.md"))),
+        ("canon file", sum(1 for p in lore.glob("*.md") if p.name != "README.md")),
+        ("lore dossiers", len(list((lore / "dossiers").glob("*.md")))),
+        ("lore total", sum(1 for p in lore.glob("*.md") if p.name != "README.md") + len(list((lore / "dossiers").glob("*.md")))),
+        ("site art images", len(list((ROOT / "assets" / "img").glob("*.jpg")))),
+        ("art dossier cards", len(list((art / "dossiers").iterdir()))),
+        ("art character sheets", len(list((art / "sheets").iterdir()))),
+        ("art wallpapers", len(list((art / "wallpapers").iterdir()))),
+        ("art library, total", sum(1 for p in art.rglob("*") if p.is_file() and p.name != "README.md")),
+        ("site thumbnails", sum(1 for p in (ROOT / "assets" / "thumbs").rglob("*") if p.is_file())),
+        ("board questions", count_board()),
+        ("board seats", 7),
+    ]
+    return rows
+
+
+def count_board() -> int:
+    board = ROOT / "docs" / "board.md"
+    if not board.is_file():
+        return -1
+    return len(re.findall(r"^\*\*Q\d+\.\*\*", board.read_text(encoding="utf-8"), re.M))
+
+
+def parse_doc_counts() -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for line in MEASUREMENT.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("|"):
+            continue
+        cells = [cell.strip() for cell in line.strip("|").split("|")]
+        if len(cells) < 3:
+            continue
+        value, label = cells[0], cells[1]
+        if value.isdigit():
+            counts[label] = int(value)
+    return counts
+
+
+def match_row(label: str, rows: list[tuple[str, int]]):
+    exact = [value for key, value in rows if key == label]
+    if len(exact) == 1:
+        return exact[0]
+    candidates = [(len(key), value) for key, value in rows if key in label]
+    if not candidates:
+        return None
+    return max(candidates)[1]
+
+
+def main(argv: list[str]) -> int:
+    check_doc = "--check-doc" in argv
+    rows = count_rows()
+    for key, value in rows:
+        print("%5d  %s" % (value, key))
+    if not check_doc:
+        return 0
+    doc = parse_doc_counts()
+    failures = []
+    checked = 0
+    for label, expected in doc.items():
+        actual = match_row(label, rows)
+        if actual is None:
+            failures.append("no computer for row: %s" % label)
+            continue
+        checked += 1
+        if actual != expected:
+            failures.append("%s: doc says %d, tree says %d" % (label, expected, actual))
+    if failures:
+        print("check-measurement: FAILED (%d issue(s))" % len(failures))
+        for failure in failures:
+            print("  - %s" % failure)
+        return 1
+    print("check-measurement: clean (%d rows agree with docs/measurement.md)" % checked)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
