@@ -42,13 +42,19 @@ means the house is performing intelligence. Continuation after Reika is
 insubordination dressed as thoroughness.
 
 When the seat agents run, the selected seat leads: it frames the question,
-states its own sentence, then runs two rounds — the seats that are not the lead
-and not Reika answer independently in one parallel batch (the takes; all six
-when Reika leads), then see every take and get one reply each to affirm,
-contest a named seat with a fact, or revise (the exchange). The lead compiles
-the seven sentences and the contested points; Reika answers step 7 and signs.
-Two rounds is the room; one targeted follow-up to a single seat is allowed only
-while a factual conflict stays open.
+states its own sentence, then runs the rounds. A decision runs two parallel
+rounds — the seats that are not the lead and not Reika answer independently in
+one parallel batch (the takes; all six when Reika leads), then see every take
+and get one reply each to affirm, contest a named seat with a fact, or revise
+(the exchange). A build descent builds together — the lead holds its slot and
+builds its lane; the other seats descend one at a time in loop order, each
+build brief carrying every prior seat's sentence and reported changed files
+(prior lanes are read, never edited) — then the same exchange, where a seat may
+revise its own lane on a fact and a cross-lane need lands only as the one
+permitted targeted follow-up. The lead compiles the seven sentences and the
+contested points; Reika answers step 7 and signs. Two rounds is the room; one
+targeted follow-up to a single seat is allowed only while a factual conflict
+stays open.
 
 ## House voice
 

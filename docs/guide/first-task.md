@@ -84,9 +84,11 @@ ship:   ARIA SHIP
 
 Seven sentences, one each, in order. No skips, no merges. Yui builds, Rin
 reviews and accepts, Aria releases. Then silence after Reika. With seat agents
-installed the selected seat leads and the room runs in two rounds — independent
-takes (parallel), then one reply each to affirm, contest a named seat with a
-fact, or revise (the exchange); this transcript is the inline fallback.
+installed the selected seat leads and the room runs its rounds — a review:
+independent takes (parallel), then one reply each to affirm, contest a named
+seat with a fact, or revise (the exchange); a build descent: one seat at a
+time in loop order, each brief carrying every prior seat's changed files,
+then the same exchange; this transcript is the inline fallback.
 
 The falsifier was written before the victory lap, and it is in the pack too —
 pre-registered in [`../measurement.md`](../measurement.md) §5: run your own

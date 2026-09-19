@@ -37,19 +37,25 @@ brief (decision → review, construction → build).
 ### The room in the harness
 
 The seat the Operator selected leads: it frames the question, states its own
-sentence, then runs two rounds. Round 1 — the takes: the seats that are not the
-lead and not Reika answer independently in one parallel batch, no seat seeing
-another's take. Round 2 — the exchange: the same seats see every take and get
-one reply each — affirm, contest a named seat with a fact, or revise — so the
-seats answer each other, not only the chair. The lead compiles the seven
-sentences and the contested points; Reika answers step 7 and signs. Two rounds
-is the room; one targeted follow-up to a single seat is allowed only while a
-factual conflict stays open — never a third full round, never a brainstorm. If
-the harness cannot run a batch concurrently, run that round one seat at a time;
-every seat in a round receives the same input, never a running relay. When Reika
-leads, all six others answer and she closes directly. With no seat agents
-installed, run the seats inline, labeled in loop order — the rounds still
-happen; only the tool changes.
+sentence, then runs the rounds. A decision runs two parallel rounds. Round 1 —
+the takes: the seats that are not the lead and not Reika answer independently in
+one parallel batch, no seat seeing another's take. Round 2 — the exchange: the
+same seats see every take and get one reply each — affirm, contest a named seat
+with a fact, or revise — so the seats answer each other, not only the chair. The
+lead compiles the seven sentences and the contested points; Reika answers step 7
+and signs. Two rounds is the room; one targeted follow-up to a single seat is
+allowed only while a factual conflict stays open — never a third full round,
+never a brainstorm. A build descent builds together: the lead holds its slot and
+builds its lane; the other seats descend one at a time in loop order, each build
+brief carrying the brief, the lead's frame, and every prior seat's sentence and
+reported changed files (prior lanes are read, never edited); then the same
+exchange runs, where a build seat may revise its own lane on a fact, re-running
+its focused checks and reporting the updated files, and a cross-lane need lands
+only as the one permitted targeted follow-up. If the harness cannot run a review
+batch concurrently, run that round one seat at a time; every seat in a round
+receives the same input. When Reika leads, all six others answer and she closes
+directly. With no seat agents installed, run the seats inline, labeled in loop
+order — the rounds still happen; only the tool changes.
 
 ### The review descent
 
@@ -62,14 +68,20 @@ verdict. The result is a recorded decision, not a diff.
 
 ### The build descent
 
-The build role runs `mei` → `elo` → `yui` → `niko` → `rin` → `aria`, then
-Reika closes.
+The build role runs `mei` → `elo` → `yui` → `niko` → `rin` → `aria`, one seat
+at a time in loop order, then Reika closes.
 
 A seat in the build role builds the lane it owns and reports its exact changed
-files. The lead inspects the per-seat diff at handoff and integrates the one
-atomic commit. Round 2 is cross-review: each seat surveys the reported changed
-files in its own lane and flags at most one thing with a fact. A seat with no
-build surface says so and stands down — it does not invent work to look busy.
+files; its brief carries the brief, the lead's frame, and every prior seat's
+sentence and reported changed files, so each seat builds with the prior handoff
+in view — prior lanes are read, never edited, and a cross-lane need is reported
+to the owning seat. The lead holds its slot and builds its own lane, inspects
+the per-seat diffs at handoff, and integrates the one atomic commit. Round 2 is
+the working exchange: every seat sees the full table and every changed file, and
+a seat may revise its own lane on a fact — re-running its focused checks and
+reporting the updated files — while a cross-lane need lands only as the one
+permitted targeted follow-up. A seat with no build surface says so and stands
+down — it does not invent work to look busy.
 
 ## What each seat owns in the loop
 

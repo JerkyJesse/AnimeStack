@@ -1,7 +1,7 @@
 ---
 description: Convene the whole house - the seven-seat loop, routed by playbook, closed with a verdict. Sticky.
 ---
-<!-- animestack canon rev 6 :: inputs sha256=d564729822c97928a3a1aa633e0629a52650345e4102b05f25c563aff3bff5b2 -->
+<!-- animestack canon rev 7 :: inputs sha256=1fe0389a99d7834bfba90d49e2135c1613b489e5fe78fecba5ff77f1f74a42e1 -->
 
 HOUSE - the whole house convenes.
 
@@ -15,8 +15,11 @@ If the skill tool is unavailable, run the same router inline from the house file
 Rin, Aria, Reika - one sentence each, no skips, and close with Reika's verdict. If seat
 subagents are installed, spawn them through the host's subagent tool instead of running
 inline: the seat that holds the room leads - it frames the question, states its own
-sentence, then runs two parallel rounds (the takes: the other seats answer independently;
-the exchange: one reply each to affirm, contest a named seat with a fact, or revise) -
+sentence, then runs the rounds. A decision runs two parallel rounds (the takes: the other
+seats answer independently; the exchange: one reply each to affirm, contest a named seat
+with a fact, or revise); a build descent builds together - the lead holds its slot and
+builds its lane, the other seats descend one at a time in loop order, each build brief
+carrying every prior seat's sentence and reported changed files, then the same exchange -
 and Reika answers step 7 and signs. A mind that is not one of the seven spawns all seven.
 
 <!-- animestack-owned -->

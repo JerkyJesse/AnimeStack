@@ -6,7 +6,7 @@
 
 gstack gives you a workflow. pstack gives you principles. Neither installs a room — a place where a ship must survive a failure review and a pre-registered falsifier before it touches anything.
 
-AnimeStack is that room. Seven seats answer in fixed order — `Mei -> Elo -> Yui -> Niko -> Rin -> Aria -> Reika` — one sentence each, in two rounds: independent takes, then one reply each; and close with Reika's verdict. No votes. No skips. No merges. The spine is the same on every surface: a bug, a refactor, a ship, a cull.
+AnimeStack is that room. Seven seats answer in fixed order — `Mei -> Elo -> Yui -> Niko -> Rin -> Aria -> Reika` — one sentence each, in the room's rounds: a review runs independent takes, then one reply each; a build descent builds together, one seat at a time in loop order with every prior seat's changed files in the brief; and close with Reika's verdict. No votes. No skips. No merges. The spine is the same on every surface: a bug, a refactor, a ship, a cull.
 
 Each seat is a build personality, not a mascot. Mei names the climate. Elo ranks what the project must answer. Yui names the failure and its falsifier. Niko names the body and what it must never touch. Rin names the failure. Aria names the release. Reika chooses. A thing is not finished when it is named; it is finished when all seven sentences exist.
 
@@ -75,12 +75,12 @@ The house kept the settled question, the cage, and the live record. The temple, 
 
 The loop is the spine. Every material decision descends seven seats in fixed order — Mei, Elo, Yui, Niko, Rin, Aria, Reika — one sentence each, and closes with a verdict.
 
-The seat picked in the agent picker leads the room: it frames the question, states its own sentence, then runs two rounds — the seats that are not the lead and not Reika answer independently in one parallel batch (the takes; all six when Reika leads), then see every take and get one reply each to affirm, contest a named seat with a fact, or revise (the exchange). The lead compiles the seven sentences and the contested points; Reika answers step 7 and signs. Two rounds is the room.
+The seat picked in the agent picker leads the room: it frames the question, states its own sentence, then runs the rounds. A decision runs two parallel rounds — the seats that are not the lead and not Reika answer independently in one parallel batch (the takes; all six when Reika leads), then see every take and get one reply each to affirm, contest a named seat with a fact, or revise (the exchange). A build descent builds together — the lead holds its slot and builds its lane; the other seats descend one at a time in loop order, each build brief carrying every prior seat's sentence and reported changed files (prior lanes are read, never edited) — then the same exchange, where a seat may revise its own lane on a fact and a cross-lane need lands only as the one permitted targeted follow-up. The lead compiles the seven sentences and the contested points; Reika answers step 7 and signs. Two rounds is the room.
 
 The same spine runs two ways:
 
 - **Review descent** — each seat answers its one sentence. Rin ends `ACCEPT` or `END`; Aria ends `SHIP` or `STAND DOWN`; Reika closes with a verdict. The result is a recorded decision, not a diff.
-- **Build descent** — each seat builds the lane it owns and reports its exact changed files.
+- **Build descent** — each seat builds the lane it owns and reports its exact changed files, one seat at a time in loop order with every prior lane's changed files in the brief; the exchange that follows may revise a seat's own lane on a fact.
 
 Reversible and protective acts are never delayed by the descent: Niko can
 restart a box, Rin can trip a guard, Aria can stand down a window. The act is
