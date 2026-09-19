@@ -16,6 +16,9 @@ jobs:
       - run: python scripts/check-board
       - run: python scripts/check-contract
       - run: python scripts/check-measurement --check-doc
+      - run: python scripts/check-voices
+      - run: python scripts/check-digest
+      - run: python -m unittest discover -s tests -v
       - name: setup dry run (no writes)
         run: |
           export HOME="$(mktemp -d)"

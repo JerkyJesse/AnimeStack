@@ -100,7 +100,9 @@ carries the seat, the review pass, and the build pass; the brief selects
 - `docs/seats/`, `docs/loop.md`, `docs/measurement.md` — the seats, the spine, and the counts.
 - Seats read their digest (`docs/seats/<seat>.md`) and dossier (`docs/lore/dossiers/<seat>.md` + `_backstory.md`) on demand — the Canon trigger lines in the agent files say when; dossier text is never inlined (guard-the-context-window, steward Mei).
 - `principles/` — doctrine.
-- `scripts/` — the gates: `gen-agent-dialects --check`, `check-lore-consistency`, `check-board`, `check-contract`.
+- `scripts/` — the gates: `gen-agent-dialects --check`, `check-lore-consistency`,
+  `check-board`, `check-contract`, `check-measurement --check-doc`,
+  `check-voices`, `check-digest`.
 - `skills/` — the nine skill dirs: `house`, `reika`, `mei`, `elo`, `yui`,
   `niko`, `rin`, `aria`, `simple`. Playbooks live under `skills/house/playbooks/`.
 - `agents/` — six dialects: `claude/`, `cursor/`, `factory/` (droids), `codex/`

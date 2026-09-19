@@ -1,0 +1,217 @@
+#!/usr/bin/env python3
+"""check-digest - the root digests must keep agreeing with the live tree.
+
+AGENTS.md and CLAUDE.md are hand-authored digests of this repo; nothing
+regenerates them, so their claims rot silently. This gate ties the checkable
+claims down:
+
+  - AGENTS.md's loop table: seven rows in loop order, the seat names, and each
+    seat's one sentence as recorded in voices/house.json;
+  - AGENTS.md's host-dialect count claim vs the agents/ trees;
+  - CLAUDE.md's canonical count phrases vs the tree (skill dirs, seats,
+    playbooks, commands, agent files per dialect, agent files total);
+  - docs/measurement.md's sample release line vs the VERSION file.
+
+The doc is the narrative form; this script is the machine form. A doc that
+disagrees with the tree is a defect - fix the doc or fix the tree.
+
+Usage: python3 scripts/check-digest [--root <dir>]
+Exit 0 = clean; 1 = failures printed; 2 = usage.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import sys
+from pathlib import Path
+
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+def _strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+ROOT = _resolve_root(sys.argv[1:])
+AGENTS_MD = ROOT / "AGENTS.md"
+CLAUDE_MD = ROOT / "CLAUDE.md"
+VOICES = ROOT / "voices" / "house.json"
+
+LOOP_ORDER = ("Mei", "Elo", "Yui", "Niko", "Rin", "Aria", "Reika")
+ROW_RE = re.compile(r"^\|\s*(\d)\s*\|\s*([A-Za-z]+)\s*\|\s*(.+?)\s*\|\s*$", re.M)
+WORDS = {
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+    "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11, "twelve": 12,
+}
+
+
+def normalize(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
+def read(path: Path) -> str:
+    return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+
+def as_int(token: str) -> int | None:
+    if token.isdigit():
+        return int(token)
+    return WORDS.get(token.lower())
+
+
+def tree_counts() -> dict[str, int]:
+    agents = ROOT / "agents"
+    skills = ROOT / "skills"
+    dialect_dirs = sorted(p for p in agents.iterdir() if p.is_dir()) if agents.is_dir() else []
+    per_dialect = [
+        len([p for p in dialect.glob("animestack-*") if p.is_file()])
+        for dialect in dialect_dirs
+    ]
+    return {
+        "dialects": len(dialect_dirs),
+        "skills": len([p for p in skills.iterdir() if p.is_dir()]) if skills.is_dir() else 0,
+        "seats": 7,
+        "playbooks": len(list((skills / "house" / "playbooks").iterdir()))
+        if (skills / "house" / "playbooks").is_dir()
+        else 0,
+        "commands": sum(1 for _ in agents.glob("*/command/*.md")) if agents.is_dir() else 0,
+        "agents_per_dialect": max(per_dialect) if per_dialect else 0,
+        "agents_total": sum(
+            1
+            for p in agents.glob("*/*")
+            if p.is_file() and p.suffix in (".md", ".toml")
+        )
+        if agents.is_dir()
+        else 0,
+    }
+
+
+def main() -> int:
+    if _strip_root(sys.argv[1:]):
+        print("usage: python3 scripts/check-digest [--root <dir>]", file=sys.stderr)
+        return 2
+
+    failures: list[str] = []
+    checks = 0
+    counts = tree_counts()
+
+    try:
+        config = json.loads(VOICES.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        config = {}
+    sentences = {
+        seat: normalize(str(register.get("sentence", "")))
+        for seat, register in config.get("registers", {}).items()
+        if isinstance(register, dict)
+    }
+
+    agents_md = read(AGENTS_MD)
+    claude_md = read(CLAUDE_MD)
+    if not agents_md:
+        failures.append("AGENTS.md missing")
+    if not claude_md:
+        failures.append("CLAUDE.md missing")
+
+    if agents_md:
+        rows = ROW_RE.findall(agents_md)
+        if len(rows) != 7:
+            failures.append("AGENTS.md loop table: expected 7 rows, found %d" % len(rows))
+        for number, seat, cell in rows:
+            checks += 1
+            if seat not in LOOP_ORDER:
+                failures.append("AGENTS.md loop table: unknown seat %r" % seat)
+                continue
+            if int(number) != LOOP_ORDER.index(seat) + 1:
+                failures.append("AGENTS.md loop table: %s sits at row %s" % (seat, number))
+            sentence = sentences.get(seat.lower(), "")
+            if sentence and sentence not in normalize(cell):
+                failures.append(
+                    "AGENTS.md loop table: %s row missing its one sentence" % seat
+                )
+
+        match = re.search(r"([A-Za-z0-9]+)\s+host dialects", agents_md)
+        checks += 1
+        if match is None:
+            failures.append("AGENTS.md: the host-dialect claim is missing")
+        else:
+            claim = as_int(match.group(1))
+            if claim != counts["dialects"]:
+                failures.append(
+                    "AGENTS.md: claims %s host dialects, tree has %d"
+                    % (match.group(1), counts["dialects"])
+                )
+
+    if claude_md:
+        counts_match = re.search(r"canonical counts \(([^)]*)\)", claude_md)
+        checks += 1
+        if counts_match is None:
+            failures.append("CLAUDE.md: the canonical counts parenthetical is missing")
+        else:
+            claim_map: dict[str, str] = {}
+            for segment in counts_match.group(1).split(","):
+                segment_match = re.match(r"([A-Za-z0-9]+)\s+(.+?)\s*$", segment.strip())
+                if segment_match:
+                    claim_map[segment_match.group(2)] = segment_match.group(1)
+            for label, key in (
+                ("skill dirs", "skills"),
+                ("seats", "seats"),
+                ("playbooks", "playbooks"),
+                ("commands", "commands"),
+                ("agent files per dialect", "agents_per_dialect"),
+                ("agent files total", "agents_total"),
+            ):
+                checks += 1
+                token = claim_map.get(label)
+                if token is None:
+                    failures.append("CLAUDE.md: the %s claim is missing" % label)
+                    continue
+                claim = as_int(token)
+                if claim != counts[key]:
+                    failures.append(
+                        "CLAUDE.md: claims %s %s, tree has %d"
+                        % (token, label, counts[key])
+                    )
+
+    version = read(ROOT / "VERSION").strip()
+    measurement = read(ROOT / "docs" / "measurement.md")
+    checks += 1
+    sample = re.search(r"release `v(\d+\.\d+\.\d+)` \(`VERSION`\)", measurement)
+    if not version:
+        failures.append("VERSION is missing or empty")
+    elif sample is None:
+        failures.append("docs/measurement.md: the release sample is missing")
+    elif sample.group(1) != version:
+        failures.append(
+            "docs/measurement.md: sample says v%s, VERSION says %s"
+            % (sample.group(1), version)
+        )
+
+    if failures:
+        print("check-digest: FAILED (%d issue(s), %d claims checked)" % (len(failures), checks))
+        for failure in failures:
+            print("  - %s" % failure)
+        return 1
+    print("check-digest: clean (%d claims checked)" % checks)
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())

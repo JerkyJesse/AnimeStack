@@ -5,12 +5,15 @@ Maintenance tool, not an installer. Edit agents/claude, run this script, commit
 the generated trees; setup installs the committed trees and audits their
 frontmatter. No network. Python 3.11+ for tomllib self-checks.
 
-Usage: python3 scripts/gen-agent-dialects [--check]
+Usage: python3 scripts/gen-agent-dialects [--check] [--root <dir>]
 
 --check regenerates in memory and compares against the committed trees without
 writing: drift, a missing or extra generated file exits 1, so a hand-edited
 dialect fails closed. Line endings are normalized before comparison (git
 text=auto may hand out CRLF working copies).
+
+--root <dir> points the script at another checkout (a test hook for fixture
+trees); the default is the repo the script lives in.
 
 Every generated file - and the claude sources they are generated from - carries
 the canon revision and an inputs hash over the canon and the dossiers; the
@@ -35,7 +38,32 @@ import sys
 import tomllib
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parents[1]
+
+
+def _strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+ROOT = _resolve_root(sys.argv[1:])
 SRC = ROOT / "agents" / "claude"
 COMMAND_SRC = ROOT / "agents" / "opencode" / "command" / "house.md"
 OPENCODE = ROOT / "agents" / "opencode"
@@ -230,9 +258,9 @@ def check(outputs: dict[Path, str]) -> int:
 
 
 def main() -> int:
-    args = sys.argv[1:]
+    args = _strip_root(sys.argv[1:])
     if args not in ([], ["--check"]):
-        print("usage: python3 scripts/gen-agent-dialects [--check]", file=sys.stderr)
+        print("usage: python3 scripts/gen-agent-dialects [--check] [--root <dir>]", file=sys.stderr)
         return 2
     built = build()
     if built is None:

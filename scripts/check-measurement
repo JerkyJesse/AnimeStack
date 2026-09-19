@@ -9,6 +9,7 @@ doc is the narrative form, this script is the machine form.
 Usage:
     python scripts/check-measurement            compute and print every count
     python scripts/check-measurement --check-doc  fail on any doc/tree mismatch
+    python scripts/check-measurement --root <dir> run against another checkout (test hook)
 """
 
 from __future__ import annotations
@@ -17,7 +18,32 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+def _strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+ROOT = _resolve_root(sys.argv[1:])
 MEASUREMENT = ROOT / "docs" / "measurement.md"
 
 HOSTS = ("claude", "cursor", "codex", "factory", "opencode", "kiro", "slate", "openclaw", "hermes", "gbrain")
@@ -122,4 +148,4 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main(_strip_root(sys.argv[1:])))

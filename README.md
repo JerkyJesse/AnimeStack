@@ -203,7 +203,8 @@ skills/             9 skills: 7 seats + /house + /simple
 principles/         12 laws + 23 doctrine
 agents/             7 seat files per dialect (roles picked from the brief)
 voices/             house voice
-scripts/            maintenance tools: the dialect generator
+scripts/            maintenance gates: dialect generator, lore consistency, board, contract, counts, voices, digest
+tests/              gate self-tests: clean paths + failure modes (unittest)
 setup               the installer: bash entry point (unix / Git Bash)
 setup.ps1           the installer: native Windows entry point, same contract
 AGENTS.md           digest / house voice

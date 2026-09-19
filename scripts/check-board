@@ -10,6 +10,7 @@ Usage:
     python scripts/check-board                 run the gate
     python scripts/check-board --count         print the counts
     python scripts/check-board --seat reika --answers B,C,A,...   score a seat
+    python scripts/check-board --root <dir>    run against another checkout (test hook)
 
 An anchor is written `[source: <path> :: <phrase>]`; the phrase is matched
 against the file after normalization (case and punctuation flattened), with
@@ -23,7 +24,32 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+def _strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+ROOT = _resolve_root(sys.argv[1:])
 BOARD = ROOT / "docs" / "board.md"
 LETTERS = "ABCD"
 
@@ -161,6 +187,7 @@ def score_seat(seat: str, answers: list[str]) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = _strip_root(sys.argv[1:] if argv is None else argv)
     parser = argparse.ArgumentParser(description="The House Board's gate.")
     parser.add_argument("--count", action="store_true", help="print the counts and exit")
     parser.add_argument("--seat", help="score one seat, e.g. reika")

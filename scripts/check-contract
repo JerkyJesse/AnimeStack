@@ -6,7 +6,7 @@ rules visible and local. It checks all six dialect trees - six seats x seven
 files, plus the two house commands - for the role trio, the seat signature,
 the close grammar, the ownership marker, and the model rule.
 
-Usage: python scripts/check-contract
+Usage: python scripts/check-contract [--root <dir>]   (--root is a test hook)
 """
 
 from __future__ import annotations
@@ -15,7 +15,17 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+ROOT = _resolve_root(sys.argv[1:])
 AGENTS = ROOT / "agents"
 
 DIALECTS = {

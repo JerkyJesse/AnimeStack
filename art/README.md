@@ -24,7 +24,8 @@ they are display copies, not a second library.
 
 ## Provenance
 
-Generated house art for AnimeStack. The pack ships it under the repository's MIT
-license (`LICENSE`, `NOTICE`). Variants, alternates, sprites, web exports, and the
+Generated house art for AnimeStack. The pack ships it under the repository's
+AGPL-3.0-or-later license (`LICENSE`, `NOTICE`; commercial terms in
+`COMMERCIAL.md`). Variants, alternates, sprites, web exports, and the
 animated wallpaper packs stay in the source repo; this directory carries one copy of each
 shipped image and nothing else.

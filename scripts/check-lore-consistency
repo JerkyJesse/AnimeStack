@@ -12,8 +12,11 @@ For every seat the art/graphics keys parsed from the canon tail must appear:
 
 Key-phrase presence only: a surface keeps its own voice, a silent drop fails
 closed. The generated dialect trees are covered by gen-agent-dialects --check.
+The second pass resolves every backticked repo path in the root docs and the
+lore corpus against the live tree (relative to the citing file first, then the
+repo root), so a pointer that rots fails closed.
 
-Usage: python3 scripts/check-lore-consistency
+Usage: python3 scripts/check-lore-consistency [--root <dir>]
 Exit 0 = clean; 1 = failures printed; 2 = usage.
 """
 
@@ -23,7 +26,32 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parents[1]
+
+
+def _strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+ROOT = _resolve_root(sys.argv[1:])
 SEATS = ("reika", "yui", "rin", "niko", "mei", "aria", "elo")
 TREE_SUFFIXES = {
     "claude": ("",),
@@ -33,6 +61,41 @@ TREE_SUFFIXES = {
 ART_KEY_RE = re.compile(r"art: (.+?)(?: \(| · graphics:)")
 GRAPHICS_KEY_RE = re.compile(r"graphics: (.+?)\.")
 CRED_LINE_RE = re.compile(r"^\*\*Credentials\.\*\* (.+)$", re.MULTILINE)
+PATH_TOKEN_RE = re.compile(r"`([A-Za-z0-9_./-]+\.[A-Za-z0-9]+)`")
+
+
+def path_token_exists(token: str, origin: Path) -> bool:
+    if "<" in token or "*" in token or token.startswith("~") or "://" in token:
+        return True
+    if ":" in token or token.startswith("/"):
+        return False
+    if "/" not in token and token.startswith("_"):
+        return True
+    bases = (origin.parent, origin.parent.parent, ROOT)
+    for base in bases:
+        if (base / token).exists():
+            return True
+    return False
+
+
+def check_path_tokens() -> tuple[list[str], int]:
+    failures: list[str] = []
+    checks = 0
+    files = [ROOT / "README.md", ROOT / "AGENTS.md", ROOT / "CLAUDE.md"]
+    lore = ROOT / "docs" / "lore"
+    if lore.is_dir():
+        files.extend(sorted(lore.rglob("*.md")))
+    for path in files:
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8")
+        for token in sorted(set(PATH_TOKEN_RE.findall(text))):
+            checks += 1
+            if not path_token_exists(token, path):
+                failures.append(
+                    "%s: path missing: %s" % (path.relative_to(ROOT).as_posix(), token)
+                )
+    return failures, checks
 
 
 def seat_block(canon: str, seat: str) -> str | None:
@@ -57,8 +120,8 @@ def bullet_line(text: str, label: str, is_html: bool) -> str | None:
 
 
 def main() -> int:
-    if sys.argv[1:]:
-        print("usage: python3 scripts/check-lore-consistency", file=sys.stderr)
+    if _strip_root(sys.argv[1:]):
+        print("usage: python3 scripts/check-lore-consistency [--root <dir>]", file=sys.stderr)
         return 2
 
     failures: list[str] = []
@@ -116,6 +179,10 @@ def main() -> int:
                     failures.append(
                         f"{seat}: {label} {cap} bullet missing key {keys[kind]!r}"
                     )
+
+    path_failures, path_checks = check_path_tokens()
+    failures.extend(path_failures)
+    checks += path_checks
 
     if failures:
         print(f"check-lore-consistency: FAILED ({len(failures)} issue(s), {checks} facts checked)")

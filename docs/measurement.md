@@ -10,8 +10,8 @@ the table, the table is wrong.
 
 ## 1. The sample
 
-What is ranked: this repository, release `v1.12.0` (`VERSION`), 2026-09-18. The canon
-text inside it is this pack's own, first written for v1.3.0; the language reform arrived in v1.4.0, the credentials in v1.5.0, the six-dialect agent coverage in v1.6.0, the art and graphics credentials in v1.7.0, the one-file opencode room in v1.8.0, the one-file-everywhere autonomy collapse in v1.9.0, the collaborative room in v1.10.0, and the House Board and the contract gate in v1.11.0, and the opencode provenance stamp in v1.12.0.
+What is ranked: this repository, release `v1.13.0` (`VERSION`), 2026-09-19. The canon
+text inside it is this pack's own, first written for v1.3.0; the language reform arrived in v1.4.0, the credentials in v1.5.0, the six-dialect agent coverage in v1.6.0, the art and graphics credentials in v1.7.0, the one-file opencode room in v1.8.0, the one-file-everywhere autonomy collapse in v1.9.0, the collaborative room in v1.10.0, and the House Board and the contract gate in v1.11.0, the opencode provenance stamp in v1.12.0, and the gate self-tests, voice and digest checks, and the `--root` hooks in v1.13.0.
 
 The claims in this pack are claims about this tree, not promises about the outcomes a
 user will get. A pack that installs cleanly on your host is a body question, not a result
@@ -24,7 +24,7 @@ the tree contains what the table says it contains, at the stated release, on the
 
 ## 2. The counts table
 
-Run each command from the repo root. The expected count is the v1.10.0 truth; a command
+Run each command from the repo root. The expected count is the v1.13.0 truth; a command
 that prints anything else is a defect, and the defect is the tree's number, never the
 prose.
 

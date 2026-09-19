@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+"""check-voices - the machine-readable house voice must match the live canon.
+
+voices/house.json is the structured voice config: one directive, one priority
+instruction, and seven registers (seat sentence + register note). No runtime
+reads it, so it rots silently unless a gate ties it down. This check fails
+closed when:
+
+  - the register set is not exactly the seven seats;
+  - the directive or priority instruction is empty;
+  - a register note is empty or duplicated across seats;
+  - a seat's sentence (normalized) is absent from its canon section or its
+    docs/seats/<seat>.md digest;
+  - a seat's sentence bleeds into another seat's canon section, digest, or
+    agent files - cross-seat voice is a house failure, not a style choice.
+
+Usage: python3 scripts/check-voices [--root <dir>]
+Exit 0 = clean; 1 = failures printed; 2 = usage.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import sys
+from pathlib import Path
+
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+def _strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+ROOT = _resolve_root(sys.argv[1:])
+SEATS = ("reika", "mei", "elo", "yui", "niko", "rin", "aria")
+VOICES = ROOT / "voices" / "house.json"
+
+
+def normalize(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
+def seat_block(canon: str, seat: str) -> str | None:
+    match = re.search(
+        rf"^###\s+[^\r\n]*\b{seat}\b[^\r\n]*\r?\n(.*?)(?=^###\s|\Z)",
+        canon,
+        re.MULTILINE | re.DOTALL | re.IGNORECASE,
+    )
+    return match.group(1) if match else None
+
+
+def read(path: Path) -> str:
+    return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+
+def main() -> int:
+    if _strip_root(sys.argv[1:]):
+        print("usage: python3 scripts/check-voices [--root <dir>]", file=sys.stderr)
+        return 2
+
+    failures: list[str] = []
+    checks = 0
+
+    if not VOICES.is_file():
+        print("check-voices: voices/house.json missing", file=sys.stderr)
+        return 2
+    try:
+        config = json.loads(VOICES.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        print("check-voices: voices/house.json invalid JSON: %s" % error, file=sys.stderr)
+        return 2
+
+    directive = config.get("directive", {})
+    for key in ("compact", "full"):
+        checks += 1
+        if not str(directive.get(key, "")).strip():
+            failures.append("directive.%s is empty" % key)
+    checks += 1
+    if not str(config.get("priority_instruction", "")).strip():
+        failures.append("priority_instruction is empty")
+
+    registers = config.get("registers", {})
+    if sorted(registers) != sorted(SEATS):
+        failures.append(
+            "registers: expected the seven seats, found: %s"
+            % (", ".join(sorted(registers)) or "none")
+        )
+
+    canon = read(ROOT / "docs" / "lore" / "canon.md")
+    if not canon:
+        failures.append("docs/lore/canon.md missing")
+
+    notes: dict[str, list[str]] = {}
+    for seat in SEATS:
+        register = registers.get(seat)
+        if not isinstance(register, dict):
+            failures.append("%s: register missing" % seat)
+            continue
+        sentence = normalize(str(register.get("sentence", "")))
+        note = normalize(str(register.get("register", "")))
+        if not sentence:
+            failures.append("%s: sentence is empty" % seat)
+            continue
+        if not note:
+            failures.append("%s: register note is empty" % seat)
+        else:
+            notes.setdefault(note, []).append(seat)
+
+        digest = read(ROOT / "docs" / "seats" / ("%s.md" % seat))
+        surfaces = {
+            "docs/lore/canon.md": seat_block(canon, seat) or "",
+            "docs/seats/%s.md" % seat: digest,
+        }
+        for label, text in surfaces.items():
+            checks += 1
+            if sentence not in normalize(text):
+                failures.append("%s: one sentence missing from %s" % (seat, label))
+
+        for other in SEATS:
+            if other == seat:
+                continue
+            targets = {
+                "canon": seat_block(canon, other) or "",
+                "digest": read(ROOT / "docs" / "seats" / ("%s.md" % other)),
+                "claude agent": read(ROOT / "agents" / "claude" / ("animestack-%s.md" % other)),
+                "opencode agent": read(ROOT / "agents" / "opencode" / ("animestack-%s.md" % other)),
+            }
+            for label, text in targets.items():
+                checks += 1
+                if sentence in normalize(text):
+                    failures.append(
+                        "%s: one sentence bleeds into %s (%s)" % (seat, other, label)
+                    )
+
+    for note, seats in notes.items():
+        if len(seats) > 1:
+            failures.append(
+                "register note duplicated across seats: %s (%s)" % (note, ", ".join(seats))
+            )
+
+    if failures:
+        print("check-voices: FAILED (%d issue(s), %d checks)" % (len(failures), checks))
+        for failure in failures:
+            print("  - %s" % failure)
+        return 1
+    print("check-voices: clean (%d checks)" % checks)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
