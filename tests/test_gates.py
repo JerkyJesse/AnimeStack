@@ -145,6 +145,15 @@ class LoreConsistencyTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
         self.assertIn("missing 'art:", proc.stdout)
 
+    def test_drifted_credential_segment_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "docs" / "lore" / "dossiers" / "elo.md"
+        with mutated(target, lambda text: text.replace("(ASA)", "(CFP)", 1)):
+            proc = run_gate("check-lore-consistency", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("elo: credential segment", proc.stdout)
+        self.assertIn("asa", proc.stdout)
+
     def test_rotted_path_pointer_fails_closed(self) -> None:
         assert FIXTURE is not None
         target = FIXTURE / "CLAUDE.md"
@@ -202,6 +211,34 @@ class ContractTests(unittest.TestCase):
             proc = run_gate("check-contract", root=FIXTURE)
         self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
         self.assertIn("last line is not the ownership marker", proc.stdout)
+
+    def test_lost_invention_line_fails_closed(self) -> None:
+        # The invention line is load-bearing in every dialect file: stripping
+        # it from one agent must fail the gate naming that file, never a
+        # silent pass. The live tree's in-flight misses (aria/reika) do not
+        # weaken the assertion: the named pair below can only come from the
+        # mutation.
+        assert FIXTURE is not None
+        target = FIXTURE / "agents" / "cursor" / "animestack-mei.md"
+        with mutated(target, lambda text: text.replace("- Invent:", "- InventX:", 1)):
+            proc = run_gate("check-contract", root=FIXTURE)
+        out = proc.stdout.replace("\\", "/")
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("missing the invention line", proc.stdout)
+        self.assertIn("agents/cursor/animestack-mei.md: missing the invention line", out)
+
+    def test_lost_cold_verification_pass_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "agents" / "cursor" / "animestack-yui.md"
+        with mutated(
+            target,
+            lambda text: text.replace("## Cold verification pass", "## Cold verification check", 1),
+        ):
+            proc = run_gate("check-contract", root=FIXTURE)
+        out = proc.stdout.replace("\\", "/")
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("missing the cold verification pass", proc.stdout)
+        self.assertIn("agents/cursor/animestack-yui.md: missing the cold verification pass", out)
 
 
 class MeasurementTests(unittest.TestCase):

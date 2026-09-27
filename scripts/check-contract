@@ -2,9 +2,10 @@
 """check-contract - the pack's shipped-agent contract, checked in CI.
 
 The installer refuses a pack that violates its rules; this gate makes the same
-rules visible and local. It checks all six dialect trees - six seats x seven
-files, plus the two house commands - for the role trio, the seat signature,
-the close grammar, the ownership marker, and the model rule.
+rules visible and local. It checks all six dialect trees - seven seats across
+the six dialects, plus the two house commands - for the role trio, the seat
+signature, the close grammar, the ownership marker, the invention line, the
+cold verification pass, and the model rule.
 
 Usage: python scripts/check-contract [--root <dir>]   (--root is a test hook)
 """
@@ -84,6 +85,10 @@ def check_agent(dialect: str, ext: str, seat: str, failures: list[str]) -> None:
     for section in MD_SECTIONS:
         if section not in text:
             failures.append("%s: missing %r" % (path.relative_to(ROOT), section))
+    if "- Invent:" not in text:
+        failures.append("%s: missing the invention line" % path.relative_to(ROOT))
+    if "## Cold verification pass" not in text:
+        failures.append("%s: missing the cold verification pass" % path.relative_to(ROOT))
     sentence = SEATS[seat]
     if sentence not in text:
         failures.append("%s: missing the one sentence: %r" % (path.relative_to(ROOT), sentence))

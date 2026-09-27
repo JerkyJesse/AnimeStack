@@ -11,10 +11,15 @@ For every seat the art/graphics keys parsed from the canon tail must appear:
     Graphics bullets.
 
 Key-phrase presence only: a surface keeps its own voice, a silent drop fails
-closed. The generated dialect trees are covered by gen-agent-dialects --check.
-The second pass resolves every backticked repo path in the root docs and the
-lore corpus against the live tree (relative to the citing file first, then the
-repo root), so a pointer that rots fails closed.
+closed. The same pass extends to the full compact credentials line: for every
+seat, the canon line's non-art segments (split ·) must resolve against the
+dossier **Credentials.** block with tolerant normalized matching - so a
+dossier that silently drops a training, industry, or certification phrase
+fails closed naming the seat and the segment. The generated dialect trees are
+covered by gen-agent-dialects --check. The second pass resolves every
+backticked repo path in the root docs and the lore corpus against the live
+tree (relative to the citing file first, then the repo root), so a pointer
+that rots fails closed.
 
 Usage: python3 scripts/check-lore-consistency [--root <dir>]
 Exit 0 = clean; 1 = failures printed; 2 = usage.
@@ -61,7 +66,19 @@ TREE_SUFFIXES = {
 ART_KEY_RE = re.compile(r"art: (.+?)(?: \(| · graphics:)")
 GRAPHICS_KEY_RE = re.compile(r"graphics: (.+?)\.")
 CRED_LINE_RE = re.compile(r"^\*\*Credentials\.\*\* (.+)$", re.MULTILINE)
+CRED_MARKER_RE = re.compile(r"^\*\*Credentials\.\*\*[^\r\n]*$", re.MULTILINE)
 PATH_TOKEN_RE = re.compile(r"`([A-Za-z0-9_./-]+\.[A-Za-z0-9]+)`")
+
+STOPWORDS = frozenset({
+    "a", "an", "and", "as", "at", "by", "for", "from", "in", "is", "it",
+    "no", "not", "of", "on", "or", "that", "the", "then", "to", "was", "with",
+})
+# Register drift tolerated by design (key phrases only - each surface keeps its
+# own voice): a token in this set may be absent from the dossier without
+# failing. university - institution qualifier, dossiers may elide it ("PPE at
+# Oxford"); published - paper status, dossiers may say "peer-reviewed" instead;
+# degree - the "no degree" qualifier, dropped when the dossier names the desk.
+ELIDABLE_TOKENS = frozenset({"university", "published", "degree"})
 
 
 def path_token_exists(token: str, origin: Path) -> bool:
@@ -117,6 +134,57 @@ def bullet_line(text: str, label: str, is_html: bool) -> str | None:
         return next((line for line in text.splitlines() if marker in line), None)
     marker = f"- **{label}.**"
     return next((line for line in text.splitlines() if line.startswith(marker)), None)
+
+
+def credentials_block(text: str) -> str | None:
+    """The bullet lines under the **Credentials.** marker, up to the first
+    non-bullet line (the dossier heading form)."""
+    match = CRED_MARKER_RE.search(text)
+    if match is None:
+        return None
+    collected: list[str] = []
+    for line in text[match.end():].splitlines():
+        stripped = line.strip()
+        if stripped.startswith("- "):
+            collected.append(stripped)
+        elif stripped and collected:
+            break
+    return "\n".join(collected) if collected else None
+
+
+def credential_segments(cred_line: str) -> list[str]:
+    """Non-art segments of a compact credentials line (·-split)."""
+    return [
+        part.strip()
+        for part in cred_line.split("·")
+        if part.strip() and not part.strip().lower().startswith(("art:", "graphics:"))
+    ]
+
+
+def _tokens(text: str) -> list[str]:
+    return re.findall(r"[^\W_]+", text.lower(), re.UNICODE)
+
+
+def required_credential_tokens(segment: str) -> list[str]:
+    return [
+        token
+        for token in dict.fromkeys(_tokens(segment))
+        if token not in STOPWORDS and token not in ELIDABLE_TOKENS
+    ]
+
+
+def missing_credential_tokens(segment: str, dossier_block: str) -> list[str]:
+    """Key-phrase presence: every required token must resolve in the dossier
+    block by exact match or a >= 4-char shared prefix (morphological drift)."""
+    pool = set(_tokens(dossier_block))
+    return [
+        token
+        for token in required_credential_tokens(segment)
+        if not any(
+            candidate == token or (len(token) >= 4 and candidate.startswith(token))
+            for candidate in pool
+        )
+    ]
 
 
 def main() -> int:
@@ -178,6 +246,35 @@ def main() -> int:
                 if line is None or keys[kind].lower() not in line.lower():
                     failures.append(
                         f"{seat}: {label} {cap} bullet missing key {keys[kind]!r}"
+                    )
+
+        # The full compact credentials line: every non-art segment
+        # (training / industry / certifications) must resolve against the
+        # dossier **Credentials.** block. Tolerant normalized matching, key
+        # phrases only; fail closed naming the seat and the segment.
+        dossier_path = ROOT / "docs" / "lore" / "dossiers" / f"{seat}.md"
+        dossier_text = (
+            dossier_path.read_text(encoding="utf-8") if dossier_path.exists() else ""
+        )
+        block = credentials_block(dossier_text)
+        segments = credential_segments(cred.group(1))
+        if not segments:
+            failures.append(f"canon: {seat} credentials line carries no checkable segment")
+        elif block is None:
+            failures.append(f"{seat}: dossier credentials block missing")
+        else:
+            for segment in segments:
+                checks += 1
+                if not required_credential_tokens(segment):
+                    failures.append(
+                        f"{seat}: credential segment has no checkable token: {segment!r}"
+                    )
+                    continue
+                missing = missing_credential_tokens(segment, block)
+                if missing:
+                    failures.append(
+                        f"{seat}: credential segment unresolved in dossier: {segment!r} "
+                        f"(missing: {', '.join(missing)})"
                     )
 
     path_failures, path_checks = check_path_tokens()
