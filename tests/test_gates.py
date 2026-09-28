@@ -215,9 +215,8 @@ class ContractTests(unittest.TestCase):
     def test_lost_invention_line_fails_closed(self) -> None:
         # The invention line is load-bearing in every dialect file: stripping
         # it from one agent must fail the gate naming that file, never a
-        # silent pass. The live tree's in-flight misses (aria/reika) do not
-        # weaken the assertion: the named pair below can only come from the
-        # mutation.
+        # silent pass. The live tree carries the line in all 42 seat files;
+        # the named pair below can only come from the mutation.
         assert FIXTURE is not None
         target = FIXTURE / "agents" / "cursor" / "animestack-mei.md"
         with mutated(target, lambda text: text.replace("- Invent:", "- InventX:", 1)):
