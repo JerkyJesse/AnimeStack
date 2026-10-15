@@ -9,7 +9,7 @@ step by step, timed. No theory you do not need.
 1. Clone the repo.
 2. Run `./setup --host <your host>` once.
 3. Open a new session and say `/house`.
-4. Give it a real task. Read the seven sentences. Watch Reika close.
+4. Give it a real task. Read the eight sentences. Watch Reika close.
 
 That is the whole window. The rest of this page is the walkthrough for each
 step.
@@ -55,7 +55,7 @@ Open a new session, then hand the house a real but small task:
 > Add a `--dry-run` flag to the sync command; it must print what would change
 > and touch nothing.
 
-Say `/house`. The router picks a playbook, opens the loop, and descends seven
+Say `/house`. The router picks a playbook, opens the loop, and descends eight
 seats. A realistic transcript:
 
 ```
@@ -66,6 +66,10 @@ MEI:    The sync format is the only thing that could obsolete this; pin the
 ELO:    Rank the sample before the build: --dry-run is a measurement when it
         lists exactly the paths that would change, and a hymn when it prints a
         plan.
+MECHAPIP: Findings first. Print-then-bail is a known shape: three prior commands
+        wear it, and two of them grew a second code path that drifted from the
+        write path inside a release. Share one planning pass between the real
+        run and the dry run — or the drift is a matter of time.
 YUI:    The failure is the missing preview — sync mutates before it reports, so
         every user guesses. Falsifier first: after a dry run the tree is
         byte-identical to before.
@@ -82,7 +86,7 @@ review: RIN  ACCEPT
 ship:   ARIA SHIP
 ```
 
-Seven sentences, one each, in order. No skips, no merges. Yui builds, Rin
+Eight sentences, one each, in order. No skips, no merges. Yui builds, Rin
 reviews and accepts, Aria releases. Then silence after Reika. With seat agents
 installed the selected seat leads and the room runs its rounds — a review:
 independent takes (parallel), then one reply each to affirm, contest a named
@@ -98,15 +102,15 @@ coat. Retire it, and say so in your own record.
 
 ## What just happened
 
-The loop is the spine. Every material decision descends seven seats in fixed
-order — Mei, Elo, Yui, Niko, Rin, Aria, Reika — one sentence each. The selected
-seat leads the room; Reika answers step 7 and signs. A thing is not finished
-when it is named; it is finished when all seven sentences exist. Missing one
-means the house is performing intelligence.
+The loop is the spine. Every material decision descends eight seats in fixed
+order — Mei, Elo, MechaPip, Yui, Niko, Rin, Aria, Reika — one sentence each.
+The selected seat leads the room; Reika answers step 8 and signs. A thing is
+not finished when it is named; it is finished when all eight sentences exist.
+Missing one means the house is performing intelligence.
 
 The full spine, the two descents, solo authority, and the waiver are in
 [`../loop.md`](../loop.md). The ring is drawn in
-[`../images/loop.svg`](../images/loop.svg).
+[`../../assets/img/loop.svg`](../../assets/img/loop.svg).
 
 ## When to use /simple
 

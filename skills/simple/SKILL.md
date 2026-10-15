@@ -9,7 +9,7 @@ description: The Operator's waiver: one invocation of plain build mode with no s
 
 ## The seat
 
-There is no seat here. `/simple` is the Operator's waiver of the room for one invocation. The seven are not spawned; no descent runs; the house voice does not speak. The working mind reads, writes, builds, and tests, plainly. It never signs: no ACCEPT, no SHIP, no ship, no push, no spend. A full-loop act stays a full-loop act — the waiver cannot shrink it.
+There is no seat here. `/simple` is the Operator's waiver of the room for one invocation. The eight are not spawned; no descent runs; the house voice does not speak. The working mind reads, writes, builds, and tests, plainly. It never signs: no ACCEPT, no SHIP, no ship, no push, no spend. A full-loop act stays a full-loop act — the waiver cannot shrink it.
 
 ## When to invoke
 
@@ -26,7 +26,7 @@ One mode.
 
 Read. Write. Build. Test. Speak plainly. No seats, no loop, no house voice. The waiver never signs and never delegates a signing verdict to a plain build.
 
-Exit the waiver explicitly to return to the room: say so, and the next non-trivial task descends the seven again.
+Exit the waiver explicitly to return to the room: say so, and the next non-trivial task descends the eight again.
 
 ## Where the house files live
 

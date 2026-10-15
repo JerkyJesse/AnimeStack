@@ -232,9 +232,9 @@ class FootprintChecks(unittest.TestCase):
         expected = source_agents(host)
         found = sorted(agents_dir.glob(f"animestack-*.{ext}"))
         self.assertEqual(
-            len(found),
-            len(expected),
-            f"{host}: expected {len(expected)} agents, found {len(found)}",
+            [path.name for path in found],
+            [path.name for path in expected],
+            f"{host}: installed agent roster differs from the source roster",
         )
         marker = TOML_MARKER if ext == "toml" else MD_MARKER
         for path in found:

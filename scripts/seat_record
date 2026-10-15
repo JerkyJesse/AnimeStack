@@ -1,0 +1,602 @@
+#!/usr/bin/env python3
+"""seat_record - the seat record: the room's conduct, counted from files.
+
+The wound this engine prices: the room pays for memory it cannot read. A
+decision that leaves no counted line is retold next session from mood. The
+record is disciplines, not money - every entry is a receipt, every delta is
+frozen by its kind, and a contradiction (a delta off its kind, a bad seat, an
+empty ref) is refused at the write, not discovered later in prose. An unread
+or empty state is named; a count is never invented.
+
+Record: record/seat_record.jsonl, one compact JSON row per line
+(ts / date / kind / seat / delta / ref / note). Writes serialize behind
+record/seat_record.lock - one O_CREAT|O_EXCL lock file, retried up to 30 s, a
+stale lock (>300 s) broken only while it still carries the aged token, and
+released only by its own writer; one atomic append of the call's rows,
+flushed + fsynced, never a partial line.
+
+Modes (run from the repo root):
+    python scripts/seat_record --event --seat Reika --kind note \
+        --ref open:2026-10-15 --note "the seat record opens"
+    python scripts/seat_record --read [--window N]
+    python scripts/seat_record --checks [--full]
+    python scripts/seat_record --check
+
+Kinds and their frozen deltas: ship/kill/red_first/receipt/debt_cleared +1;
+gate_fail/code_red/stub -1; gate_thin/watch/note/check_green 0. Seats: the
+eight (Mei, Elo, MechaPip, Yui, Niko, Rin, Aria, Reika). check_green is
+machine-only (--checks).
+
+Usage: python3 scripts/seat_record <mode> [options] [--root <dir>]
+Exit codes: 0 ok, 1 --check failure, 2 usage / refusal.
+Stdlib only; no network.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import sys
+import time
+import uuid
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+def _strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+ROOT = _resolve_root(sys.argv[1:])
+RECORD_REL = Path("record") / "seat_record.jsonl"
+
+SEATS = ("Mei", "Elo", "MechaPip", "Yui", "Niko", "Rin", "Aria", "Reika")
+
+KIND_DELTAS = {
+    "ship": 1,
+    "kill": 1,
+    "red_first": 1,
+    "receipt": 1,
+    "debt_cleared": 1,
+    "gate_fail": -1,
+    "code_red": -1,
+    "stub": -1,
+    "gate_thin": 0,
+    "watch": 0,
+    "note": 0,
+    "check_green": 0,
+}
+MANUAL_KINDS = tuple(kind for kind in KIND_DELTAS if kind != "check_green")
+
+# The gate suite's charge sheet: a red books against the seat that owns the
+# surface, so a failure lands on a name, never on the weather.
+CHECK_OWNERS = {
+    "gen-agent-dialects": "Niko",
+    "check-contract": "Niko",
+    "check-lore-consistency": "MechaPip",
+    "check-board": "Elo",
+    "check-measurement": "Elo",
+    "check-digest": "Elo",
+    "check-voices": "Rin",
+    "unittest": "Rin",
+}
+
+LOCK_TIMEOUT = 30.0
+LOCK_STALE = 300.0
+CHECK_TIMEOUT = 300.0
+NOTE_CAP = 160
+
+
+class RecordRefusal(RuntimeError):
+    """A write the record refuses: usage, bad seat/kind, or a missing ref."""
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def utc_today() -> str:
+    return utc_now().strftime("%Y-%m-%d")
+
+
+def record_path_for(root) -> Path:
+    return Path(root) / RECORD_REL
+
+
+def make_row(kind: str, seat: str, ref: str, note: str) -> dict:
+    now = utc_now()
+    return {
+        "ts": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "date": now.strftime("%Y-%m-%d"),
+        "kind": kind,
+        "seat": seat,
+        "delta": KIND_DELTAS[kind],
+        "ref": ref,
+        "note": note,
+    }
+
+
+def tier_for(net_w: int) -> str:
+    if net_w >= 5:
+        return "the floor"
+    if net_w >= 3:
+        return "first claim"
+    if net_w <= -5:
+        return "bar again"
+    if net_w <= -3:
+        return "audit"
+    return ""
+
+
+# --------------------------------------------------------------------------
+# record I/O and the lock
+# --------------------------------------------------------------------------
+
+def read_rows(path) -> list[dict]:
+    """Tolerant read: malformed lines are skipped; --check is the validator."""
+    try:
+        text = Path(path).read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return []
+    rows = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(row, dict):
+            rows.append(row)
+    return rows
+
+
+def read_rows_strict(path) -> tuple[list[tuple[int, dict]], list[str]]:
+    try:
+        text = Path(path).read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        return [], [f"record unreadable: {exc}"]
+    rows: list[tuple[int, dict]] = []
+    errors: list[str] = []
+    for lineno, line in enumerate(text.splitlines(), 1):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except ValueError:
+            errors.append(f"line {lineno}: malformed JSON")
+            continue
+        if not isinstance(row, dict):
+            errors.append(f"line {lineno}: not a JSON object")
+            continue
+        rows.append((lineno, row))
+    return rows, errors
+
+
+def _tail_hash(path, size: int = 512) -> str:
+    try:
+        data = Path(path).read_bytes()[-size:]
+    except OSError:
+        return ""
+    return hashlib.sha256(data).hexdigest()[:12]
+
+
+def _lock_token() -> str:
+    return f"{os.getpid()}-{uuid.uuid4().hex[:12]}"
+
+
+def _break_stale(lock: Path, held: str | None) -> bool:
+    """Unlink a stale lock only while it still carries the token we aged."""
+    if held is None:
+        return False
+    try:
+        if lock.read_text(encoding="ascii", errors="replace") != held:
+            return False
+        lock.unlink()
+        return True
+    except OSError:
+        return False
+
+
+def _acquire(lock: Path, *, timeout: float, stale_after: float) -> str:
+    token = _lock_token()
+    deadline = time.time() + timeout
+    while True:
+        try:
+            fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            os.write(fd, token.encode("ascii"))
+            os.close(fd)
+            return token
+        except FileExistsError:
+            age = 0.0
+            held: str | None = None
+            try:
+                age = time.time() - lock.stat().st_mtime
+                held = lock.read_text(encoding="ascii", errors="replace")
+            except OSError:
+                pass
+            if age > stale_after and _break_stale(lock, held):
+                continue
+            if time.time() >= deadline:
+                raise TimeoutError(f"record lock busy (held {age:.0f}s)")
+            time.sleep(0.25)
+
+
+def _release(lock: Path, token: str | None) -> None:
+    """Unlink the lock only when it still carries our token."""
+    if token is None:
+        return
+    try:
+        if lock.read_text(encoding="ascii", errors="replace") != token:
+            return
+        lock.unlink()
+    except OSError:
+        pass
+
+
+def append_rows(record_path, rows: list[dict], *, timeout: float | None = None,
+                expect_tail: str | None = None) -> int:
+    """One locked append for every row; raises TimeoutError / RuntimeError.
+
+    The tail is captured before the lock and re-checked after acquiring; a
+    changed tail - another writer landed - fails closed, never overwrites.
+    """
+    if timeout is None:
+        timeout = LOCK_TIMEOUT
+    path = Path(record_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lock = path.with_suffix(".lock")
+    before = expect_tail if expect_tail is not None else _tail_hash(path)
+    token = _acquire(lock, timeout=timeout, stale_after=LOCK_STALE)
+    try:
+        after = _tail_hash(path)
+        if after != before:
+            raise RuntimeError("record changed while waiting; retry")
+        text = "".join(
+            json.dumps(row, separators=(",", ":"), ensure_ascii=False) + "\n"
+            for row in rows
+        )
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(text)
+            fh.flush()
+            os.fsync(fh.fileno())
+    finally:
+        _release(lock, token)
+    return len(rows)
+
+
+# --------------------------------------------------------------------------
+# --event: one manual row
+# --------------------------------------------------------------------------
+
+def cmd_event(record_path, args) -> int:
+    seat = args.seat or ""
+    kind = args.kind or ""
+    ref = (args.ref or "").strip()
+    note = args.note or ""
+    if seat not in SEATS:
+        print(f"seat_record: invalid seat {seat!r} (one of: {', '.join(SEATS)})",
+              file=sys.stderr)
+        return 2
+    if kind not in MANUAL_KINDS:
+        print(f"seat_record: invalid kind {kind!r} (manual kinds: {', '.join(MANUAL_KINDS)})",
+              file=sys.stderr)
+        return 2
+    if not ref:
+        print("seat_record: ref is required and non-empty", file=sys.stderr)
+        return 2
+    row = make_row(kind, seat, ref, note)
+    append_rows(record_path, [row])
+    print(f"seat_record: {kind} {seat} {ref} ({KIND_DELTAS[kind]:+d}) appended")
+    return 0
+
+
+# --------------------------------------------------------------------------
+# --read: standings, worst first
+# --------------------------------------------------------------------------
+
+def build_read(record_path, window: int = 30, today=None) -> dict:
+    path = Path(record_path)
+    if not path.is_file():
+        raise RecordRefusal(f"record missing ({path}) - nothing to read")
+    rows = read_rows(path)
+    today_date = today or utc_now().date()
+    span = max(int(window), 1)
+    cutoff = (today_date - timedelta(days=span - 1)).strftime("%Y-%m-%d")
+    seats = []
+    for seat in SEATS:
+        credits_w = debts_w = credits_all = debts_all = 0
+        seat_rows = 0
+        for row in rows:
+            if row.get("seat") != seat:
+                continue
+            seat_rows += 1
+            delta = row.get("delta")
+            if isinstance(delta, bool) or not isinstance(delta, int):
+                continue
+            if delta > 0:
+                credits_all += delta
+            elif delta < 0:
+                debts_all += -delta
+            date = row.get("date")
+            if isinstance(date, str) and date >= cutoff:
+                if delta > 0:
+                    credits_w += delta
+                elif delta < 0:
+                    debts_w += -delta
+        net_w = credits_w - debts_w
+        seats.append({
+            "seat": seat,
+            "credits_w": credits_w,
+            "debts_w": debts_w,
+            "net_w": net_w,
+            "credits_all": credits_all,
+            "debts_all": debts_all,
+            "net_all": credits_all - debts_all,
+            "rows": seat_rows,
+            "tier": tier_for(net_w),
+        })
+    seats.sort(key=lambda row: (row["net_w"], SEATS.index(row["seat"])))
+    return {
+        "window": span,
+        "today": today_date.strftime("%Y-%m-%d"),
+        "window_start": cutoff,
+        "rows": len(rows),
+        "seats": seats,
+    }
+
+
+def render_read(report: dict) -> str:
+    lines = [
+        f"seat_record --read window={report['window']}d "
+        f"({report['window_start']}..{report['today']}): standings, worst first; "
+        f"{report['rows']} row(s)"
+    ]
+    for row in report["seats"]:
+        tier = f"  [{row['tier']}]" if row["tier"] else ""
+        named = "  [no rows]" if row["rows"] == 0 else ""
+        lines.append(
+            f"  {row['seat']:<9} net {row['net_w']:+d}  "
+            f"(credit {row['credits_w']} / debt {row['debts_w']})  "
+            f"all-time {row['net_all']:+d}{tier}{named}"
+        )
+    return "\n".join(lines) + "\n"
+
+
+# --------------------------------------------------------------------------
+# --checks: run the gate suite and book the outcomes
+# --------------------------------------------------------------------------
+
+def default_checks(root) -> list[tuple[str, list]]:
+    py = sys.executable
+    scripts = Path(root) / "scripts"
+    return [
+        ("gen-agent-dialects", [py, str(scripts / "gen-agent-dialects"), "--check"]),
+        ("check-contract", [py, str(scripts / "check-contract")]),
+        ("check-lore-consistency", [py, str(scripts / "check-lore-consistency")]),
+        ("check-board", [py, str(scripts / "check-board")]),
+        ("check-measurement", [py, str(scripts / "check-measurement"), "--check-doc"]),
+        ("check-digest", [py, str(scripts / "check-digest")]),
+        ("check-voices", [py, str(scripts / "check-voices")]),
+    ]
+
+
+def full_checks() -> list[tuple[str, list]]:
+    return [
+        ("unittest", [sys.executable, "-m", "unittest", "discover", "-s", "tests"]),
+    ]
+
+
+def _run_check_command(argv: list, root, limit: float = CHECK_TIMEOUT) -> tuple[int, str]:
+    try:
+        proc = subprocess.run(
+            [str(arg) for arg in argv], cwd=str(root), capture_output=True,
+            text=True, errors="replace", timeout=limit,
+        )
+        return proc.returncode, (proc.stdout or "") + (proc.stderr or "")
+    except subprocess.TimeoutExpired as exc:
+        output = ""
+        for part in (exc.stdout, exc.stderr):
+            if part:
+                output += part if isinstance(part, str) else part.decode("utf-8", "replace")
+        return -1, output + f"\ntimeout after {limit:.0f}s"
+    except OSError as exc:
+        return -1, f"cannot run {argv[0]}: {exc}"
+
+
+def _first_line(output: str, needle: str) -> str:
+    for line in output.splitlines():
+        if needle.lower() in line.lower():
+            return line.strip()
+    for line in output.splitlines():
+        if line.strip():
+            return line.strip()
+    return "(no output)"
+
+
+def run_checks(checks: list[tuple[str, list]], record_path, today: str, *,
+               root, timeout: float | None = None) -> list[dict]:
+    path = Path(record_path)
+    # Tail captured before the read: a write landing in the window either
+    # shows up in the dedup sets or trips the append re-check, never both.
+    tail = _tail_hash(path)
+    rows = read_rows(path)
+    greens = {(row.get("ref"), row.get("date"))
+              for row in rows if row.get("kind") == "check_green"}
+    reds = {(row.get("ref"), row.get("date"))
+            for row in rows if row.get("kind") == "code_red"}
+    emitted: list[dict] = []
+    for label, argv in checks:
+        owner = CHECK_OWNERS.get(label, "Reika")
+        ref = f"check:{label}"
+        rc, output = _run_check_command(argv, root)
+        if rc == 0:
+            if (ref, today) in greens:
+                print(f"  {label}: green (already recorded)")
+                continue
+            note = _first_line(output, "clean")[:NOTE_CAP]
+            row = make_row("check_green", owner, ref, note)
+            emitted.append(row)
+            greens.add((ref, today))
+            print(f"  {label}: green")
+        else:
+            if (ref, today) in reds:
+                print(f"  {label}: red rc={rc} (already recorded)")
+                continue
+            line = _first_line(output, "FAILED")[:140]
+            note = f"{label} red rc={rc} -> {owner}: {line}"
+            row = make_row("code_red", owner, ref, note)
+            emitted.append(row)
+            reds.add((ref, today))
+            print(f"  {label}: red rc={rc} -> {owner}")
+    if emitted:
+        append_rows(path, emitted, timeout=timeout, expect_tail=tail)
+    return emitted
+
+
+# --------------------------------------------------------------------------
+# --check: the validator
+# --------------------------------------------------------------------------
+
+def validate_row(row: dict, lineno: int) -> list[str]:
+    issues: list[str] = []
+    ref = row.get("ref")
+    if not (isinstance(ref, str) and ref.strip()):
+        issues.append(f"line {lineno}: ref missing or empty")
+    kind = row.get("kind")
+    if kind not in KIND_DELTAS:
+        issues.append(f"line {lineno}: unknown kind {kind!r}")
+    elif row.get("delta") != KIND_DELTAS[kind]:
+        issues.append(
+            f"line {lineno}: kind {kind} delta {row.get('delta')!r} != {KIND_DELTAS[kind]}"
+        )
+    seat = row.get("seat")
+    if seat not in SEATS:
+        issues.append(f"line {lineno}: invalid seat {seat!r}")
+    return issues
+
+
+def cmd_check(record_path) -> int:
+    path = Path(record_path)
+    if not path.is_file():
+        print(f"seat_record --check: record missing ({path})", file=sys.stderr)
+        return 1
+    rows, errors = read_rows_strict(path)
+    issues = list(errors)
+    for lineno, row in rows:
+        issues.extend(validate_row(row, lineno))
+    if issues:
+        print(f"seat_record --check: FAILED ({len(issues)} issue(s))", file=sys.stderr)
+        for issue in issues:
+            print(f"  FAIL {issue}", file=sys.stderr)
+        return 1
+    print(f"seat_record --check: clean ({len(rows)} row(s), {len(SEATS)} seats)")
+    return 0
+
+
+# --------------------------------------------------------------------------
+# CLI
+# --------------------------------------------------------------------------
+
+def _configure_stdio() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        try:
+            reconfigure(encoding="utf-8", errors="replace")
+        except (OSError, ValueError):
+            continue
+
+
+def _build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        description="The seat record: the room's conduct, counted from files."
+    )
+    parser.add_argument("--event", action="store_true", help="append one row")
+    parser.add_argument("--read", action="store_true", help="render standings, worst first")
+    parser.add_argument("--checks", action="store_true", help="run the gate suite and book it")
+    parser.add_argument("--check", action="store_true", help="validate the record file")
+    parser.add_argument("--window", type=int, default=30,
+                        help="read window in days (default 30)")
+    parser.add_argument("--full", action="store_true",
+                        help="add the test suite to --checks")
+    parser.add_argument("--seat")
+    parser.add_argument("--kind")
+    parser.add_argument("--ref")
+    parser.add_argument("--note", default="")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    _configure_stdio()
+    raw = sys.argv[1:] if argv is None else list(argv)
+    root = _resolve_root(raw)
+    args = _build_parser().parse_args(_strip_root(raw))
+    modes = [
+        flag for flag, value in (
+            ("--event", args.event), ("--read", args.read),
+            ("--checks", args.checks), ("--check", args.check),
+        ) if value
+    ]
+    if len(modes) != 1:
+        print(
+            "seat_record: choose exactly one mode (--event, --read, --checks, --check)",
+            file=sys.stderr,
+        )
+        return 2
+    record_path = record_path_for(root)
+    try:
+        if args.event:
+            return cmd_event(record_path, args)
+        if args.read:
+            print(render_read(build_read(record_path, window=args.window)))
+            return 0
+        if args.checks:
+            checks = default_checks(root)
+            if args.full:
+                checks = checks + full_checks()
+            today = utc_today()
+            emitted = run_checks(checks, record_path, today, root=root)
+            print(f"seat_record --checks: {len(checks)} check(s) run, "
+                  f"{len(emitted)} row(s) emitted for {today}")
+            return 0
+        return cmd_check(record_path)
+    except RecordRefusal as exc:
+        print(f"seat_record: {exc}", file=sys.stderr)
+        return 2
+    except TimeoutError as exc:
+        print(f"seat_record: lock timeout: {exc}", file=sys.stderr)
+        return 2
+    except RuntimeError as exc:
+        print(f"seat_record: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -2,10 +2,11 @@
 """check-contract - the pack's shipped-agent contract, checked in CI.
 
 The installer refuses a pack that violates its rules; this gate makes the same
-rules visible and local. It checks all six dialect trees - seven seats across
+rules visible and local. It checks all six dialect trees - eight seats across
 the six dialects, plus the two house commands - for the role trio, the seat
 signature, the close grammar, the ownership marker, the invention line, the
-cold verification pass, and the model rule.
+cold verification pass, the engineer's layer, the optimizer's ledger, and the
+model rule.
 
 Usage: python scripts/check-contract [--root <dir>]   (--root is a test hook)
 """
@@ -41,6 +42,7 @@ DIALECTS = {
 SEATS = {
     "mei": "What change in the world makes this obsolete?",
     "elo": "What does the crowd refuse to measure correctly?",
+    "mechapip": "What has this pattern done before?",
     "yui": "What failure does this prevent, and what would falsify it?",
     "niko": "Where does it live, and what must it never touch?",
     "rin": "How does this fail, and how fast?",
@@ -51,11 +53,24 @@ SEATS = {
 CLOSES = {
     "mei": ("VERDICT: PASS", "VERDICT: FAIL"),
     "elo": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "mechapip": ("VERDICT: MATCH", "VERDICT: NO MATCH"),
     "yui": ("VERDICT: PASS", "VERDICT: FAIL"),
     "niko": ("VERDICT: PASS", "VERDICT: FAIL"),
     "rin": ("VERDICT: ACCEPT", "VERDICT: END"),
     "aria": ("VERDICT: SHIP", "VERDICT: STAND DOWN"),
     "reika": ("close with the verdict in your own voice",),
+}
+
+# The eight techniques (canon section XIII): one distinct signature per seat.
+SIGNATURES = {
+    "mei": "The Weather Read",
+    "elo": "The Measurement",
+    "mechapip": "The Graveyard Pass",
+    "yui": "The Second Sample",
+    "niko": "The Cage",
+    "rin": "The Red Once",
+    "aria": "The 47-Second Click",
+    "reika": "The First Sentence",
 }
 
 ROLE_MARKERS = ("## Role and autonomy", "## Role - auto-picked from the brief")
@@ -65,6 +80,11 @@ MD_SECTIONS = (
     "## Room protocol",
     "## Review protocol",
     "## Build protocol",
+)
+
+LAYER_SECTIONS = (
+    "## The Engineer's Layer",
+    "## The Optimizer's Ledger",
 )
 
 MODEL_INHERIT = {"claude", "factory"}
@@ -89,6 +109,24 @@ def check_agent(dialect: str, ext: str, seat: str, failures: list[str]) -> None:
         failures.append("%s: missing the invention line" % path.relative_to(ROOT))
     if "## Cold verification pass" not in text:
         failures.append("%s: missing the cold verification pass" % path.relative_to(ROOT))
+    for section in LAYER_SECTIONS:
+        if section not in text:
+            failures.append("%s: missing %r" % (path.relative_to(ROOT), section))
+    signature_lines = [
+        line for line in text.splitlines() if line.startswith("- Signature -")
+    ]
+    if len(signature_lines) != 1:
+        failures.append(
+            "%s: needs exactly one '- Signature -' line (found %d)"
+            % (path.relative_to(ROOT), len(signature_lines))
+        )
+    elif SIGNATURES[seat] not in signature_lines[0]:
+        failures.append(
+            "%s: signature is not the seat's: expected 'Signature - %s'"
+            % (path.relative_to(ROOT), SIGNATURES[seat])
+        )
+    if not any(line.startswith("- Opt:") for line in text.splitlines()):
+        failures.append("%s: missing the '- Opt:' line" % path.relative_to(ROOT))
     sentence = SEATS[seat]
     if sentence not in text:
         failures.append("%s: missing the one sentence: %r" % (path.relative_to(ROOT), sentence))

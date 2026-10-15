@@ -192,7 +192,7 @@ class BoardTests(unittest.TestCase):
     def test_count_path_is_clean(self) -> None:
         proc = run_gate("check-board", "--count")
         self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
-        self.assertIn("98 questions", proc.stdout)
+        self.assertIn("112 questions", proc.stdout)
 
 
 class ContractTests(unittest.TestCase):
@@ -215,7 +215,7 @@ class ContractTests(unittest.TestCase):
     def test_lost_invention_line_fails_closed(self) -> None:
         # The invention line is load-bearing in every dialect file: stripping
         # it from one agent must fail the gate naming that file, never a
-        # silent pass. The live tree carries the line in all 42 seat files;
+        # silent pass. The live tree carries the line in all 48 seat files;
         # the named pair below can only come from the mutation.
         assert FIXTURE is not None
         target = FIXTURE / "agents" / "cursor" / "animestack-mei.md"
@@ -239,15 +239,35 @@ class ContractTests(unittest.TestCase):
         self.assertIn("missing the cold verification pass", proc.stdout)
         self.assertIn("agents/cursor/animestack-yui.md: missing the cold verification pass", out)
 
+    def test_stripped_signature_line_fails_closed(self) -> None:
+        # Exactly one '- Signature -' line per seat file is the contract; the
+        # failure was red-watched by hand at the port, this case pins it. The
+        # mutation strips the prefix match of one line (found 0), never edits
+        # the signature's name.
+        assert FIXTURE is not None
+        target = FIXTURE / "agents" / "cursor" / "animestack-rin.md"
+        with mutated(target, lambda text: text.replace("- Signature -", "- SignatureX -", 1)):
+            proc = run_gate("check-contract", root=FIXTURE)
+        out = proc.stdout.replace("\\", "/")
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("needs exactly one '- Signature -' line", proc.stdout)
+        self.assertIn(
+            "agents/cursor/animestack-rin.md: needs exactly one '- Signature -' line (found 0)",
+            out,
+        )
+
 
 class MeasurementTests(unittest.TestCase):
     def test_doc_count_mismatch_fails_closed(self) -> None:
+        # The playbooks row is the near-number twin of the laws row and its
+        # count did not move with the port; mutate it, never a row whose count
+        # moved (the laws row is thirteen now, and its fixture went stale).
         assert FIXTURE is not None
         target = FIXTURE / "docs" / "measurement.md"
-        with mutated(target, lambda text: text.replace("| 12 | laws |", "| 13 | laws |", 1)):
+        with mutated(target, lambda text: text.replace("| 12 | playbooks |", "| 13 | playbooks |", 1)):
             proc = run_gate("check-measurement", "--check-doc", root=FIXTURE)
         self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
-        self.assertIn("laws: doc says 13", proc.stdout)
+        self.assertIn("playbooks: doc says 13, tree says 12", proc.stdout)
 
 
 class VoicesTests(unittest.TestCase):
@@ -277,12 +297,47 @@ class VoicesTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
         self.assertIn("one sentence missing", proc.stdout)
 
+    def test_missing_register_fails_closed(self) -> None:
+        # The eighth register is the port's newest surface: delete the mechapip
+        # block plus its leading comma (the result stays valid JSON, so the
+        # gate reaches the register checks) and the gate must fail closed.
+        assert FIXTURE is not None
+        target = FIXTURE / "voices" / "house.json"
+
+        def drop_machine_register(text: str) -> str:
+            return re.sub(
+                r',\n    "mechapip": \{.*?\n    \}',
+                "",
+                text,
+                count=1,
+                flags=re.DOTALL,
+            )
+
+        with mutated(target, drop_machine_register):
+            proc = run_gate("check-voices", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("expected the eight seats", proc.stdout)
+        self.assertIn("mechapip: register missing", proc.stdout)
+
+    def test_machine_sentence_bleed_fails_closed(self) -> None:
+        # The machine's sentence landing on another seat's seed page is
+        # cross-seat voice: the gate must name the bled seat, not pass it.
+        assert FIXTURE is not None
+        target = FIXTURE / "docs" / "seats" / "mei.md"
+        with mutated(
+            target,
+            lambda text: text + '\n\n"What has this pattern done before?"\n',
+        ):
+            proc = run_gate("check-voices", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("mechapip: one sentence bleeds into mei (digest)", proc.stdout)
+
 
 class DigestTests(unittest.TestCase):
     def test_loop_row_out_of_order_fails_closed(self) -> None:
         assert FIXTURE is not None
         target = FIXTURE / "AGENTS.md"
-        with mutated(target, lambda text: text.replace("| 3 | Yui |", "| 8 | Yui |", 1)):
+        with mutated(target, lambda text: text.replace("| 4 | Yui |", "| 8 | Yui |", 1)):
             proc = run_gate("check-digest", root=FIXTURE)
         self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
         self.assertIn("Yui sits at row 8", proc.stdout)
@@ -296,10 +351,18 @@ class DigestTests(unittest.TestCase):
         self.assertIn("thirteen playbooks", proc.stdout)
 
     def test_version_sample_mismatch_fails_closed(self) -> None:
+        # Anchor the mutation to the sample the measurement doc actually
+        # carries, so the case pins the mismatch itself and never depends on
+        # the release lane having synced VERSION yet.
         assert FIXTURE is not None
         target = FIXTURE / "docs" / "measurement.md"
-        version = (FIXTURE / "VERSION").read_text(encoding="utf-8").strip()
-        with mutated(target, lambda text: text.replace("`v%s`" % version, "`v9.9.9`", 1)):
+        sample = re.search(
+            r"release `v(\d+\.\d+\.\d+)`",
+            target.read_text(encoding="utf-8"),
+        )
+        assert sample is not None  # the fixture carries the release sample line
+        sample_version = sample.group(1)
+        with mutated(target, lambda text: text.replace("`v%s`" % sample_version, "`v9.9.9`", 1)):
             proc = run_gate("check-digest", root=FIXTURE)
         self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
         self.assertIn("sample says v9.9.9", proc.stdout)

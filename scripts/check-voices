@@ -2,11 +2,11 @@
 """check-voices - the machine-readable house voice must match the live canon.
 
 voices/house.json is the structured voice config: one directive, one priority
-instruction, and seven registers (seat sentence + register note). No runtime
+instruction, and eight registers (seat sentence + register note). No runtime
 reads it, so it rots silently unless a gate ties it down. This check fails
 closed when:
 
-  - the register set is not exactly the seven seats;
+  - the register set is not exactly the eight seats;
   - the directive or priority instruction is empty;
   - a register note is empty or duplicated across seats;
   - a seat's sentence (normalized) is absent from its canon section or its
@@ -51,7 +51,7 @@ def _strip_root(argv: list[str]) -> list[str]:
 
 
 ROOT = _resolve_root(sys.argv[1:])
-SEATS = ("reika", "mei", "elo", "yui", "niko", "rin", "aria")
+SEATS = ("reika", "mei", "elo", "mechapip", "yui", "niko", "rin", "aria")
 VOICES = ROOT / "voices" / "house.json"
 
 
@@ -101,7 +101,7 @@ def main() -> int:
     registers = config.get("registers", {})
     if sorted(registers) != sorted(SEATS):
         failures.append(
-            "registers: expected the seven seats, found: %s"
+            "registers: expected the eight seats, found: %s"
             % (", ".join(sorted(registers)) or "none")
         )
 

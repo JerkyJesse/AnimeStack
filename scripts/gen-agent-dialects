@@ -149,8 +149,8 @@ def stamp_toml(rev: str, digest: str) -> str:
 
 def build() -> tuple[dict[Path, str], dict[str, int]] | None:
     sources = sorted(SRC.glob("*.md"))
-    if len(sources) != 7:
-        print(f"error: expected 7 claude agents, found {len(sources)}", file=sys.stderr)
+    if len(sources) != 8:
+        print(f"error: expected 8 claude agents, found {len(sources)}", file=sys.stderr)
         return None
 
     rev, digest = lore_stamp()

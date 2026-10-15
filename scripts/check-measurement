@@ -47,7 +47,7 @@ ROOT = _resolve_root(sys.argv[1:])
 MEASUREMENT = ROOT / "docs" / "measurement.md"
 
 HOSTS = ("claude", "cursor", "codex", "factory", "opencode", "kiro", "slate", "openclaw", "hermes", "gbrain")
-SEATS = ("mei", "elo", "yui", "niko", "rin", "aria", "reika")
+SEATS = ("mei", "elo", "mechapip", "yui", "niko", "rin", "aria", "reika")
 
 
 def count_rows():
@@ -74,7 +74,7 @@ def count_rows():
         ("house command, opencode", len(list((agents / "opencode" / "command").glob("*.md")))),
         ("house command, factory", len(list((agents / "factory" / "command").glob("*.md")))),
         ("commands, all hosts", sum(1 for p in agents.glob("*/command/*.md"))),
-        ("canon file", sum(1 for p in lore.glob("*.md") if p.name != "README.md")),
+        ("lore pages", sum(1 for p in lore.glob("*.md") if p.name != "README.md")),
         ("lore dossiers", len(list((lore / "dossiers").glob("*.md")))),
         ("lore total", sum(1 for p in lore.glob("*.md") if p.name != "README.md") + len(list((lore / "dossiers").glob("*.md")))),
         ("site art images", len(list((ROOT / "assets" / "img").glob("*.jpg")))),
@@ -84,7 +84,7 @@ def count_rows():
         ("art library, total", sum(1 for p in art.rglob("*") if p.is_file() and p.name != "README.md")),
         ("site thumbnails", sum(1 for p in (ROOT / "assets" / "thumbs").rglob("*") if p.is_file())),
         ("board questions", count_board()),
-        ("board seats", 7),
+        ("board seats", 8),
     ]
     return rows
 

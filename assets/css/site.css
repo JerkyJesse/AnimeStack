@@ -328,7 +328,7 @@ section.exam p.lead strong { color: var(--ink); }
 
 /* ----------------------------------------------------------------------
    Roster grid (index)
-   Seven seats, one spine. Cards link to seats/<seat>.html.
+   Eight seats, one spine. Cards link to seats/<seat>.html.
    ---------------------------------------------------------------------- */
 .roster {
   display: grid;

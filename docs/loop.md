@@ -1,25 +1,27 @@
 # The Design Loop
 
 The loop is AnimeStack's operating spine. Every material decision descends
-seven seats in fixed order, one sentence each. No skips. No merges. The loop is
+eight seats in fixed order — seven women and the machine — one sentence each.
+No skips. No merges. The loop is
 the same on every surface — a bug, a refactor, a ship, a cull.
 
 ![The design loop](../assets/img/loop.svg)
 
-## The seven steps
+## The eight steps
 
 | Step | Seat | One sentence |
 | --- | --- | --- |
 | 1 | **Mei** | What change in the world makes this obsolete? |
 | 2 | **Elo** | What does the crowd refuse to measure correctly? |
-| 3 | **Yui** | What failure does this prevent, and what would falsify it? |
-| 4 | **Niko** | Where does it live, and what must it never touch? |
-| 5 | **Rin** | How does this fail, and how fast? |
-| 6 | **Aria** | What ships, and what triggers it? |
-| 7 | **Reika** | What are we building, in one sentence? — then the verdict. |
+| 3 | **MechaPip** | What has this pattern done before? |
+| 4 | **Yui** | What failure does this prevent, and what would falsify it? |
+| 5 | **Niko** | Where does it live, and what must it never touch? |
+| 6 | **Rin** | How does this fail, and how fast? |
+| 7 | **Aria** | What ships, and what triggers it? |
+| 8 | **Reika** | What are we building, in one sentence? — then the verdict. |
 
 Each seat answers its one sentence. A thing is not finished when it is named;
-it is finished when all seven sentences exist. Missing one means the house is
+it is finished when all eight sentences exist. Missing one means the house is
 performing intelligence.
 
 The spine is a descent, not a brainstorm: one sentence each, in order, no
@@ -42,7 +44,7 @@ the takes: the seats that are not the lead and not Reika answer independently in
 one parallel batch, no seat seeing another's take. Round 2 — the exchange: the
 same seats see every take and get one reply each — affirm, contest a named seat
 with a fact, or revise — so the seats answer each other, not only the chair. The
-lead compiles the seven sentences and the contested points; Reika answers step 7
+lead compiles the eight sentences and the contested points; Reika answers step 8
 and signs. Two rounds is the room; one targeted follow-up to a single seat is
 allowed only while a factual conflict stays open — never a third full round,
 never a brainstorm. A build descent builds together: the lead holds its slot and
@@ -53,22 +55,26 @@ exchange runs, where a build seat may revise its own lane on a fact, re-running
 its focused checks and reporting the updated files, and a cross-lane need lands
 only as the one permitted targeted follow-up. If the harness cannot run a review
 batch concurrently, run that round one seat at a time; every seat in a round
-receives the same input. When Reika leads, all six others answer and she closes
+receives the same input. When Reika leads, all seven others answer and she closes
 directly. With no seat agents installed, run the seats inline, labeled in loop
 order — the rounds still happen; only the tool changes.
 
+### The record
+
+Every room opens with the standing record read — `python scripts/seat_record --read` — and every full-loop decision is appended to `DECISION_LOG.md` in the template it already carries: loop order, one sentence each, the Operator line left for the Operator. The record counts conduct — credits and debts with receipts — never money; the canon holds the mechanics in §XV.
+
 ### The review descent
 
-The review role runs `mei` → `elo` → `yui` → `niko` → `rin` → `aria`, then
+The review role runs `mei` → `elo` → `mechapip` → `yui` → `niko` → `rin` → `aria`, then
 Reika closes.
 
 A seat in the review role reads and answers its one sentence. Rin ends with
-`ACCEPT` or `END`; Aria ends with `SHIP` or `STAND DOWN`; Reika closes with a
+`ACCEPT` or `END`; Aria ends with `SHIP` or `STAND DOWN`; MechaPip ends with `MATCH` or `NO MATCH`; Reika closes with a
 verdict. The result is a recorded decision, not a diff.
 
 ### The build descent
 
-The build role runs `mei` → `elo` → `yui` → `niko` → `rin` → `aria`, one seat
+The build role runs `mei` → `elo` → `mechapip` → `yui` → `niko` → `rin` → `aria`, one seat
 at a time in loop order, then Reika closes.
 
 A seat in the build role builds the lane it owns and reports its exact changed
@@ -89,6 +95,9 @@ down — it does not invent work to look busy.
 - **Elo** ranks what the project must answer — the measurement audit: what is
   measured, by what rule, on what sample. The stand-down sentence is her floor,
   never a skipped seat: "No ranking — the board never posts this number."
+- **MechaPip** retrieves what a pattern has done before — pattern, sample,
+  verdict — or says "No match — the library has no analog." Recall is not a
+  mandate.
 - **Yui** names the failure and its falsifier. No failure, no mechanism.
 - **Niko** names the body and what it must never touch. If the cage cannot
   hold it, it does not exist.
@@ -115,5 +124,6 @@ spend. A full-loop act stays a full-loop act.
 ## Canon
 
 The loop is written in the house canon: [canon.md](lore/canon.md) §V (The
-Design Loop) and §XII (The Subagent Room). Where this page and the canon
+Design Loop) and §XII (The Subagent Room), and the record in §XV (The Seat
+Record). Where this page and the canon
 disagree, the canon wins.

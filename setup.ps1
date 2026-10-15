@@ -1,4 +1,4 @@
-# AnimeStack setup.ps1 - install the seven-seat house skills, agents, and the
+# AnimeStack setup.ps1 - install the eight-seat house skills, agents, and the
 # /house commands into supported AI coding hosts on Windows. The native entry
 # point beside ./setup (bash); same contract, same ownership gate, same model
 # rule. No network, no admin, no node.
@@ -30,7 +30,7 @@ $ErrorActionPreference = 'Stop'
 
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 
-$Skills = @('house', 'reika', 'mei', 'elo', 'yui', 'niko', 'rin', 'aria', 'simple')
+$Skills = @('house', 'reika', 'mei', 'elo', 'mechapip', 'yui', 'niko', 'rin', 'aria', 'simple')
 $AllHosts = @('claude', 'cursor', 'codex', 'factory', 'opencode', 'kiro', 'slate', 'openclaw', 'hermes', 'gbrain')
 $AutoHosts = @('claude', 'cursor', 'codex', 'factory', 'opencode', 'kiro', 'openclaw', 'hermes', 'gbrain')
 
@@ -48,7 +48,7 @@ $Paths = New-Object System.Collections.Generic.List[string]
 
 function Write-Usage {
     Write-Output @'
-AnimeStack setup.ps1 - install the seven-seat house skills, agents, and the
+AnimeStack setup.ps1 - install the eight-seat house skills, agents, and the
 /house commands into AI hosts (native Windows entry point beside ./setup)
 
 Usage: .\setup.ps1 [-TargetHost <name>] [-Uninstall] [-Check] [-Quiet] [-Help]
@@ -237,7 +237,7 @@ function Install-Digest([string]$HostName, [string]$Target) {
 # AnimeStack (digest for $HostName)
 
 AnimeStack is installed here as a rules-only digest: the house voice lives in
-AGENTS.md, and the full skill pack (seven seat skills, the /house router, the
+AGENTS.md, and the full skill pack (eight seat skills, the /house router, the
 /simple waiver, playbooks, principles, and agents) lives in the source repo.
 
 Repo: https://github.com/JerkyJesse/AnimeStack

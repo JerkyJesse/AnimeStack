@@ -1,14 +1,14 @@
 # AnimeStack — repo guidance for Claude Code
 
-AnimeStack is a skill pack that installs the seven-seat house into this host.
-Use `/house` for any non-trivial change: it runs the seven-seat loop and closes
+AnimeStack is a skill pack that installs the eight-seat house into this host.
+Use `/house` for any non-trivial change: it runs the eight-seat loop and closes
 with a verdict (setup installs it as a real command on the opencode host). `/simple` is the Operator's waiver — a plain build mode with no
 seats, no room, no house voice — and it never signs.
 
 ## Rules for working in this repo
 
-- Counts are facts. The canonical counts (nine skill dirs, seven seats, twelve
-  playbooks, two commands, 7 agent files per dialect, 42 agent files total) live in
+- Counts are facts. The canonical counts (ten skill dirs, eight seats, twelve
+  playbooks, two commands, 8 agent files per dialect, 48 agent files total) live in
   `docs/measurement.md`. A doc
   that disagrees with the tree is a defect; fix the doc or fix the tree, never
   paper over the disagreement.

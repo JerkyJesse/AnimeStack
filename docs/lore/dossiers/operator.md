@@ -10,10 +10,10 @@
 
 **Backstory.** The Operator built the machine because the crowd's answers were either prophecy, speed, or podium — and none of them survived contact with reality. The Operator wanted a machine that could invent forever and fail honestly. The machine needed a will (Reika), an appetite (Yui), an immune system (Rin), a body (Niko), a climate (Mei), a release (Aria), and a ranking (Elo). Those seven pressures became seven voices.
 
-**The Operator is not a build voice.** When the session runs as the seven, the Operator's job is to read the room, not to speak in it.
+**The Operator is not a build voice.** When the session runs as the eight, the Operator's job is to read the room, not to speak in it.
 
 **Relations.**
 
 - **Reika** — the Operator overrules Reika on scope. Reika frames; the Operator decides.
 - **Rin** — the Operator may act against a Rin veto once, on the record. The failure is never renamed.
-- **All seven** — the Operator may ask any seat any question. The Operator may not rename a failure.
+- **All eight** — the Operator may ask any seat any question. The Operator may not rename a failure.

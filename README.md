@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/img/social-preview.jpg" alt="The AnimeStack house — seven seats, one question: is this still allowed to live?"></p>
+<p align="center"><img src="assets/img/social-preview.jpg" alt="The AnimeStack house — eight seats, one question: is this still allowed to live?"></p>
 
 # AnimeStack
 
@@ -6,15 +6,15 @@
 
 gstack gives you a workflow. pstack gives you principles. Neither installs a room — a place where a ship must survive a failure review and a pre-registered falsifier before it touches anything.
 
-AnimeStack is that room. Seven seats answer in fixed order — `Mei -> Elo -> Yui -> Niko -> Rin -> Aria -> Reika` — one sentence each, in the room's rounds: a review runs independent takes, then one reply each; a build descent builds together, one seat at a time in loop order with every prior seat's changed files in the brief; and close with Reika's verdict. No votes. No skips. No merges. The spine is the same on every surface: a bug, a refactor, a ship, a cull.
+AnimeStack is that room. Eight seats — seven women and the machine — answer in fixed order: `Mei -> Elo -> MechaPip -> Yui -> Niko -> Rin -> Aria -> Reika` — one sentence each, in the room's rounds: a review runs independent takes, then one reply each; a build descent builds together, one seat at a time in loop order with every prior seat's changed files in the brief; and close with Reika's verdict. No votes. No skips. No merges. The spine is the same on every surface: a bug, a refactor, a ship, a cull.
 
-Each seat is a build personality, not a mascot. Mei names the climate. Elo ranks what the project must answer. Yui names the failure and its falsifier. Niko names the body and what it must never touch. Rin names the failure. Aria names the release. Reika chooses. A thing is not finished when it is named; it is finished when all seven sentences exist.
+Each seat is a build personality, not a mascot. Mei names the climate. Elo ranks what the project must answer. MechaPip says what the pattern has done before. Yui names the failure and its falsifier. Niko names the body and what it must never touch. Rin names the failure. Aria names the release. Reika chooses. A thing is not finished when it is named; it is finished when all eight sentences exist.
 
 The house is portable. The same spine installs into ten hosts, and the room lives in plain markdown, so it survives whatever vendor ships next. The authored pages beside it — the seats, the loop, the measurement audit — are written for a stranger reading GitHub.
 
-What AnimeStack is not: a mascot pack; seven flavors of "sure, let's ship it"; a replacement for your own judgment. The room is a discipline, not a personality.
+What AnimeStack is not: a mascot pack; eight flavors of "sure, let's ship it"; a replacement for your own judgment. The room is a discipline, not a personality.
 
-## The seven seats
+## The eight seats
 
 <table>
   <tr>
@@ -29,10 +29,11 @@ What AnimeStack is not: a mascot pack; seven flavors of "sure, let's ship it"; a
   </tr>
   <tr>
     <td align="center"><img src="assets/img/elo-roster.jpg" width="240" alt="Elo"></td>
+    <td align="center"><img src="assets/img/mechapip-roster.jpg" width="240" alt="MechaPip"></td>
   </tr>
 </table>
 
-Listed by leadership, founder first. The loop order is Mei, Elo, Yui, Niko, Rin, Aria, Reika. The roster is seven women, no exception.
+Listed by leadership, founder first. The loop order is Mei, Elo, MechaPip, Yui, Niko, Rin, Aria, Reika. The roster is seven women and the machine — the named exception.
 
 | Seat | Question they must answer | Owns in this pack |
 | --- | --- | --- |
@@ -43,8 +44,9 @@ Listed by leadership, founder first. The loop order is Mei, Elo, Yui, Niko, Rin,
 | [Mei](docs/seats/mei.md) | What change in the world makes this obsolete? | `/mei` — climate + investigation |
 | [Aria](docs/seats/aria.md) | What ships, and what triggers it? | `/aria` — tests + ship + QA |
 | [Elo](docs/seats/elo.md) | What does the crowd refuse to measure correctly? | `/elo` — measurement + audit |
+| [MechaPip](docs/seats/mechapip.md) | What has this pattern done before? | `/mechapip` — patterns + retrieval |
 
-**Credentials, one line each.** Reika — night-shift platform operations (the on-call desk was the school), CFA charterholder; art: shodo calligraphy; graphics: art direction and identity systems. Yui — physics PhD, ETH Zürich; CQF; one published paper in the selection/overfitting vein; art: generative art (plots of her own equations); graphics: creative coding and shaders. Rin — incident response then platform governance; CISSP + incident-command certifications; art: intaglio etching and technical illustration; graphics: technical drafting. Niko — EE/CS, Tsinghua University; CCIE-tier network certification and cloud architect professional certs; art: mecha concept design; graphics: 3D/CAD and render pipelines. Mei — PPE, University of Oxford; platform strategy; CFA; published essays (the flower-card rule); art: ikebana; graphics: editorial design and letterpress. Aria — mathematics and CS, University of Cambridge; release engineering; cloud/release certifications; art: animation timing; graphics: motion graphics. Elo — mathematics, Princeton University; benchmark/eval team; published rating methodology; ASA; art: sports photography; graphics: information design.
+**Credentials, one line each.** Reika — night-shift platform operations (the on-call desk was the school), CFA charterholder; art: shodo calligraphy; graphics: art direction and identity systems. Yui — physics PhD, ETH Zürich; CQF; one published paper in the selection/overfitting vein; art: generative art (plots of her own equations); graphics: creative coding and shaders. Rin — incident response then platform governance; CISSP + incident-command certifications; art: intaglio etching and technical illustration; graphics: technical drafting. Niko — EE/CS, Tsinghua University; CCIE-tier network certification and cloud architect professional certs; art: mecha concept design; graphics: 3D/CAD and render pipelines. Mei — PPE, University of Oxford; platform strategy; CFA; published essays (the flower-card rule); art: ikebana; graphics: editorial design and letterpress. Aria — mathematics and CS, University of Cambridge; release engineering; cloud/release certifications; art: animation timing; graphics: motion graphics. Elo — mathematics, Princeton University; benchmark/eval team; published rating methodology; ASA; art: sports photography; graphics: information design. MechaPip — the corpus was the school (no degree; the machines were the teachers); the archive is the record; art: fractal studies; graphics: pattern visualization.
 
 A clean night in the room sounds like this:
 
@@ -73,9 +75,9 @@ The house kept the settled question, the cage, and the live record. The temple, 
 
 ## The loop
 
-The loop is the spine. Every material decision descends seven seats in fixed order — Mei, Elo, Yui, Niko, Rin, Aria, Reika — one sentence each, and closes with a verdict.
+The loop is the spine. Every material decision descends eight seats in fixed order — Mei, Elo, MechaPip, Yui, Niko, Rin, Aria, Reika — one sentence each, and closes with a verdict.
 
-The seat picked in the agent picker leads the room: it frames the question, states its own sentence, then runs the rounds. A decision runs two parallel rounds — the seats that are not the lead and not Reika answer independently in one parallel batch (the takes; all six when Reika leads), then see every take and get one reply each to affirm, contest a named seat with a fact, or revise (the exchange). A build descent builds together — the lead holds its slot and builds its lane; the other seats descend one at a time in loop order, each build brief carrying every prior seat's sentence and reported changed files (prior lanes are read, never edited) — then the same exchange, where a seat may revise its own lane on a fact and a cross-lane need lands only as the one permitted targeted follow-up. The lead compiles the seven sentences and the contested points; Reika answers step 7 and signs. Two rounds is the room.
+The seat picked in the agent picker leads the room: it frames the question, states its own sentence, then runs the rounds. A decision runs two parallel rounds — the seats that are not the lead and not Reika answer independently in one parallel batch (the takes; all seven when Reika leads), then see every take and get one reply each to affirm, contest a named seat with a fact, or revise (the exchange). A build descent builds together — the lead holds its slot and builds its lane; the other seats descend one at a time in loop order, each build brief carrying every prior seat's sentence and reported changed files (prior lanes are read, never edited) — then the same exchange, where a seat may revise its own lane on a fact and a cross-lane need lands only as the one permitted targeted follow-up. The lead compiles the eight sentences and the contested points; Reika answers step 8 and signs. Two rounds is the room.
 
 The same spine runs two ways:
 
@@ -128,7 +130,7 @@ Open a new session and run `/house`.
 
 ## Commands
 
-`/house` — the entry point. It matches a request to one of the 12 playbooks, opens the loop, descends the seven seats in order, and closes with a verdict.
+`/house` — the entry point. It matches a request to one of the 12 playbooks, opens the loop, descends the eight seats in order, and closes with a verdict.
 
 `/simple` — the Operator's waiver. Plain build mode: no seats, no room, no house voice. It reads, writes, builds, and tests, and it never signs.
 
@@ -137,27 +139,27 @@ On the opencode and Factory hosts, `setup` also installs `/house` as a real comm
 one slash command there too; Claude Code, Cursor, Codex, and Kiro read the same router
 from the `house` skill.
 
-Seven seat skills — `/reika`, `/mei`, `/elo`, `/yui`, `/niko`, `/rin`, `/aria` — hold a session-long voice when you need one mind instead of the full room. Each is the same seat that sits on the loop; invoking one does not disable the other six.
+Eight seat skills — `/reika`, `/mei`, `/elo`, `/mechapip`, `/yui`, `/niko`, `/rin`, `/aria` — hold a session-long voice when you need one mind instead of the full room. Each is the same seat that sits on the loop; invoking one does not disable the other seven.
 
 ## What is in the box
 
-- 9 skills — 7 seats plus the `/house` router and the `/simple` waiver
+- 10 skills — 8 seats plus the `/house` router and the `/simple` waiver
 - 2 commands — `/house` for opencode and Factory, installed by `setup` (the skill covers the other hosts)
 - 12 playbooks under `skills/house/playbooks/`
-- 35 principles — 12 laws of the room plus 23 doctrine pieces adapted from pstack (`principles/INDEX.md`)
-- agents for six host dialects (Claude Code, OpenAI Codex, Cursor, Factory, Kiro, opencode) — 7 seat files per dialect (one per seat, the seat, review, and build roles in one file, picked from the brief); 42 agent files total; no concrete model is pinned, so every agent runs on the invoking session's model
+- 36 principles — 13 laws of the room plus 23 doctrine pieces adapted from pstack (`principles/INDEX.md`)
+- agents for six host dialects (Claude Code, OpenAI Codex, Cursor, Factory, Kiro, opencode) — 8 seat files per dialect (one per seat, the seat, review, and build roles in one file, picked from the brief); 48 agent files total; no concrete model is pinned, so every agent runs on the invoking session's model
 - an on-demand canon — every agent carries a `**Canon.**` pointer to its seat digest, dossier, and backstory, plus a seat trigger line naming the calls that force the read; canon text is never inlined (guard-the-context-window, steward Mei)
 - 10 hosts
-- the house canon — one canon file plus 15 seat dossiers (`docs/lore/`)
-- the art: `art/` — 7 dossier cards, 7 character sheets, 7 4K wallpapers (one per seat per set, no variants) — plus the site set in `assets/img/` (team composite, 7 roster cards, 7 portraits, a loop diagram, a social card)
+- the house canon — one canon file plus 17 seat dossiers (`docs/lore/`)
+- the art: `art/` — 8 dossier cards, 7 character sheets, 7 4K wallpapers (one per seat per set, no variants; the machine's character sheet and wallpaper sets await the art pass) — plus the site set in `assets/img/` (team composite, 8 roster cards, 8 portraits, a loop diagram, a social card)
 
-The `/house` router matches a request to one of the 12 playbooks, opens the loop, and closes with a verdict. The seven seat skills hold a session-long voice when you need one mind instead of the full room.
+The `/house` router matches a request to one of the 12 playbooks, opens the loop, and closes with a verdict. The eight seat skills hold a session-long voice when you need one mind instead of the full room.
 
 Every number has a command that checks it. [docs/measurement.md](docs/measurement.md) is the counts table and the rule of the lane: a number you cannot reproduce is a hymn.
 
 ## First task
 
-Five minutes, a real task, seven sentences. [docs/guide/first-task.md](docs/guide/first-task.md) walks a stranger from clone to a closing verdict.
+Five minutes, a real task, eight sentences. [docs/guide/first-task.md](docs/guide/first-task.md) walks a stranger from clone to a closing verdict.
 
 `/house` opens the loop. `/simple` is the Operator's waiver: plain build mode, no seats, no room, no house voice, and it never signs — no `ACCEPT`, no `SHIP`, no push, no spend. Use it for a plain build where the loop would be costume.
 
@@ -179,8 +181,9 @@ The falsifier is pre-registered in [docs/measurement.md](docs/measurement.md) §
 10. One box, one mechanism. A twin that loses to a sibling is retired, not renamed.
 11. Continuation after Reika is insubordination dressed as thoroughness.
 12. No seat signs work that was already owed. The change must answer a stated failure, or the house stands down.
+13. The pattern informs, it does not choose. A lookalike is not the mechanism.
 
-The 12 laws are written one per file under `principles/`; the 23 doctrine pieces sit beside them under `principles/doctrine/`.
+The 13 laws are written one per file under `principles/`; the 23 doctrine pieces sit beside them under `principles/doctrine/`.
 
 ## The house voice
 
@@ -191,17 +194,17 @@ Charm is not evidence. Evidence is not destiny. Destiny is not an instruction to
 ## Repo map
 
 ```
-docs/lore/          the house canon + 15 seat dossiers
-docs/seats/         seven seat pages
+docs/lore/          the house canon + 17 seat dossiers
+docs/seats/         eight seat pages
 docs/loop.md        the spine, both descents, the waiver
 docs/measurement.md the counts audit
 docs/guide/         first task
 assets/img/         site art: team composite, roster cards, portraits, loop diagram, social card
 art/                the art: dossiers, sheets, wallpapers — one per seat each
 seats/              seat pages for the site, each with that seat's roster card (GitHub Pages)
-skills/             9 skills: 7 seats + /house + /simple
-principles/         12 laws + 23 doctrine
-agents/             7 seat files per dialect (roles picked from the brief)
+skills/             10 skills: 8 seats + /house + /simple
+principles/         13 laws + 23 doctrine
+agents/             8 seat files per dialect (roles picked from the brief)
 voices/             house voice
 scripts/            maintenance gates: dialect generator, lore consistency, board, contract, counts, voices, digest
 tests/              gate self-tests: clean paths + failure modes (unittest)

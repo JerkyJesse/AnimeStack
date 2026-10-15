@@ -1,6 +1,6 @@
 # Principles
 
-35 principles: 12 laws of the room (canon §III) + 23 doctrine pieces (adapted from pstack, MIT).
+36 principles: 13 laws of the room (canon §III) + 23 doctrine pieces (adapted from pstack, MIT).
 
 The laws are the room's floor — verbatim from the canon, translated into software work. The doctrine pieces are re-voiced from pstack's engineering principles; each is translated, not copied. A steward owns each principle. A principle with no steward is a suggestion.
 
@@ -20,6 +20,7 @@ The laws are the room's floor — verbatim from the canon, translated into softw
 | `law-10-one-box-one-mechanism.md` | One concern per module; a losing twin is retired, not renamed. | Niko |
 | `law-11-continuation-after-reika.md` | Past the close, further work is insubordination dressed as thoroughness. | Reika |
 | `law-12-yui-no-work-already-owed.md` | No work that was already owed; a stated failure or stand down. | Yui |
+| `law-13-the-pattern-informs.md` | The pattern informs, it does not choose; a lookalike is not the mechanism. | MechaPip |
 
 ## Doctrine
 

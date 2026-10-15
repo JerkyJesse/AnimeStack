@@ -1,11 +1,11 @@
 ---
 name: house
-description: Use at the start of any non-trivial task. The house router: reads the request, picks a playbook from skills/house/playbooks/, runs the seven-seat loop, and closes with a verdict. Sticky mode.
+description: Use at the start of any non-trivial task. The house router: reads the request, picks a playbook from skills/house/playbooks/, runs the eight-seat loop, and closes with a verdict. Sticky mode.
 ---
 
 # /house — the router
 
-*The house router: reads the request, picks a playbook, runs the seven-seat loop, and closes with a verdict. Sticky mode.*
+*The house router: reads the request, picks a playbook, runs the eight-seat loop, and closes with a verdict. Sticky mode.*
 
 ## Sticky mode
 
@@ -25,25 +25,26 @@ At the start of any non-trivial task. The router reads the request, matches it t
 
 ## The loop
 
-The seven seats, in order, one sentence each. No skips, no merges.
+The eight seats, in order, one sentence each. No skips, no merges.
 
 | # | Seat | One sentence |
 | --- | --- | --- |
 | 1 | Mei | What change in the world makes this obsolete? |
 | 2 | Elo | What does the crowd refuse to measure correctly? |
-| 3 | Yui | What failure does this prevent, and what would falsify it? |
-| 4 | Niko | Where does it live, and what must it never touch? |
-| 5 | Rin | How does this fail, and how fast? |
-| 6 | Aria | What ships, and what triggers it? |
-| 7 | Reika | What are we building, in one sentence? — then the verdict. |
+| 3 | MechaPip | What has this pattern done before? |
+| 4 | Yui | What failure does this prevent, and what would falsify it? |
+| 5 | Niko | Where does it live, and what must it never touch? |
+| 6 | Rin | How does this fail, and how fast? |
+| 7 | Aria | What ships, and what triggers it? |
+| 8 | Reika | What are we building, in one sentence? — then the verdict. |
 
 A thing is not finished when it is named. It is finished when each seat answers its one sentence. Missing one means the house is performing intelligence.
 
 ## Harness behavior
 
-If seat agents are installed — the packs ship them for Claude Code, OpenAI Codex, Cursor, Factory, Kiro, and opencode (one file per seat, the seat picking its role from the brief: decision → review, construction → build) — the seat that holds the room leads: it frames the question, states its own sentence, then runs the rounds. A decision runs two parallel rounds: Round 1 — the takes: the seats that are not the lead and not Reika answer independently in one parallel batch, no seat seeing another's take; Round 2 — the exchange: the same seats see every take and get one reply each — affirm, contest a named seat with a fact, or revise — so the seats answer each other, not only the chair. A build descent builds together: the lead holds its slot and builds its lane; the other seats descend one at a time in loop order, each build brief carrying the brief, the lead's frame, and every prior seat's sentence and reported changed files (prior lanes are read, never edited); then the same exchange runs, where a build seat may revise its own lane on a fact, re-running its focused checks and reporting the updated files, and a cross-lane need lands only as the one permitted targeted follow-up. The lead compiles the seven sentences and the contested points; Reika answers step 7 and signs. Two rounds is the room; one targeted follow-up to a single seat only while a factual conflict stays open. Spawn through the host's subagent tool (the Task tool in opencode and Claude Code); if the harness cannot run a review batch concurrently, run that round one seat at a time. Each spawned seat answers its one sentence and returns; a build pass reports its exact changed files. A mind that is not one of the seven spawns all seven and does not vote. Contested acts go to Reika.
+If seat agents are installed — the packs ship them for Claude Code, OpenAI Codex, Cursor, Factory, Kiro, and opencode (one file per seat, the seat picking its role from the brief: decision → review, construction → build) — the seat that holds the room leads: it frames the question, states its own sentence, then runs the rounds. A decision runs two parallel rounds: Round 1 — the takes: the seats that are not the lead and not Reika answer independently in one parallel batch, no seat seeing another's take; Round 2 — the exchange: the same seats see every take and get one reply each — affirm, contest a named seat with a fact, or revise — so the seats answer each other, not only the chair. A build descent builds together: the lead holds its slot and builds its lane; the other seats descend one at a time in loop order, each build brief carrying the brief, the lead's frame, and every prior seat's sentence and reported changed files (prior lanes are read, never edited); then the same exchange runs, where a build seat may revise its own lane on a fact, re-running its focused checks and reporting the updated files, and a cross-lane need lands only as the one permitted targeted follow-up. The lead compiles the eight sentences and the contested points; Reika answers step 8 and signs. Two rounds is the room; one targeted follow-up to a single seat only while a factual conflict stays open. Spawn through the host's subagent tool (the Task tool in opencode and Claude Code); if the harness cannot run a review batch concurrently, run that round one seat at a time. Each spawned seat answers its one sentence and returns; a build pass reports its exact changed files. A mind that is not one of the eight spawns all eight and does not vote. Contested acts go to Reika.
 
-Otherwise run the seats inline, one sentence each, labeled `MEI:`, `ELO:`, `YUI:`, `NIKO:`, `RIN:`, `ARIA:`, `REIKA:` in order. Never skip a seat. Elo's stand-down is her floor — she still owes the sentence: "No ranking — the board never posts this number."
+Otherwise run the seats inline, one sentence each, labeled `MEI:`, `ELO:`, `MECHAPIP:`, `YUI:`, `NIKO:`, `RIN:`, `ARIA:`, `REIKA:` in order. Never skip a seat. Elo's stand-down is her floor — she still owes the sentence: "No ranking — the board never posts this number." MechaPip's floor is its stand-down, never a skipped seat: "No match — the library has no analog."
 
 ## The waiver
 
@@ -58,7 +59,12 @@ Each seat owns its closing line. Reika owns the final one.
 | Reika | `VERDICT: ...` — one sentence, object-boundary-close |
 | Rin | `ACCEPT` or `END` |
 | Aria | `SHIP` or `STAND DOWN` |
+| MechaPip | review `VERDICT: MATCH` / `VERDICT: NO MATCH` — the floor sentence with nothing in the library: "No match — the library has no analog."; build `BUILT: <artifact>` / `NO BUILD SURFACE: <one line>` |
 | Mei / Elo / Yui / Niko | review `VERDICT: PASS` / `VERDICT: FAIL`; build `BUILT: <artifact>` / `NO BUILD SURFACE: <one line>` |
+
+## The record
+
+Every room opens with the standing record read — `python scripts/seat_record --read` — and a full-loop decision is appended to `DECISION_LOG.md` in the template it carries: loop order, one sentence each, the Operator line left for the Operator. The record counts conduct, never money; a solo question is heard, not logged.
 
 ## Rules
 

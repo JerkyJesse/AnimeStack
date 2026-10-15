@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# AnimeStack setup - install the seven-seat house skills, agents, and the
+# AnimeStack setup - install the eight-seat house skills, agents, and the
 # opencode and factory /house commands into supported AI coding hosts. No
 # network, no bun, no sudo, no node.
 #
@@ -28,7 +28,7 @@ UNINSTALL=0
 CHECK=0
 HOST="claude"
 
-SKILLS="house reika mei elo yui niko rin aria simple"
+SKILLS="house reika mei elo mechapip yui niko rin aria simple"
 ALL_HOSTS="claude cursor codex factory opencode kiro slate openclaw hermes gbrain"
 AUTO_HOSTS="claude cursor codex factory opencode kiro openclaw hermes gbrain"
 
@@ -47,7 +47,7 @@ PATHS=""
 
 usage() {
   cat <<'EOF'
-AnimeStack setup - install the seven-seat house skills, agents, and the
+AnimeStack setup - install the eight-seat house skills, agents, and the
 opencode and factory /house commands into AI hosts
 
 Usage: ./setup [options]
@@ -308,7 +308,7 @@ _install_digest() {
 # AnimeStack (digest for $host)
 
 AnimeStack is installed here as a rules-only digest: the house voice lives in
-AGENTS.md, and the full skill pack (seven seat skills, the /house router, the
+AGENTS.md, and the full skill pack (eight seat skills, the /house router, the
 /simple waiver, playbooks, principles, and agents) lives in the source repo.
 
 Repo: https://github.com/JerkyJesse/AnimeStack

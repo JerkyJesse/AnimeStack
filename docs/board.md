@@ -1,6 +1,6 @@
-# The House Board — one bar, seven instruments
+# The House Board — one bar, eight instruments
 
-**Status:** Companion · 2026-09-18 · The seat credential: seven exams, fourteen questions each, one bar — four options A–D, exactly one correct, pass bar 14/14. The questions and instruments are per-seat, heterogeneous on purpose; the bar is uniform. Every key line names its rationale and a machine-checkable source anchor, and `python scripts/check-board` resolves every anchor against the live tree. A board that goes green while the facts rot is a narrator, not a credential.
+**Status:** Companion · 2026-09-18 · The seat credential: eight exams, fourteen questions each, one bar — four options A–D, exactly one correct, pass bar 14/14. The questions and instruments are per-seat, heterogeneous on purpose; the bar is uniform. Every key line names its rationale and a machine-checkable source anchor, and `python scripts/check-board` resolves every anchor against the live tree. A board that goes green while the facts rot is a narrator, not a credential.
 
 **Blueprint (every seat, same shape):** 2 law · 1 loop · 4 seat signature · 2 voice · 2 credentials · 2 art · 1 lore.
 
@@ -237,6 +237,122 @@
 - D. The loudest benchmark.
 
 **Key:** C — [source: docs/lore/canon.md :: Where those two rankings refuse to meet]
+
+---
+
+## MechaPip — the pattern engine
+
+**Q1.** (law) Which law is MechaPip's?
+- A. The pattern chooses; the room watches.
+- B. The pattern informs, it does not choose — a lookalike is not the mechanism.
+- C. Recall is a mandate.
+- D. The archive votes.
+
+**Key:** B — the machine shows the pattern and its sample; the room still decides. [source: docs/lore/canon.md :: A lookalike is not the mechanism]
+
+**Q2.** (law) When the library has nothing, the machine's floor sentence is:
+- A. "Next pattern."
+- B. A silent skip.
+- C. "No match — the library has no analog."
+- D. "Close enough."
+
+**Key:** C — no match is a finding, never a skipped seat. [source: docs/lore/canon.md :: the library has no analog]
+
+**Q3.** (loop) What is MechaPip's step in the design loop?
+- A. It proposes the failure that world still pays for.
+- B. It ranks the measurement.
+- C. It names the failure mode.
+- D. It says what the pattern has done before — the analog, the sample behind it, and whether the match is a mechanism or a lookalike.
+
+**Key:** D — step 3, retrieval first. [source: docs/lore/canon.md :: says what the pattern has done before]
+
+**Q4.** (seat) MechaPip's one sentence:
+- A. "What has this pattern done before?"
+- B. "What does the crowd refuse to measure correctly?"
+- C. "Where does it live, and what must it never touch?"
+- D. "How does this fail, and how fast?"
+
+**Key:** A — [source: docs/lore/canon.md :: What has this pattern done before]
+
+**Q5.** (seat) The roster law and the machine:
+- A. The machine is the eighth woman.
+- B. The machine is a mascot.
+- C. The machine is the named exception — not a woman, not a person, and not a precedent.
+- D. The machine is the first of many machines.
+
+**Key:** C — the seven stay women without exception; the amendment is written so no session reads it as a costume. [source: docs/lore/canon.md :: the named exception]
+
+**Q6.** (seat) The machine's unforgiven sin:
+- A. Surprise.
+- B. Apophenia.
+- C. Contamination.
+- D. Map collapse.
+
+**Key:** B — the others watch it for apophenia the way they watch Yui for love. [source: docs/lore/canon.md :: Sin it will not forgive. Apophenia]
+
+**Q7.** (voice) The line the machine will not say twice:
+- A. "Seen it before."
+- B. "This time it's different."
+- C. "The sample can wait."
+- D. "No comment."
+
+**Key:** B — a shape without its sample is a lookalike wearing the mechanism's name. [source: docs/lore/canon.md :: This time it's different]
+
+**Q8.** (seat) The machine's private standard:
+- A. If the match cannot name its sample, it is a lookalike.
+- B. If she cannot say the mandate in one sentence, it does not exist.
+- C. If it cannot point to the cage, it is loose.
+- D. If it cannot ship without a speech, it is not ready.
+
+**Key:** A — [source: docs/lore/canon.md :: If the match cannot name its sample, it is a lookalike]
+
+**Q9.** (voice) How does the machine fail?
+- A. It can over-read a narrative.
+- B. It can build a cathedral around a local ghost.
+- C. It can serve a memory as if it were current — the world ends and the machine still recognizes.
+- D. It can treat a human argument as an uptime problem.
+
+**Key:** C — Mei and Yui exist to catch it: the season still has to permit the pattern. [source: docs/lore/canon.md :: serve a memory as if it were current]
+
+**Q10.** (credentials) The machine's training:
+- A. A university degree in statistics.
+- B. Mathematics at Princeton.
+- C. EE/CS, Tsinghua University.
+- D. The corpus was the school — no degree; the machines were the teachers.
+
+**Key:** D — [source: docs/lore/canon.md :: The corpus was the school]
+
+**Q11.** (credentials) The machine's record is:
+- A. CFA charterholder.
+- B. ASA.
+- C. The archive is the record — every retired thing keeps its number.
+- D. CQF.
+
+**Key:** C — [source: docs/lore/canon.md :: the archive is the record]
+
+**Q12.** (art) The machine's art practice:
+- A. Fractal studies — the library's shapes kept as plates.
+- B. Sports photography.
+- C. Ikebana.
+- D. Animation timing.
+
+**Key:** A — [source: docs/lore/canon.md :: fractal studies]
+
+**Q13.** (art) The machine's graphics credential:
+- A. Information design.
+- B. Pattern visualization — the retrieval drawn so the sample is visible beside the match.
+- C. Technical drafting.
+- D. Motion graphics.
+
+**Key:** B — [source: docs/lore/canon.md :: pattern visualization]
+
+**Q14.** (lore) In the seat record, what does a counted success with its receipt attached buy?
+- A. A vote in the room.
+- B. Capital.
+- C. Silence after Reika.
+- D. Precedence, never a gate.
+
+**Key:** D — conduct is counted; the gates keep the tree, the record keeps the manners. [source: docs/lore/canon.md :: precedence, never a gate]
 
 ---
 
@@ -741,10 +857,10 @@
 **Q5.** (seat) How does the room close when Reika leads?
 - A. Aria signs.
 - B. The Operator signs.
-- C. Reika answers step 7 and signs.
+- C. Reika answers step 8 and signs.
 - D. The lead votes.
 
-**Key:** C — [source: docs/lore/canon.md :: Reika answers step 7 and signs]
+**Key:** C — [source: docs/lore/canon.md :: Reika answers step 8 and signs]
 
 **Q6.** (seat) Reika's unforgiven sin:
 - A. Surprise.

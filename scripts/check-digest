@@ -5,7 +5,7 @@ AGENTS.md and CLAUDE.md are hand-authored digests of this repo; nothing
 regenerates them, so their claims rot silently. This gate ties the checkable
 claims down:
 
-  - AGENTS.md's loop table: seven rows in loop order, the seat names, and each
+  - AGENTS.md's loop table: eight rows in loop order, the seat names, and each
     seat's one sentence as recorded in voices/house.json;
   - AGENTS.md's host-dialect count claim vs the agents/ trees;
   - CLAUDE.md's canonical count phrases vs the tree (skill dirs, seats,
@@ -56,7 +56,7 @@ AGENTS_MD = ROOT / "AGENTS.md"
 CLAUDE_MD = ROOT / "CLAUDE.md"
 VOICES = ROOT / "voices" / "house.json"
 
-LOOP_ORDER = ("Mei", "Elo", "Yui", "Niko", "Rin", "Aria", "Reika")
+LOOP_ORDER = ("Mei", "Elo", "MechaPip", "Yui", "Niko", "Rin", "Aria", "Reika")
 ROW_RE = re.compile(r"^\|\s*(\d)\s*\|\s*([A-Za-z]+)\s*\|\s*(.+?)\s*\|\s*$", re.M)
 WORDS = {
     "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
@@ -81,6 +81,7 @@ def as_int(token: str) -> int | None:
 def tree_counts() -> dict[str, int]:
     agents = ROOT / "agents"
     skills = ROOT / "skills"
+    seats = ROOT / "docs" / "seats"
     dialect_dirs = sorted(p for p in agents.iterdir() if p.is_dir()) if agents.is_dir() else []
     per_dialect = [
         len([p for p in dialect.glob("animestack-*") if p.is_file()])
@@ -89,7 +90,7 @@ def tree_counts() -> dict[str, int]:
     return {
         "dialects": len(dialect_dirs),
         "skills": len([p for p in skills.iterdir() if p.is_dir()]) if skills.is_dir() else 0,
-        "seats": 7,
+        "seats": len(list(seats.iterdir())) if seats.is_dir() else 0,
         "playbooks": len(list((skills / "house" / "playbooks").iterdir()))
         if (skills / "house" / "playbooks").is_dir()
         else 0,
@@ -133,8 +134,8 @@ def main() -> int:
 
     if agents_md:
         rows = ROW_RE.findall(agents_md)
-        if len(rows) != 7:
-            failures.append("AGENTS.md loop table: expected 7 rows, found %d" % len(rows))
+        if len(rows) != len(LOOP_ORDER):
+            failures.append("AGENTS.md loop table: expected %d rows, found %d" % (len(LOOP_ORDER), len(rows)))
         for number, seat, cell in rows:
             checks += 1
             if seat not in LOOP_ORDER:

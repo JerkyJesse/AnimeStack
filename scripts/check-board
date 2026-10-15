@@ -53,12 +53,12 @@ ROOT = _resolve_root(sys.argv[1:])
 BOARD = ROOT / "docs" / "board.md"
 LETTERS = "ABCD"
 
-SEAT_RE = re.compile(r"^##\s+(Reika|Yui|Rin|Niko|Mei|Aria|Elo)\b.*$", re.M)
+SEAT_RE = re.compile(r"^##\s+(Reika|Yui|Rin|Niko|Mei|Aria|Elo|MechaPip)\b.*$", re.M)
 QUESTION_RE = re.compile(r"^\*\*Q(\d+)\.\*\*\s*(?:\((law|loop|seat|voice|credentials|art|lore)\)\s*)?(.+?)\s*$", re.M)
 OPTION_RE = re.compile(r"^-\s*([A-D])\.\s+(.+?)\s*$", re.M)
 KEY_RE = re.compile(r"^\*\*Key:\*\*\s*([A-D])\s*[\u2014-]\s*(.+?)\s*\[source:\s*(.+?)\s*::\s*(.+?)\s*\]\s*$", re.M)
 
-SEATS = ("Mei", "Elo", "Yui", "Niko", "Rin", "Aria", "Reika")
+SEATS = ("Mei", "Elo", "MechaPip", "Yui", "Niko", "Rin", "Aria", "Reika")
 QUESTIONS_PER_SEAT = 14
 
 
@@ -201,7 +201,7 @@ def main(argv: list[str] | None = None) -> int:
         text = BOARD.read_text(encoding="utf-8")
         questions = len(QUESTION_RE.findall(text))
         anchors = len(KEY_RE.findall(text))
-        print("board: 7 seats, %d questions, %d anchors; audit with python scripts/check-board" % (questions, anchors))
+        print("board: %d seats, %d questions, %d anchors; audit with python scripts/check-board" % (len(SEATS), questions, anchors))
         return 0
 
     if args.seat:
@@ -209,7 +209,12 @@ def main(argv: list[str] | None = None) -> int:
             print("check-board: --seat needs --answers", file=sys.stderr)
             return 2
         answers = [chunk.strip() for chunk in args.answers.split(",")]
-        return score_seat(args.seat.strip().lower().capitalize(), answers)
+        requested = args.seat.strip().lower()
+        seat = next((name for name in SEATS if name.lower() == requested), None)
+        if seat is None:
+            print("check-board: no such seat: %s" % args.seat.strip(), file=sys.stderr)
+            return 2
+        return score_seat(seat, answers)
 
     return run_gate()
 

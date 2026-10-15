@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Consistency check: the seven seats' credential facts agree across surfaces.
+"""Consistency check: the eight seats' credential facts agree across surfaces.
 
 Source of truth: docs/lore/canon.md (each seat's compact credentials line).
 For every seat the art/graphics keys parsed from the canon tail must appear:
@@ -57,7 +57,7 @@ def _strip_root(argv: list[str]) -> list[str]:
 
 
 ROOT = _resolve_root(sys.argv[1:])
-SEATS = ("reika", "yui", "rin", "niko", "mei", "aria", "elo")
+SEATS = ("reika", "yui", "rin", "niko", "mei", "aria", "elo", "mechapip")
 TREE_SUFFIXES = {
     "claude": ("",),
     "opencode": ("",),

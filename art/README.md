@@ -5,16 +5,16 @@ house art here:
 
 | Set | Files | What |
 | --- | --- | --- |
-| `dossiers/` | 7 | one dossier card per seat |
-| `sheets/` | 7 | one character sheet per seat |
-| `wallpapers/` | 7 | one 4K wallpaper per seat (stamped jpg) |
+| `dossiers/` | 8 | one dossier card per seat — the machine's card landed with the eighth seat |
+| `sheets/` | 7 | one character sheet per seat (the machine's sheet awaits the art pass) |
+| `wallpapers/` | 7 | one 4K wallpaper per seat (stamped jpg; the machine's awaits the art pass) |
 
 The base set — portraits, roster cards, the team composite, the loop diagram, the social
 card — lives once in `assets/img/` and is what the site and the README render. The lore
 the agents read lives in `docs/seats/` and `docs/lore/`; this directory is only the
 pictures.
 
-Seat slugs: `reika`, `yui`, `rin`, `niko`, `mei`, `aria`, `elo` (leadership order, founder first; the loop order is separate).
+Seat slugs: `reika`, `yui`, `rin`, `niko`, `mei`, `aria`, `elo`, `mechapip` (leadership order, founder first; the loop order is separate).
 
 ## The tour
 

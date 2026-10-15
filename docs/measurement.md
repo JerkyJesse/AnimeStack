@@ -10,8 +10,8 @@ the table, the table is wrong.
 
 ## 1. The sample
 
-What is ranked: this repository, release `v1.16.0` (`VERSION`), 2026-09-28. The canon
-text inside it is this pack's own, first written for v1.3.0; the language reform arrived in v1.4.0, the credentials in v1.5.0, the six-dialect agent coverage in v1.6.0, the art and graphics credentials in v1.7.0, the one-file opencode room in v1.8.0, the one-file-everywhere autonomy collapse in v1.9.0, the collaborative room in v1.10.0, the House Board and the contract gate in v1.11.0, the opencode provenance stamp in v1.12.0, the gate self-tests, voice and digest checks, and the `--root` hooks in v1.13.0, and the building room in v1.14.0, the invention surface and the cold verification pass in v1.15.0, and the per-host installer round-trip tests in v1.16.0.
+What is ranked: this repository, release `v1.17.0` (`VERSION`), 2026-10-15. The canon
+text inside it is this pack's own, first written for v1.3.0; the language reform arrived in v1.4.0, the credentials in v1.5.0, the six-dialect agent coverage in v1.6.0, the art and graphics credentials in v1.7.0, the one-file opencode room in v1.8.0, the one-file-everywhere autonomy collapse in v1.9.0, the collaborative room in v1.10.0, the House Board and the contract gate in v1.11.0, the opencode provenance stamp in v1.12.0, the gate self-tests, voice and digest checks, and the `--root` hooks in v1.13.0, and the building room in v1.14.0, the invention surface and the cold verification pass in v1.15.0, the per-host installer round-trip tests in v1.16.0, and the whole-house port in v1.17.0 — the machine seat, the counted record, and the recorded loop, every trading fact stripped.
 
 The claims in this pack are claims about this tree, not promises about the outcomes a
 user will get. A pack that installs cleanly on your host is a body question, not a result
@@ -24,58 +24,61 @@ the tree contains what the table says it contains, at the stated release, on the
 
 ## 2. The counts table
 
-Run each command from the repo root. The expected count is the v1.16.0 truth; a command
+Run each command from the repo root. The expected count is the v1.17.0 truth; a command
 that prints anything else is a defect, and the defect is the tree's number, never the
 prose.
 
 | Count | What | Audit command |
 | --- | --- | --- |
-| 7 | seats | `ls docs/seats \| wc -l` |
-| 9 | skills | `ls skills \| wc -l` (house, reika, mei, elo, yui, niko, rin, aria, simple) |
+| 8 | seats | `ls docs/seats \| wc -l` |
+| 10 | skills | `ls skills \| wc -l` (house, reika, mei, elo, mechapip, yui, niko, rin, aria, simple) |
 | 12 | playbooks | `ls skills/house/playbooks \| wc -l` |
-| 12 | laws | `ls principles/law-*.md \| wc -l` |
+| 13 | laws | `ls principles/law-*.md \| wc -l` |
 | 23 | doctrine pieces | `ls principles/doctrine \| wc -l` |
 | 10 | hosts | `grep -oE 'claude\|cursor\|codex\|factory\|opencode\|kiro\|slate\|openclaw\|hermes\|gbrain' setup \| sort -u \| wc -l` |
-| 7 | agents, claude host | `ls agents/claude \| wc -l` (one seat file per seat; role picked from the brief) |
-| 7 | agents, cursor host | `ls agents/cursor/*.md \| wc -l` |
-| 7 | agents, factory host | `ls agents/factory/*.md \| wc -l` |
-| 7 | agents, codex host | `ls agents/codex/*.toml \| wc -l` |
-| 7 | agents, kiro host | `ls agents/kiro/*.md \| wc -l` |
-| 7 | agents, opencode host | `ls agents/opencode/*.md \| wc -l` |
-| 42 | agent files, all dialects | `find agents -maxdepth 2 -type f \( -name '*.md' -o -name '*.toml' \) \| wc -l` |
+| 8 | agents, claude host | `ls agents/claude \| wc -l` (one seat file per seat; role picked from the brief) |
+| 8 | agents, cursor host | `ls agents/cursor/*.md \| wc -l` |
+| 8 | agents, factory host | `ls agents/factory/*.md \| wc -l` |
+| 8 | agents, codex host | `ls agents/codex/*.toml \| wc -l` |
+| 8 | agents, kiro host | `ls agents/kiro/*.md \| wc -l` |
+| 8 | agents, opencode host | `ls agents/opencode/*.md \| wc -l` |
+| 48 | agent files, all dialects | `find agents -maxdepth 2 -type f \( -name '*.md' -o -name '*.toml' \) \| wc -l` |
 | 1 | house command, opencode | `ls agents/opencode/command/*.md \| wc -l` |
 | 1 | house command, factory | `ls agents/factory/command/*.md \| wc -l` |
 | 2 | commands, all hosts | `find agents -path '*/command/*.md' \| wc -l` |
-| 1 | canon file | `ls docs/lore/*.md \| grep -v README \| wc -l` (canon) |
-| 15 | lore dossiers | `ls docs/lore/dossiers \| wc -l` |
-| 16 | lore total | the canon + 15 dossiers, the two rows above summed |
-| 98 | board questions | `python scripts/check-board --count` |
-| 16 | site art images | `ls assets/img/*.jpg \| wc -l` |
-| 7 | art dossier cards | `ls art/dossiers \| wc -l` |
+| 3 | lore pages | `ls docs/lore/*.md \| grep -v README \| wc -l` (canon, scenes, lore index) |
+| 17 | lore dossiers | `ls docs/lore/dossiers \| wc -l` |
+| 20 | lore total | the lore pages + 17 dossiers, the two rows above summed |
+| 112 | board questions | `python scripts/check-board --count` |
+| 8 | board seats | `python scripts/check-board --count` |
+| 18 | site art images | `ls assets/img/*.jpg \| wc -l` |
+| 8 | art dossier cards | `ls art/dossiers \| wc -l` |
 | 7 | art character sheets | `ls art/sheets \| wc -l` |
 | 7 | art wallpapers | `ls art/wallpapers \| wc -l` |
-| 21 | art library, total | `find art -type f -not -name 'README.md' \| wc -l` |
+| 22 | art library, total | `find art -type f -not -name 'README.md' \| wc -l` |
 | 28 | site thumbnails | `find assets/thumbs -type f \| wc -l` |
 
 Notes on the rows.
 
-The seats row is seven, not eight. The roster is seven women, no exception, and the
-seat pages mirror them one for one. A seat written otherwise has left the tree.
+The seats row is eight: seven women and the machine — the named exception, written
+down so no session reads it as a costume or as a precedent. The seat pages mirror
+the roster one for one; the machine's sheet, wallpaper, and thumbnail sets await
+the art pass. A seat written otherwise has left the tree.
 
-The skills row is nine: the seven seats plus the `house` skill and the `simple` waiver.
+The skills row is ten: the eight seats plus the `house` skill and the `simple` waiver.
 If a new skill appears without a row here, the table is stale, not the skill.
 
-The playbooks and laws are both twelve, and they are not the same twelve. The playbooks
-live under `skills/house/playbooks`; the laws live under `principles/law-*.md`. Count
-each with its own command and do not let the matching numbers fool you into merging them.
+The playbooks row is twelve and the laws row is thirteen; they are not the same set.
+The playbooks live under `skills/house/playbooks`; the laws live under `principles/law-*.md`.
+Count each with its own command and do not let the near numbers fool you into merging them.
 
 The hosts row counts the ten host names the setup script ships for, not a README
 heading. `grep -c '^### ' README.md` is a hymn: it counts headings, not hosts. Use the
 setup list; it prints 10. The ten names are claude, cursor, codex, factory, opencode,
 kiro, slate, openclaw, hermes, gbrain.
 
-The agents rows: every dialect ships seven seat files - one file per seat, the
-seat, review, and build roles in one file, picked from the brief - forty-two
+The agents rows: every dialect ships eight seat files - one file per seat, the
+seat, review, and build roles in one file, picked from the brief - forty-eight
 agent files total. Codex ships TOML custom agents; the others ship markdown. A
 host that ships the wrong roster is a defect, not a rounding error.
 
@@ -86,27 +89,28 @@ The commands rows count two: `agents/opencode/command/house.md` and
 and Kiro need no command file — the `house` skill is already the slash command
 there.
 
-The lore rows are two that sum to sixteen: one canon file at the top of `docs/lore`
-(`canon.md`), and fifteen dossiers in `docs/lore/dossiers`. The policy page
-`docs/lore/README.md` is authored, not canon, and is not one of the sixteen. The canon
-is the law; the dossiers are the deep lore. They are kept separate because a dossier
-deepens a seat and never contradicts it, and the count is the proof they are both present.
+The lore rows are three pages and seventeen dossiers, twenty total: the pages at the
+top of `docs/lore` — `canon.md`, `SCENES.md`, and `LORE_INDEX.md` — hold the law, the
+format models, and the retrieval map. The policy page `docs/lore/README.md` is
+authored, not canon, and is not one of the twenty. The dossiers are the deep lore,
+kept separate because a dossier deepens a seat and never contradicts it, and the
+count is the proof they are all present.
 
-The site-art row is the sixteen jpgs in `assets/img/` — seven portraits, seven roster cards,
-the team composite, and the social card; the loop diagram and the favicon are svg and are
-not counted. One copy of each picture ships in the repo; the README and `docs/seats/*.md`
+The site-art row is the eighteen jpgs in `assets/img/` — seven portraits, seven roster
+cards, the machine's portrait and roster card, the team composite, and the social card;
+the loop diagram and the favicon are svg and are not counted. One copy of each picture ships in the repo; the README and `docs/seats/*.md`
 render these same files.
 
 The art library rows are the pack's own art set at the repo root, in `art/` — one picture
-per seat per set, no variants: seven dossier cards, seven character sheets, seven 4K
-wallpapers. The library total is the three rows summed, `find art -type f`, minus the
-library's own `README.md`. The thumbnails row counts the site's pre-rendered thumbnails
+per seat per set: eight dossier cards, seven character sheets, seven 4K wallpapers;
+the machine's sheet, wallpaper, and thumbnail sets await the art pass. The library
+total is the three rows summed, `find art -type f`, minus the library's own `README.md`. The thumbnails row counts the site's pre-rendered thumbnails
 under `assets/thumbs/` — one per library piece plus the seven primary portraits; every
 thumbnail is generated from the source picture, never the other way around. A thumbnail
 set that drifts from the library is a defect; re-run the count before believing the tour.
 
-The seat pages and the first row are the same seven files. They are not counted twice
-as different things; seven seats, seven pages, one row.
+The seat pages and the first row are the same eight files. They are not counted twice
+as different things; eight seats, eight pages, one row.
 
 ## 3. The rule of the lane
 
