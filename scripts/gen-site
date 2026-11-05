@@ -1,0 +1,897 @@
+#!/usr/bin/env python3
+"""gen-site - the GitHub Pages surface, generated from the tree.
+
+The site is not authored. Every page is rendered from a source file the rest of
+the pack already gates: the canon and its lore books, the board, the counts,
+the record rows, the claim standard, the security gate, the DSH surface, the
+playbook shelf, and the guide. A page that disagrees with its source is a
+generator defect, not an editorial choice.
+
+Every number in a page comes from `scripts/check-measurement --json`, from a
+file count the page names, or from the record itself; `scripts/check-site`
+re-derives those numbers and fails on a hardcoded claim.
+
+Usage:
+    python scripts/gen-site            write the pages
+    python scripts/gen-site --check    render in memory and compare (no writes)
+    python scripts/gen-site --list     print the page paths, one per line
+    python scripts/gen-site --root <dir>
+
+Exit 0 = written or in sync; 1 = --check found a stale page or an unread
+source; 2 = usage. Stdlib only; no network.
+"""
+
+from __future__ import annotations
+
+import html
+import json
+import posixpath
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+SITE = "https://animestack.jerkyjesse.com"
+REPO = "https://github.com/JerkyJesse/AnimeStack"
+BLOB = REPO + "/blob/main/"
+RELEASE_DATE_RE = re.compile(r"release `v\d+\.\d+\.\d+` \(`VERSION`\), (\d{4}-\d{2}-\d{2})")
+CANON_REV_RE = re.compile(r"\*\*Revision:\*\*\s*(\d+)")
+
+SEATS = ("reika", "yui", "rin", "niko", "mei", "aria", "elo", "mechapip")
+LOOP = ("mei", "elo", "mechapip", "yui", "niko", "rin", "aria", "reika")
+ACCENTS = {
+    "reika": "#E8B552",
+    "yui": "#B28CFF",
+    "rin": "#F06A68",
+    "niko": "#38D2E6",
+    "mei": "#E276D2",
+    "aria": "#FA8C42",
+    "elo": "#EEE8DC",
+    "mechapip": "#EB3B3B",
+}
+NAV = (
+    ("House", "index.html"),
+    ("Seats", "index.html#seats"),
+    ("Lore", "lore/index.html"),
+    ("Board", "lore/board.html"),
+    ("Record", "lore/record.html"),
+    ("Playbooks", "lore/playbooks.html"),
+    ("Guide", "guide.html"),
+    ("DSH", "lore/dsh.html"),
+    ("GitHub", REPO),
+)
+
+# The books: (site path, page title, kicker, source, description, nav label)
+BOOKS = (
+    ("lore/canon.html", "The House Canon", "Lore · the law",
+     "docs/lore/canon.md",
+     "The whole house in one book: the law of the room, the loop, the archive, the evidence ladder, the claim standard, and the seat record.",
+     "Lore"),
+    ("lore/oracles.html", "The Oracles", "Pre-history · book one",
+     "docs/lore/ORACLES.md",
+     "The first question: why an answer that cannot close cannot pay, and what the first falsifiable test changed.",
+     "Lore"),
+    ("lore/machines.html", "The Machines", "Pre-history · book two",
+     "docs/lore/MACHINES.md",
+     "The speed religion and the failures it paid for, told in public facts and dated receipts.",
+     "Lore"),
+    ("lore/arena.html", "The Arena", "Pre-history · book three",
+     "docs/lore/ARENA.md",
+     "The leaderboard and the record: why a podium rewards variance and the evidence record keeps survivors.",
+     "Lore"),
+    ("lore/archive.html", "The Archive", "Lore · what the house paid for",
+     "docs/lore/ARCHIVE.md",
+     "The park law, the registry, and the failures the house keeps labeled so no session repeats one under a new name.",
+     "Lore"),
+    ("lore/voice.html", "The Voice Register", "Lore · one bar, eight voices",
+     "docs/lore/VOICE.md",
+     "Four anchored lines per seat, each resolved to its source and disjoint from every other seat, so no two voices can say the same sentence the same way.",
+     "Lore"),
+    ("lore/scenes.html", "The Scene Book", "Lore · how the seats sound under load",
+     "docs/lore/SCENES.md",
+     "Format models, not evidence: the eight seats under pressure, in their own voices, with every cited number resolved to the registry.",
+     "Lore"),
+    ("lore/board.html", "The House Board", "The credential · one bar, eight instruments",
+     "docs/board.md",
+     "Eight seat exams, fourteen questions each, every key carrying its rationale and a source anchor resolved against the live tree.",
+     "Board"),
+    ("lore/measurement.html", "Measurement", "The counts · every number with its command",
+     "docs/measurement.md",
+     "The counts table, the rule of the lane, the pre-registered falsifier, the claim standard in this lane's words, and the contact read.",
+     "Lore"),
+    ("lore/claim-standard.html", "The Claim Standard", "The claim · what a claim owes",
+     "docs/claim-standard.md",
+     "The ten fields of a claim card, the hymn catalogue, the park law, the seven surfaces, and three worked cards.",
+     "Lore"),
+    ("lore/security.html", "Security: the zero-leak gate", "The gate · nothing private crosses",
+     "docs/security.md",
+     "The two-tier leak gate, the asset class, the history proof, the CI surface, and the red-first rule that keeps the gate honest.",
+     "Lore"),
+    ("lore/dsh.html", "The DSH Surface", "The team · eight seats as durable teammates",
+     "dsh/README.md",
+     "The eleventh install target: eight seat packs, eleven Agent presets, two operator commands, and the owned-dir install with an opt-in profile merge.",
+     "DSH"),
+    ("lore/operator.html", "The Operator", "Lore · the seat that is not in the eight",
+     "docs/lore/dossiers/operator.md",
+     "The human hand that owns the scope, the stop, and the first loss; the seat that reads the room and does not speak in it.",
+     "Lore"),
+)
+BOOK_PATHS = tuple(book[0] for book in BOOKS)
+
+TITLES = {
+    "reika": "Reika Kurogane",
+    "yui": "Yui Aizawa",
+    "rin": "Rin Takamiya",
+    "niko": "Niko Hoshino",
+    "mei": "Mei Sakuraba",
+    "aria": "Aria Kanzaki",
+    "elo": "Elo Star",
+    "mechapip": "MechaPip",
+}
+
+SITE_MAP = {
+    "docs/lore/canon.md": "lore/canon.html",
+    "docs/lore/ORACLES.md": "lore/oracles.html",
+    "docs/lore/MACHINES.md": "lore/machines.html",
+    "docs/lore/ARENA.md": "lore/arena.html",
+    "docs/lore/ARCHIVE.md": "lore/archive.html",
+    "docs/lore/VOICE.md": "lore/voice.html",
+    "docs/lore/SCENES.md": "lore/scenes.html",
+    "docs/lore/LORE_INDEX.md": "lore/index.html",
+    "docs/lore/README.md": "lore/index.html",
+    "docs/board.md": "lore/board.html",
+    "docs/measurement.md": "lore/measurement.html",
+    "docs/claim-standard.md": "lore/claim-standard.html",
+    "docs/security.md": "lore/security.html",
+    "docs/loop.md": "lore/canon.html",
+    "docs/guide/first-task.md": "guide.html",
+    "dsh/README.md": "lore/dsh.html",
+    "README.md": "index.html",
+    "record/seat_record.jsonl": "lore/record.html",
+}
+for _seat in SEATS:
+    SITE_MAP["docs/seats/%s.md" % _seat] = "seats/%s.html" % _seat
+    SITE_MAP["docs/lore/dossiers/%s.md" % _seat] = "seats/%s.html" % _seat
+    SITE_MAP["docs/lore/dossiers/%s_backstory.md" % _seat] = "seats/%s.html#backstory" % _seat
+SITE_MAP["docs/lore/dossiers/operator.md"] = "lore/operator.html"
+
+WORD_NUMBERS = {
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+    "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
+    "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
+    "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
+    "twenty": 20, "twenty-five": 25, "thirty": 30,
+}
+
+
+def resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+def strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+def read(path: Path) -> str:
+    return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+
+def measurement(root: Path) -> dict:
+    completed = subprocess.run(
+        [sys.executable, str(root / "scripts" / "check-measurement"), "--json", "--root", str(root)],
+        capture_output=True, text=True, encoding="utf-8", timeout=300,
+    )
+    if completed.returncode != 0:
+        raise SystemExit("gen-site: check-measurement --json failed:\n" + completed.stderr)
+    data = json.loads(completed.stdout)
+    return {row["label"]: row for row in data["rows"]}
+
+
+def release(root: Path) -> str:
+    version = read(root / "VERSION").strip()
+    if not version:
+        raise SystemExit("gen-site: VERSION is empty")
+    return version
+
+
+def release_date(root: Path) -> str:
+    match = RELEASE_DATE_RE.search(read(root / "docs" / "measurement.md"))
+    if not match:
+        raise SystemExit("gen-site: docs/measurement.md has no dated sample line")
+    return match.group(1)
+
+
+def canon_rev(root: Path) -> str:
+    match = CANON_REV_RE.search(read(root / "docs" / "lore" / "canon.md"))
+    if not match:
+        raise SystemExit("gen-site: docs/lore/canon.md has no Revision line")
+    return match.group(1)
+
+
+def count_presets(root: Path) -> int:
+    text = read(root / "dsh" / "animestack-house" / "cordis.patch.yml")
+    return len(re.findall(r"^\s*- id: preset-", text, re.M))
+
+
+def count_dialects(root: Path) -> int:
+    agents = root / "agents"
+    return len([p for p in agents.iterdir() if p.is_dir()]) if agents.is_dir() else 0
+
+
+def count_hosts(root: Path) -> int:
+    text = read(root / "setup")
+    match = re.search(r'^ALL_HOSTS="([^"]+)"', text, re.M)
+    if not match:
+        return 0
+    return len([name for name in match.group(1).split() if name != "dsh"])
+
+
+def count_files(directory: Path, pattern: str = "*") -> int:
+    return len([p for p in directory.glob(pattern) if p.is_file()]) if directory.is_dir() else 0
+
+
+def counts(root: Path) -> dict[str, int]:
+    rows = measurement(root)
+    values = {label: int(row["count"]) for label, row in rows.items()}
+    values["presets"] = count_presets(root)
+    values["dialects"] = count_dialects(root)
+    values["hosts"] = count_hosts(root)
+    values["dossier cards"] = count_files(root / "art" / "dossiers")
+    values["character sheets"] = count_files(root / "art" / "sheets")
+    values["wallpapers"] = count_files(root / "art" / "wallpapers")
+    return values
+
+
+def slug(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-") or "section"
+
+
+def strip_title(text: str) -> str:
+    lines = text.splitlines()
+    if lines and lines[0].startswith("# "):
+        lines = lines[1:]
+    while lines and not lines[0].strip():
+        lines = lines[1:]
+    return "\n".join(lines)
+
+
+def strip_seat_header(text: str) -> str:
+    """Drop the title and the `<img ...>` roster line from a seat digest."""
+    lines = strip_title(text).splitlines()
+    while lines and (not lines[0].strip() or lines[0].lstrip().startswith("<img")):
+        lines = lines[1:]
+    return "\n".join(lines)
+
+
+def resolve_repo_path(source: str, href: str) -> str | None:
+    if href.startswith(("http://", "https://", "mailto:", "#")):
+        return None
+    path = href.split("#", 1)[0]
+    if not path:
+        return None
+    base = posixpath.dirname(source)
+    joined = posixpath.normpath(posixpath.join(base, path)) if base else posixpath.normpath(path)
+    return joined
+
+
+def site_href(source: str, href: str) -> str:
+    """Map a markdown link from a source file to the generated site (or GitHub)."""
+    if href.startswith(("http://", "https://", "mailto:", "#")):
+        return href
+    anchor = ""
+    if "#" in href:
+        path_part, anchor = href.split("#", 1)
+        anchor = "#" + anchor
+    else:
+        path_part = href
+    target = resolve_repo_path(source, path_part) if path_part else None
+    if target is None:
+        return href
+    target = target.replace("\\", "/")
+    if target in SITE_MAP:
+        return SITE_MAP[target] + anchor
+    return BLOB + target + anchor
+
+
+INLINE_CODE_RE = re.compile(r"`([^`]+)`")
+
+
+def inline(text: str, source: str, prefix: str) -> str:
+    placeholders: list[str] = []
+
+    def hold_code(match: re.Match) -> str:
+        placeholders.append("<code>%s</code>" % html.escape(match.group(1), quote=False))
+        return "\x00%d\x00" % (len(placeholders) - 1)
+
+    text = INLINE_CODE_RE.sub(hold_code, text)
+    text = html.escape(text, quote=False)
+
+    def image(match: re.Match) -> str:
+        alt = match.group(1)
+        href = html.unescape(match.group(2))
+        mapped = site_href(source, href)
+        if not mapped.startswith(("http://", "https://")):
+            mapped = prefix + mapped
+        return '<img src="%s" alt="%s" loading="lazy">' % (html.escape(mapped), html.escape(alt, quote=False))
+
+    text = re.sub(r"!\[([^\]]*)\]\(([^)\s]+)\)", image, text)
+
+    def link(match: re.Match) -> str:
+        label = match.group(1)
+        href = html.unescape(match.group(2))
+        mapped = site_href(source, href)
+        if not mapped.startswith(("http://", "https://", "mailto:", "#")):
+            mapped = prefix + mapped
+        return '<a href="%s">%s</a>' % (html.escape(mapped), label)
+
+    text = re.sub(r"\[([^\]]+)\]\(([^)\s]+)\)", link, text)
+    text = re.sub(r"\*\*([^*]+)\*\*", r"<strong>\1</strong>", text)
+    text = re.sub(r"(?<![*\w])\*([^*\n]+)\*(?![*\w])", r"<em>\1</em>", text)
+    for index, code in enumerate(placeholders):
+        text = text.replace("\x00%d\x00" % index, code)
+    return text
+
+
+def markdown(text: str, source: str, prefix: str) -> str:
+    """A small, deterministic markdown renderer for the pack's own docs."""
+    lines = text.splitlines()
+    out: list[str] = []
+    ids: dict[str, int] = {}
+    index = 0
+
+    def anchor_id(title: str) -> str:
+        base = slug(title)
+        count = ids.get(base, 0)
+        ids[base] = count + 1
+        return base if count == 0 else "%s-%d" % (base, count + 1)
+
+    while index < len(lines):
+        line = lines[index]
+        stripped = line.strip()
+
+        if not stripped:
+            index += 1
+            continue
+
+        if stripped.startswith("```"):
+            fence = stripped[:3]
+            index += 1
+            code: list[str] = []
+            while index < len(lines) and not lines[index].strip().startswith(fence):
+                code.append(lines[index])
+                index += 1
+            index += 1
+            out.append("<pre><code>%s</code></pre>" % html.escape("\n".join(code), quote=False))
+            continue
+
+        heading = re.match(r"^(#{1,6})\s+(.*)$", line)
+        if heading:
+            level = min(len(heading.group(1)), 4)
+            title = heading.group(2).strip()
+            out.append('<h%d id="%s">%s</h%d>' % (level, anchor_id(title), inline(title, source, prefix), level))
+            index += 1
+            continue
+
+        if re.match(r"^\s*(?:-{3,}|\*{3,})\s*$", line):
+            out.append("<hr>")
+            index += 1
+            continue
+
+        if stripped.startswith(">"):
+            quote: list[str] = []
+            while index < len(lines) and lines[index].strip().startswith(">"):
+                quote.append(lines[index].strip()[1:].strip())
+                index += 1
+            out.append("<blockquote><p>%s</p></blockquote>" % inline(" ".join(quote), source, prefix))
+            continue
+
+        if "|" in stripped and index + 1 < len(lines) and re.match(
+            r"^\s*\|?\s*:?-{2,}", lines[index + 1]
+        ):
+            header = [cell.strip() for cell in stripped.strip("|").split("|")]
+            index += 2
+            body: list[list[str]] = []
+            while index < len(lines) and "|" in lines[index] and lines[index].strip():
+                body.append([cell.strip() for cell in lines[index].strip().strip("|").split("|")])
+                index += 1
+            head_html = "".join("<th>%s</th>" % inline(cell, source, prefix) for cell in header)
+            rows_html = "".join(
+                "<tr>%s</tr>" % "".join("<td>%s</td>" % inline(cell, source, prefix) for cell in row)
+                for row in body
+            )
+            out.append('<div class="table-wrap"><table><thead><tr>%s</tr></thead><tbody>%s</tbody></table></div>' % (head_html, rows_html))
+            continue
+
+        bullet = re.match(r"^\s*[-*+]\s+(.*)$", line)
+        ordered = re.match(r"^\s*(\d+)\.\s+(.*)$", line)
+        if bullet or ordered:
+            kind = "ul" if bullet else "ol"
+            items: list[str] = []
+            while index < len(lines):
+                current = lines[index]
+                bullet_match = re.match(r"^\s*[-*+]\s+(.*)$", current)
+                ordered_match = re.match(r"^\s*\d+\.\s+(.*)$", current)
+                if bullet_match and kind == "ul":
+                    items.append(bullet_match.group(1))
+                    index += 1
+                    continue
+                if ordered_match and kind == "ol":
+                    items.append(ordered_match.group(1))
+                    index += 1
+                    continue
+                if current.startswith("  ") and current.strip() and items:
+                    items[-1] += " " + current.strip()
+                    index += 1
+                    continue
+                break
+            out.append("<%s>%s</%s>" % (kind, "".join("<li>%s</li>" % inline(item, source, prefix) for item in items), kind))
+            continue
+
+        paragraph: list[str] = []
+        while index < len(lines):
+            current = lines[index]
+            if not current.strip():
+                break
+            if paragraph and (
+                current.startswith("#")
+                or current.strip().startswith(("```", ">"))
+                or re.match(r"^\s*[-*+]\s+", current)
+                or re.match(r"^\s*\d+\.\s+", current)
+            ):
+                break
+            paragraph.append(current.strip())
+            index += 1
+        if paragraph:
+            out.append("<p>%s</p>" % inline(" ".join(paragraph), source, prefix))
+    return "\n".join(out)
+
+
+def rel(prefix: str, target: str) -> str:
+    if target.startswith(("http://", "https://", "mailto:", "#")):
+        return target
+    return prefix + target
+
+
+def shell(root: Path, path: str, title: str, description: str, body: str, active: str,
+          accent: str | None = None, extra: str = "") -> str:
+    prefix = "../" * path.count("/")
+    version = release(root)
+    rev = canon_rev(root)
+    nav_items = []
+    for label, target in NAV:
+        href = rel(prefix, target)
+        here = ' class="here"' if label == active else ""
+        nav_items.append('<a href="%s"%s>%s</a>' % (html.escape(href), here, label))
+    body_style = ' style="--accent: %s"' % accent if accent else ""
+    return """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="{prefix}assets/img/favicon.svg" type="image/svg+xml">
+<title>{full_title}</title>
+<meta name="description" content="{description}">
+<link rel="canonical" href="{page_url}">
+<meta property="og:title" content="{full_title}">
+<meta property="og:description" content="{description}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{page_url}">
+<meta property="og:image" content="{site}/assets/img/social-preview.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="{prefix}assets/css/site.css">
+{extra}</head>
+<body{style}>
+<div class="shell">
+<nav><span class="brand">ANIMESTACK</span><span class="nav-links">{nav}</span></nav>
+{body}
+<footer>
+  ANIMESTACK · v{version} · canon Rev {rev} · <a href="{repo}">github.com/JerkyJesse/AnimeStack</a> · <a href="https://www.jerkyjesse.com">www.jerkyjesse.com</a>
+</footer>
+</div>
+</body>
+</html>
+""".format(
+        prefix=prefix,
+        title=html.escape(title, quote=False),
+        full_title=html.escape(title if "AnimeStack" in title else title + " · AnimeStack", quote=False),
+        description=html.escape(description, quote=True),
+        site=SITE,
+        page_url=SITE + "/" if path == "index.html" else SITE + "/" + path,
+        path=path,
+        extra=extra,
+        style=body_style,
+        nav="".join(nav_items),
+        body=body,
+        version=version,
+        rev=rev,
+        repo=REPO,
+    )
+
+
+def header(kicker: str, title: str, sentence: str, sub: str = "") -> str:
+    sub_html = '<p class="sub">%s</p>' % sub if sub else ""
+    return (
+        '<header class="page"><div class="kicker">%s</div><h1>%s</h1>'
+        '<p class="one-sentence">%s</p>%s</header>' % (kicker, html.escape(title, quote=False), sentence, sub_html)
+    )
+
+
+def section(kicker: str, title: str, body: str, anchor: str = "") -> str:
+    id_attr = ' id="%s"' % anchor if anchor else ""
+    return '<section class="block"%s><div class="block-kicker">%s</div><h2>%s</h2>\n%s\n</section>' % (id_attr, kicker, title, body)
+
+
+def seat_meta(root: Path) -> dict[str, dict]:
+    voices = json.loads(read(root / "voices" / "house.json"))
+    meta: dict[str, dict] = {}
+    for seat in SEATS:
+        digest = read(root / "docs" / "seats" / ("%s.md" % seat))
+        first = digest.splitlines()[0] if digest else ""
+        match = re.match(r"^#\s+(.+?)\s+—\s+(.+)$", first)
+        name = match.group(1) if match else TITLES[seat]
+        role = match.group(2) if match else ""
+        sentence = voices.get("registers", {}).get(seat, {}).get("sentence", "")
+        meta[seat] = {"name": name, "role": role, "sentence": sentence}
+    return meta
+
+
+def build_index(root: Path, values: dict[str, int]) -> str:
+    meta = seat_meta(root)
+    version = release(root)
+    rev = canon_rev(root)
+    cards = []
+    for seat in SEATS:
+        info = meta[seat]
+        cards.append(
+            '<div class="card"><a href="seats/%s.html">'
+            '<img src="assets/img/%s-roster.jpg" alt="%s roster card" loading="lazy">'
+            '<div class="body"><span class="name">%s</span><span class="role">%s</span>'
+            '<span class="sentence">%s</span></div></a></div>'
+            % (seat, seat, html.escape(info["name"], quote=True), html.escape(info["name"], quote=False),
+               html.escape(info["role"], quote=False), html.escape(info["sentence"], quote=False))
+        )
+    laws = []
+    for law in sorted((root / "principles").glob("law-*.md")):
+        text = read(law)
+        title = text.splitlines()[0].lstrip("# ").strip() if text else ""
+        title = re.sub(r"^Law\s+\d+\s+—\s+", "", title)
+        body = strip_title(text).strip().splitlines()
+        statement = ""
+        for line in body:
+            if line.strip():
+                statement = line.strip()
+                if statement.startswith("**") and statement.endswith("**"):
+                    statement = statement[2:-2]
+                else:
+                    statement = re.sub(r"^\*\*[^*]+\*\*\s*", "", statement)
+                break
+        laws.append(
+            '<li><span class="law-num">%02d</span><div><strong>%s.</strong> %s</div></li>'
+            % (len(laws) + 1, html.escape(title, quote=False), inline(statement, "docs/lore/canon.md", ""))
+        )
+    books = []
+    for path, title, kicker, source, description, nav in BOOKS:
+        if path == "lore/dsh.html":
+            continue
+        books.append(
+            '<a class="shelf-card" href="%s"><span class="shelf-kicker">%s</span>'
+            '<span class="shelf-title">%s</span><span class="shelf-desc">%s</span></a>'
+            % (path, html.escape(kicker, quote=False), html.escape(title, quote=False), html.escape(description, quote=False))
+        )
+    stats = (
+        '<div class="numbers">'
+        '<span><strong>%d</strong> seats</span>'
+        '<span><strong>%d</strong> laws</span>'
+        '<span><strong>%d</strong> board questions</span>'
+        '<span><strong>%d</strong> canon sections</span>'
+        '<span><strong>%d</strong> agent files</span>'
+        '<span><strong>%d</strong> install targets</span>'
+        '</div>'
+        % (values["seats"], values["laws"], values["board questions"], values["canon sections"],
+           values["agent files, all dialects"], values["install targets"])
+    )
+    body = "\n".join([
+        header("The house in your agent · v%s · canon Rev %s" % (version, rev),
+               "AnimeStack",
+               "Eight seats argue in fixed order. One sentence each. Then a verdict.",
+               "The eight-seat house, installed into an AI coding host. Not a mascot pack — a design layer: every material decision descends Mei → Elo → MechaPip → Yui → Niko → Rin → Aria → Reika, one sentence each, and closes with a verdict."),
+        '<figure class="hero"><img src="assets/img/social-preview.jpg" alt="The AnimeStack house — eight seats, one question: is this still allowed to live?"><figcaption>the house · one question</figcaption></figure>',
+        '<p class="lede">AnimeStack is a room. A ship must survive a failure review and a pre-registered falsifier before it touches anything. No votes. No skips. No merges. The same spine runs on every surface — a bug, a refactor, a ship, a cull. <strong>One box, one mechanism.</strong> A thing is not finished when it is named; it is finished when all eight sentences exist.</p>',
+        '<figure class="loop-figure"><img src="assets/img/loop.svg" alt="The eight-seat design loop"><figcaption>the design loop · Mei, Elo, MechaPip, Yui, Niko, Rin, Aria, Reika</figcaption></figure>',
+        section("The eight seats", "Roster", '<div class="roster">%s</div><p class="lede">Listed by leadership, founder first; the loop order is Mei, Elo, MechaPip, Yui, Niko, Rin, Aria, Reika. The roster is seven women and the machine — the named exception. A seat page opens the digest, the dossier, and the companion backstory.</p>' % "".join(cards), "seats"),
+        section("Doctrine · the floor", "The %d laws of the room" % values["laws"], '<ol class="laws">%s</ol>' % "".join(laws)),
+        section("The books", "Lore", '<p class="lede">The canon, the pre-history, the archive, the voice register, the scene book, the board, the counts, the claim standard, the security gate, and the team surface. Every page is generated from the source the gates check.</p><div class="linkgrid">%s</div>' % "".join(books)),
+        section("Evidence", "The numbers", stats + '<p class="lede">Every number has a command. <a href="lore/measurement.html">Measurement</a> is the table; <a href="lore/board.html">the House Board</a> is the credential; <a href="lore/record.html">the record</a> is the conduct.</p>'),
+        section("Install", "Five minutes", '<pre class="install"><code>git clone https://github.com/JerkyJesse/AnimeStack ~/animestack\ncd ~/animestack\n./setup --host &lt;your host&gt;   # or --host dsh for the team surface</code></pre><p class="lede">Ten coding-host dialects plus the DSH team surface: eleven install targets, one installer, two entry points. Open a session and say <code>/house</code>.</p><p><a class="button" href="guide.html">Read the first-task guide</a></p>'),
+        '<blockquote class="freeze"><p><strong>AnimeStack house canon · Rev %s.</strong><br>The canon ships with the pack; this repo is the source.<br>Eight seats, one loop, one law of the room.</p></blockquote>' % rev,
+    ])
+    return shell(root, "index.html", "AnimeStack — the house in your agent",
+                 "AnimeStack — an eight-seat design house installed into an AI coding host. Eight seats argue in fixed order, one sentence each, then a verdict.",
+                 body, "House")
+
+
+def build_seat(root: Path, seat: str, values: dict[str, int]) -> str:
+    info = seat_meta(root)[seat]
+    digest = strip_seat_header(read(root / "docs" / "seats" / ("%s.md" % seat)))
+    dossier = strip_title(read(root / "docs" / "lore" / "dossiers" / ("%s.md" % seat)))
+    backstory = strip_title(read(root / "docs" / "lore" / "dossiers" / ("%s_backstory.md" % seat)))
+    prefix = "../"
+    body = "\n".join([
+        header("Seat · the eight · %s" % html.escape(info["role"], quote=False), info["name"],
+               html.escape(info["sentence"], quote=False)),
+        '<div class="portrait"><figure><img src="../assets/img/%s-roster.jpg" alt="%s roster card"><figcaption>%s · roster card</figcaption></figure><p class="seat-note">One card per seat. The full library — dossier cards, character sheets, and wallpapers — lives in <code>art/</code>.</p></div>' % (seat, html.escape(info["name"], quote=True), html.escape(info["name"], quote=False)),
+        '<section class="zone" id="digest"><div class="zone-kicker">Seat digest · AnimeStack</div><h2>%s — %s</h2><p class="meta">The seat\'s own digest, beside the dossier and the companion backstory below.</p>%s</section>' % (html.escape(info["name"], quote=False), html.escape(info["role"], quote=False), markdown(digest, "docs/seats/%s.md" % seat, prefix)),
+        '<section class="zone" id="dossier"><div class="zone-kicker">Dossier · the deep file</div><h2>%s — the dossier</h2>%s</section>' % (html.escape(info["name"], quote=False), markdown(dossier, "docs/lore/dossiers/%s.md" % seat, prefix)),
+        '<section class="zone" id="backstory"><div class="zone-kicker">Companion · the full telling</div><h2>%s — the backstory</h2>%s</section>' % (html.escape(info["name"], quote=False), markdown(backstory, "docs/lore/dossiers/%s_backstory.md" % seat, prefix)),
+    ])
+    return shell(root, "seats/%s.html" % seat, "%s — %s" % (info["name"], info["role"]),
+                 "%s, %s in the AnimeStack house: %s" % (info["name"], info["role"], info["sentence"]),
+                 body, "Seats", accent=ACCENTS[seat])
+
+
+def build_book(root: Path, spec: tuple, values: dict[str, int]) -> str:
+    path, title, kicker, source, description, active = spec
+    prefix = "../"
+    text = strip_title(read(root / source))
+    extra = ""
+    if path == "lore/measurement.html":
+        rows = [
+            (row["label"], row["count"], row["target"], row["owner"], row["floor"])
+            for row in measurement(root).values()
+        ]
+        live = ["<h2>Live read</h2>", '<div class="table-wrap"><table><thead><tr><th>Class</th><th>Count</th><th>Owner</th></tr></thead><tbody>']
+        for label, count, target, owner, floor in rows:
+            live.append("<tr><td>%s</td><td>%d</td><td>%s</td></tr>" % (label, count, owner))
+        live.append("</tbody></table></div>")
+        extra = "\n".join(live)
+    if path == "lore/dsh.html":
+        extra = ('<div class="numbers"><span><strong>%d</strong> seat packs</span>'
+                 '<span><strong>%d</strong> presets</span><span><strong>%d</strong> install targets</span></div>'
+                 % (values["seat packs"], values["presets"], values["install targets"]))
+    if path == "lore/board.html":
+        extra = ('<div class="numbers"><span><strong>%d</strong> seats</span>'
+                 '<span><strong>%d</strong> board questions</span><span>pass bar 14/14</span></div>'
+                 % (values["board seats"], values["board questions"]))
+    if path == "lore/record.html":
+        extra = record_read(root, values)
+    body = "\n".join([
+        header(kicker, title, "“%s”" % "Is this still allowed to live?" if path == "lore/canon.html" else "", description),
+        extra,
+        '<article class="book">%s</article>' % markdown(text, source, prefix),
+    ])
+    return shell(root, path, title, description, body, active)
+
+
+def record_rows(root: Path) -> list[dict]:
+    rows: list[dict] = []
+    for line in read(root / "record" / "seat_record.jsonl").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            rows.append(json.loads(line))
+        except ValueError:
+            continue
+    return rows
+
+
+def record_read(root: Path, values: dict[str, int]) -> str:
+    end = release_date(root)
+    rows = record_rows(root)
+    summary = subprocess.run(
+        [sys.executable, str(root / "scripts" / "seat_record"), "--read", "--root", str(root)],
+        capture_output=True, text=True, encoding="utf-8", timeout=120,
+    )
+    day_line = ""
+    if summary.returncode == 0:
+        for line in summary.stdout.splitlines():
+            if "streak" in line:
+                day_line = line.strip()
+    start = ""
+    match = re.search(r"window=\d+d \(([0-9-]+)\.\.([0-9-]+)\)", day_line)
+    if match:
+        start, end = match.group(1), match.group(2)
+    by_seat: dict[str, dict[str, int]] = {seat: {"credit": 0, "debt": 0} for seat in LOOP}
+    for row in rows:
+        seat = str(row.get("seat", "")).lower()
+        if seat in by_seat:
+            delta = int(row.get("delta", 0))
+            if delta > 0:
+                by_seat[seat]["credit"] += delta
+            elif delta < 0:
+                by_seat[seat]["debt"] += -delta
+    table = ['<div class="table-wrap"><table><thead><tr><th>Seat</th><th>Credit</th><th>Debt</th><th>Net</th></tr></thead><tbody>']
+    for seat in LOOP:
+        data = by_seat[seat]
+        table.append('<tr><td><a href="../seats/%s.html">%s</a></td><td>%d</td><td>%d</td><td>%+d</td></tr>' % (seat, TITLES[seat], data["credit"], data["debt"], data["credit"] - data["debt"]))
+    table.append("</tbody></table></div>")
+    return (
+        '<div class="numbers"><span><strong>%d</strong> record rows</span><span><strong>%d</strong> seats</span><span>window %s to %s</span></div>'
+        '%s<p class="lede">%s</p>' % (values["record rows"], values["seats"], start or "unread", end, "".join(table), html.escape(day_line, quote=False))
+    )
+
+
+def build_record(root: Path, values: dict[str, int]) -> str:
+    canon = strip_title(read(root / "docs" / "lore" / "canon.md"))
+    match = re.search(r"^## XXV\. The Seat Record\s*$(.*?)(?=^## |\Z)", canon, re.M | re.S)
+    section_text = match.group(1).strip() if match else ""
+    description = "The eight seats' credits, debts, day score, and tiers, read from the append-only record; the record keeps the manners."
+    body = "\n".join([
+        header("The record · conduct, never scope", "The Seat Record",
+               "“Is this still allowed to live?”", description),
+        record_read(root, values),
+        '<article class="book">%s</article>' % markdown(section_text, "docs/lore/canon.md", "../"),
+    ])
+    return shell(root, "lore/record.html", "The Seat Record", description, body, "Record")
+
+
+def build_playbooks(root: Path) -> str:
+    files = sorted((root / "skills" / "house" / "playbooks").glob("*.md"))
+    cards = []
+    for path in files:
+        text = read(path)
+        title = text.splitlines()[0].lstrip("# ").strip() if text else path.stem
+        when = ""
+        match = re.search(r"^## When\s*$(.*?)(?=^## |\Z)", text, re.M | re.S)
+        if match:
+            lines = [line.strip().lstrip("-*+ ").strip() for line in match.group(1).splitlines() if line.strip()]
+            when = " · ".join(lines[:3])
+        cards.append(
+            '<div class="playbook-card"><h3>%s</h3><p>%s</p><p class="meta"><a href="%s">%s</a></p></div>'
+            % (html.escape(title, quote=False), html.escape(when, quote=False), BLOB + "skills/house/playbooks/" + path.name, path.name)
+        )
+    description = "Twelve playbooks: the request matches one, the loop opens, and the room closes with a verdict."
+    body = "\n".join([
+        header("The playbooks · twelve doors", "Playbooks",
+               "“What are we building, in one sentence?”", description),
+        '<p class="lede">The router reads the request and picks one playbook. The loop descends eight seats in order, one sentence each, and closes with a verdict. A build under a playbook carries its claim card.</p>',
+        '<div class="playbooks">%s</div>' % "".join(cards),
+    ])
+    return shell(root, "lore/playbooks.html", "Playbooks", description, body, "Playbooks")
+
+
+def build_lore_index(root: Path) -> str:
+    cards = []
+    for path, title, kicker, source, description, active in BOOKS:
+        cards.append(
+            '<a class="shelf-card" href="%s"><span class="shelf-kicker">%s</span><span class="shelf-title">%s</span><span class="shelf-desc">%s</span></a>'
+            % (path.split("/", 1)[1], html.escape(kicker, quote=False), html.escape(title, quote=False), html.escape(description, quote=False))
+        )
+    cards.append('<a class="shelf-card" href="record.html"><span class="shelf-kicker">The record · conduct</span><span class="shelf-title">The Seat Record</span><span class="shelf-desc">Credits, debts, the day score, and the tiers, read from the append-only record.</span></a>')
+    cards.append('<a class="shelf-card" href="playbooks.html"><span class="shelf-kicker">The router · twelve doors</span><span class="shelf-title">Playbooks</span><span class="shelf-desc">The twelve playbooks the house router can open, with the lead seat and the when.</span></a>')
+    description = "The library: the canon, the pre-history, the archive, the voice register, the scene book, the board, the counts, the claim standard, the security gate, the DSH surface, and the record."
+    body = "\n".join([
+        header("The library · read on demand", "Lore",
+               "“The canon is the floor, never the ceiling.”", description),
+        '<div class="linkgrid">%s</div>' % "".join(cards),
+        '<p class="lede">A pointer that cannot be read is a defect named in the open, never a silence. Where a page and its source disagree, the source wins.</p>',
+    ])
+    return shell(root, "lore/index.html", "Lore", description, body, "Lore")
+
+
+def build_guide(root: Path) -> str:
+    source = "docs/guide/first-task.md"
+    description = "Five minutes from clone to a closing verdict: install, open one session, hand the house a real task, read eight sentences."
+    body = "\n".join([
+        header("The first task · five minutes", "First task",
+               "“What are we building, in one sentence?”", description),
+        '<article class="book">%s</article>' % markdown(strip_title(read(root / source)), source, ""),
+    ])
+    return shell(root, "guide.html", "First task", description, body, "Guide")
+
+
+def build_404(root: Path) -> str:
+    description = "No page at this address. The house keeps the links it can check."
+    body = "\n".join([
+        header("404 · no such page", "Nothing here",
+               "“A pointer that cannot be read is a defect named in the open.”",
+               "The address you followed has no page. The library index is the map; the canon is the floor."),
+        '<p class="lede"><a class="button" href="index.html">House</a> <a class="button" href="lore/index.html">Library</a> <a class="button" href="guide.html">First task</a></p>',
+    ])
+    return shell(root, "404.html", "Not found", description, body, "")
+
+
+def build_sitemap(root: Path, pages: list[str]) -> str:
+    date = release_date(root)
+    items = []
+    for path in pages:
+        if path == "404.html":
+            continue
+        priority = "1.0" if path == "index.html" else "0.7"
+        items.append("  <url><loc>%s/%s</loc><lastmod>%s</lastmod><priority>%s</priority></url>" % (SITE, path, date, priority))
+    return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n%s\n</urlset>\n' % "\n".join(items)
+
+
+def build_robots(root: Path) -> str:
+    return "User-agent: *\nAllow: /\nSitemap: %s/sitemap.xml\n" % SITE
+
+
+def render(root: Path) -> dict[str, str]:
+    values = counts(root)
+    pages: dict[str, str] = {}
+    pages["index.html"] = build_index(root, values)
+    for seat in SEATS:
+        pages["seats/%s.html" % seat] = build_seat(root, seat, values)
+    pages["lore/index.html"] = build_lore_index(root)
+    for spec in BOOKS:
+        if spec[0] == "lore/record.html":
+            continue
+        pages[spec[0]] = build_book(root, spec, values)
+    pages["lore/record.html"] = build_record(root, values)
+    pages["lore/playbooks.html"] = build_playbooks(root)
+    pages["guide.html"] = build_guide(root)
+    pages["404.html"] = build_404(root)
+    paths = sorted(pages)
+    pages["sitemap.xml"] = build_sitemap(root, paths)
+    pages["robots.txt"] = build_robots(root)
+    return pages
+
+
+def main(argv: list[str]) -> int:
+    args = strip_root(argv)
+    root = resolve_root(argv)
+    if "--list" in args:
+        for path in sorted(render_keys(root)):
+            print(path)
+        return 0
+    check = "--check" in args
+    for arg in args:
+        if arg not in ("--check", "--list"):
+            print("gen-site: usage: [--check] [--list] [--root <dir>]", file=sys.stderr)
+            return 2
+    pages = render(root)
+    if check:
+        stale: list[str] = []
+        for path, content in pages.items():
+            current = root / path
+            if not current.is_file() or current.read_text(encoding="utf-8") != content:
+                stale.append(path)
+        extra = []
+        for pattern in ("lore/*.html", "seats/*.html", "*.html"):
+            for path in sorted(root.glob(pattern)):
+                rel_path = path.relative_to(root).as_posix()
+                if rel_path not in pages:
+                    extra.append(rel_path)
+        if stale or extra:
+            print("gen-site: FAILED (%d stale, %d unexpected)" % (len(stale), len(extra)))
+            for path in stale:
+                print("  stale: %s" % path)
+            for path in extra:
+                print("  unexpected: %s" % path)
+            return 1
+        print("gen-site: in sync (%d pages)" % len(pages))
+        return 0
+    for path, content in pages.items():
+        target = root / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding="utf-8")
+    print("gen-site: wrote %d pages" % len(pages))
+    return 0
+
+
+def render_keys(root: Path) -> list[str]:
+    values = counts(root)
+    pages = ["index.html"] + ["seats/%s.html" % seat for seat in SEATS] + ["lore/index.html"]
+    pages += [spec[0] for spec in BOOKS if spec[0] != "lore/record.html"]
+    pages += ["lore/record.html", "lore/playbooks.html", "guide.html", "404.html", "sitemap.xml", "robots.txt"]
+    return pages
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

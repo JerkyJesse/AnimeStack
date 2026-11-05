@@ -1,0 +1,27 @@
+{
+  "name": "animestack-house-presets",
+  "version": "2.0.0",
+  "_stamp": "animestack canon rev 9 :: inputs sha256=4cb4abe5e46ad8172d874d2af5f40bc5a85a99c7f436dda08fbf6d5c4c0bd9ca",
+  "private": true,
+  "description": "AnimeStack house Agent presets and operator commands for DeepSeek Harness: the Agent Teams chair, the subagent room chair, the eight seats, and the /simple waiver.",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "commands.generated.js",
+    "cordis.patch.yml",
+    "profile.patch.yml",
+    "locale/*.json",
+    "icon.svg"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

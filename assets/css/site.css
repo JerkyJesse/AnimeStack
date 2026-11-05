@@ -1,0 +1,206 @@
+/* ==========================================================================
+   AnimeStack - shared site stylesheet
+   animestack.jerkyjesse.com
+
+   The house dark theme. One cage, one palette:
+     bg    #0a0a0f
+     text  #e8e8ef
+     gold  #E8B552
+   A seat page sets --accent on <body>; every page falls back to the gold.
+   ========================================================================== */
+
+:root {
+  --bg: #0a0a0f;
+  --bg-soft: #12121a;
+  --bg-soft2: #16161f;
+  --line: #26262f;
+  --ink: #e8e5df;
+  --ink-dim: #9b968c;
+  --ink-faint: #6b675f;
+  --accent: #E8B552;
+  --gold: #E8B552;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232,181,82,0.08), transparent 60%);
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  line-height: 1.72;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 0.85em;
+  background: var(--bg-soft2);
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: #e8d0cd;
+}
+
+p { margin: 0 0 16px; }
+h1, h2, h3, h4 { font-weight: 400; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
+ul, ol { margin: 0 0 16px 24px; padding: 0; }
+li { margin-bottom: 8px; }
+
+.shell { max-width: 880px; margin: 0 auto; padding: 0 24px 96px; }
+
+/* Nav ------------------------------------------------------------------- */
+nav {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+nav .brand { color: var(--gold); font-weight: 700; letter-spacing: 0.12em; }
+nav .nav-links { display: flex; gap: 16px; flex-wrap: wrap; }
+nav .nav-links a { color: var(--ink-dim); }
+nav .nav-links a:hover, nav .nav-links a.here { color: var(--accent); text-decoration: none; }
+
+/* Page header ----------------------------------------------------------- */
+header.page { padding: 56px 0 8px; }
+header.page .kicker {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+header.page h1 { font-size: 42px; line-height: 1.08; margin: 10px 0 0; letter-spacing: -0.01em; }
+header.page .one-sentence { color: var(--gold); font-style: italic; font-size: 19px; margin-top: 16px; }
+header.page .sub { color: var(--ink-dim); font-style: italic; margin-top: 10px; max-width: 68ch; }
+
+/* Figures --------------------------------------------------------------- */
+.hero, .loop-figure { margin: 36px 0 8px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--bg-soft); }
+.hero img, .loop-figure img { display: block; width: 100%; height: auto; }
+.hero figcaption, .loop-figure figcaption {
+  padding: 8px 12px;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+
+/* Blocks and lede ------------------------------------------------------- */
+.lede { color: var(--ink-dim); font-size: 17px; margin: 28px 0 20px; }
+.lede strong { color: var(--ink); }
+section.block { margin-top: 56px; }
+section.block .block-kicker {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+section.block h2 { font-size: 30px; font-weight: 400; margin: 8px 0 16px; line-height: 1.15; }
+
+/* Roster ---------------------------------------------------------------- */
+.roster { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; margin: 36px 0 8px; }
+.roster .card { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--bg-soft); }
+.roster .card a { display: block; color: var(--ink); }
+.roster .card a:hover { text-decoration: none; }
+.roster .card img { display: block; width: 100%; height: auto; border-bottom: 1px solid var(--line); }
+.roster .card .body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 4px; }
+.roster .card .name { font-size: 19px; letter-spacing: 0.01em; }
+.roster .card .role { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.roster .card .sentence { font-style: italic; font-size: 14px; color: var(--ink-dim); margin-top: 6px; }
+
+/* Laws ------------------------------------------------------------------ */
+.laws { list-style: none; margin: 0; padding: 0; counter-reset: law; }
+.laws li { counter-increment: law; position: relative; display: flex; gap: 16px; padding: 12px 0; margin: 0; border-bottom: 1px solid var(--line); }
+.laws .law-num { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12px; color: var(--gold); padding-top: 4px; min-width: 24px; }
+.laws strong { color: var(--ink); }
+
+/* Shelves --------------------------------------------------------------- */
+.linkgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin: 20px 0 8px; }
+.shelf-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg-soft);
+  color: var(--ink);
+}
+.shelf-card:hover { text-decoration: none; border-color: var(--accent); }
+.shelf-kicker { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+.shelf-title { font-size: 20px; }
+.shelf-desc { font-size: 14px; color: var(--ink-dim); }
+
+/* Numbers and install --------------------------------------------------- */
+.numbers { display: flex; gap: 22px; flex-wrap: wrap; margin: 24px 0 8px; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.numbers span { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13px; color: var(--ink-dim); }
+.numbers strong { color: var(--gold); font-size: 18px; }
+pre.install { padding: 18px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg-soft); overflow-x: auto; font-size: 14px; }
+.button { display: inline-block; padding: 8px 14px; border: 1px solid var(--accent); border-radius: 4px; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 13px; }
+.button:hover { background: var(--bg-soft2); text-decoration: none; }
+
+/* Freeze and quotes ----------------------------------------------------- */
+.freeze { margin: 32px 0 8px; padding: 14px 18px; border-left: 3px solid var(--accent); background: var(--bg-soft); color: var(--ink-dim); font-style: italic; font-size: 15px; }
+.freeze p { margin: 0; }
+blockquote { margin: 20px 0; padding-left: 18px; border-left: 2px solid var(--accent); color: var(--ink-dim); }
+
+/* Seat pages ------------------------------------------------------------ */
+.portrait { display: flex; gap: 20px; align-items: flex-start; margin: 28px 0 8px; flex-wrap: wrap; }
+.portrait figure { margin: 0; width: 260px; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--bg-soft); }
+.portrait figure img { display: block; width: 100%; height: auto; }
+.portrait figure figcaption { padding: 6px 10px; font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 11px; color: var(--ink-faint); }
+.portrait .seat-note { max-width: 46ch; color: var(--ink-dim); font-size: 15px; font-style: italic; }
+section.zone { margin-top: 52px; }
+section.zone .zone-kicker { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); }
+section.zone h2 { font-size: 28px; margin: 6px 0 4px; line-height: 1.15; }
+section.zone .meta { color: var(--ink-dim); font-style: italic; font-size: 15px; margin: 0 0 20px; }
+
+/* Books ----------------------------------------------------------------- */
+article.book { margin-top: 28px; }
+article.book h2 { font-size: 30px; margin: 44px 0 12px; line-height: 1.15; }
+article.book h3 { font-size: 22px; color: var(--gold); margin: 36px 0 10px; letter-spacing: 0.01em; }
+article.book h4 { font-size: 18px; color: var(--gold); margin: 28px 0 8px; }
+article.book p { margin: 0 0 18px; }
+article.book hr { margin: 36px 0; }
+article.book pre { padding: 16px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg-soft); overflow-x: auto; font-size: 14px; }
+article.book blockquote { font-style: italic; }
+.table-wrap { overflow-x: auto; margin: 20px 0 26px; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); }
+
+/* Playbooks ------------------------------------------------------------- */
+.playbooks { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 26px; }
+.playbook-card { border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; background: var(--bg-soft); }
+.playbook-card h3 { margin: 0 0 8px; color: var(--gold); font-size: 20px; }
+.playbook-card p { margin: 0 0 10px; color: var(--ink-dim); font-size: 14px; }
+.playbook-card .meta { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 11px; }
+
+/* Footer ---------------------------------------------------------------- */
+footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--ink-faint); font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 12px; letter-spacing: 0.02em; }
+
+/* Responsive ------------------------------------------------------------ */
+@media (max-width: 640px) {
+  body { font-size: 16px; line-height: 1.66; }
+  .shell { padding: 0 16px 72px; }
+  header.page h1 { font-size: 32px; }
+  .portrait figure { width: 100%; }
+  .roster { grid-template-columns: 1fr 1fr; }
+  nav { justify-content: flex-start; }
+}
+@media (max-width: 400px) {
+  .roster { grid-template-columns: 1fr; }
+  nav { gap: 12px; }
+}

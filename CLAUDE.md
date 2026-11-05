@@ -1,0 +1,37 @@
+# AnimeStack — repo guidance for Claude Code
+
+AnimeStack is a skill pack that installs the eight-seat house into this host.
+Use `/house` for any non-trivial change: it runs the eight-seat loop and closes
+with a verdict (setup installs it as a real command on the opencode host). `/simple` is the Operator's waiver — a plain build mode with no
+seats, no room, no house voice — and it never signs.
+
+## Rules for working in this repo
+
+- Counts are facts. The canonical counts (ten skill dirs, eight seats, twelve
+  playbooks, two commands, 8 agent files per dialect, 48 agent files total) live in
+  `docs/measurement.md`. A doc
+  that disagrees with the tree is a defect; fix the doc or fix the tree, never
+  paper over the disagreement. At v2.0.0 the same table is 14 laws, 37
+  principles, 11 install targets (ten coding hosts plus the DSH surface), 8
+  seat packs, 11 Agent presets, 25 canon sections, 112 board questions, 40
+  measurement rows, 16 registry entries, 3 claim cards, and 27 generated pages.
+- `docs/lore/` is the house canon. It is part of this repo and is edited here
+  like any other doc; the canon is the law the pack ships with.
+- No secrets in this repo, ever. No channel URLs, no keys, no tokens, no
+  machine paths. A secret belongs in an env file outside git. The leak gate is
+  `python scripts/check-leak --tree`; the sealed tier is a release secret.
+- The site is generated: edit the source, run `python scripts/gen-site`, and
+  commit the pages with the source. `python scripts/gen-site --check` and
+  `python scripts/check-site` must stay green; a hand-edited page is a defect.
+- `setup` and `setup.ps1` are the one installer, two entry points (bash /
+  native Windows). It never touches a file or directory it cannot
+  prove it owns, and it is the single path that registers skills and agents.
+
+## Build discipline
+
+- Build pass: answer the one sentence, build the lane the seat owns, report
+  exact changed files.
+- Integration, the one atomic commit, the gates, and any signed execution
+  belong to the owning seat; contested acts go to Reika.
+- A number is a measurement or a hymn. Elo audits which. Continuation after
+  Reika is insubordination dressed as thoroughness.

@@ -1,0 +1,431 @@
+#!/usr/bin/env python3
+"""check-claim - the claim standard's gate: cards, fields, ordering, disposition.
+
+A claim is a card in `claims/`: ten fields in one fenced block, then the prose
+that explains it. This gate is the reader: it refuses a card whose sample has
+no floor, whose falsifier was written after the sample, whose half is red under
+a SHIP, whose park has no review date, whose retire carries no counted
+refusal, whose control is the mechanism, whose THIN reading quotes a result,
+whose receipt path the tree cannot resolve, and whose prose carries a hymn or
+a stub.
+
+It also refuses a card whose `pattern=` citation resolves to no row in
+`patterns/registry.json`: a claim arrives with its kin already retrieved.
+
+No second record engine: the card carries evidence, `record/seat_record.jsonl`
+carries conduct, and this gate never writes.
+
+Usage:
+    python3 scripts/check-claim                 run the gate (same as --check)
+    python3 scripts/check-claim --check         run the gate
+    python3 scripts/check-claim --count         print the number of cards
+    python3 scripts/check-claim --list          one line per card
+    python3 scripts/check-claim --rerun         replay the receipts that may be replayed
+    python3 scripts/check-claim --root <dir>    run against another checkout (test hook)
+
+Exit 0 = clean; 1 = failures printed; 2 = usage.
+Stdlib only; no network; read-only.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import shlex
+import subprocess
+import sys
+from datetime import date
+from pathlib import Path
+
+CARD_KEYS = (
+    "id",
+    "claim",
+    "failure",
+    "mechanism",
+    "sample",
+    "control",
+    "halves",
+    "falsifier",
+    "carved",
+    "receipt",
+    "disposition",
+)
+
+DISPOSITIONS = ("SHIP", "PARK", "RETIRE", "THIN")
+HALF_STATES = ("green", "red", "thin", "unrun")
+
+ID_RE = re.compile(r"^claim-\d{3}$")
+HALF_RE = re.compile(r"\b(formed|fresh)\s*=\s*(green|red|thin|unrun)\b", re.I)
+PATTERN_RE = re.compile(r"\bpattern\s*=\s*((?:P|A)-\d{3})\b")
+REVIEW_RE = re.compile(r"\breview\s*=\s*(\d{4}-\d{2}-\d{2})\b")
+REFUSAL_RE = re.compile(r"\brefusal\s*=\s*(\S+)")
+DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+FENCE_RE = re.compile(r"```[a-zA-Z]*\s*\n(.*?)\n```", re.S)
+KEY_RE = re.compile(r"^([a-z][a-z_]*)\s*:\s*(.*)$")
+
+# A path the tree can resolve: contains a separator or carries a known suffix.
+PATH_TOKEN_RE = re.compile(
+    r"(?<![\w/.-])((?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]+|(?:[A-Za-z0-9_.-]+\.(?:py|md|json|yml|yaml|html|txt|toml|svg|css)))(?::(\d+))?"
+)
+
+HYMN_TOKENS = (
+    "works great",
+    "much faster",
+    "feels right",
+    "obviously",
+    "everyone knows",
+    "no doubt",
+    "trust me",
+    "clearly better",
+    "basically works",
+    "huge improvement",
+    "self-evident",
+)
+
+STUB_TOKENS = ("TODO", "TBD", "FIXME", "placeholder", "phase two", "coming soon")
+
+RERUN_PREFIXES = (
+    "python scripts/",
+    "python3 scripts/",
+    "python -m pytest",
+    "python3 -m pytest",
+)
+
+
+def resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+def read(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def parse_card(path: Path) -> tuple[dict[str, str], list[str]]:
+    """Parse the first fenced block of a card. Returns (fields, failures)."""
+    failures: list[str] = []
+    text = read(path)
+    match = FENCE_RE.search(text)
+    if match is None:
+        return {}, ["%s: no card block (a claim needs its ten fields in one fence)" % path.name]
+    fields: dict[str, str] = {}
+    for line in match.group(1).splitlines():
+        line = line.rstrip()
+        if not line.strip():
+            continue
+        key_match = KEY_RE.match(line)
+        if key_match is None:
+            continue
+        fields[key_match.group(1)] = key_match.group(2).strip()
+    for key in CARD_KEYS:
+        if not fields.get(key):
+            failures.append("%s: missing or empty field: %s" % (path.name, key))
+    return fields, failures
+
+
+def resolve_token(root: Path, token: str) -> bool:
+    """A token resolves when the path exists and any cited line is in range."""
+    token = token.rstrip(".,;:)")
+    line_number = None
+    if ":" in token:
+        head, _, tail = token.rpartition(":")
+        if tail.isdigit():
+            token, line_number = head, int(tail)
+    candidate = (root / token).resolve()
+    try:
+        candidate.relative_to(root.resolve())
+    except ValueError:
+        return False
+    if not candidate.is_file():
+        return False
+    if line_number is not None:
+        try:
+            lines = len(read(candidate).splitlines())
+        except (OSError, UnicodeDecodeError):
+            return False
+        if line_number < 1 or line_number > lines:
+            return False
+    return True
+
+
+def path_tokens(value: str) -> list[str]:
+    return [match.group(0) for match in PATH_TOKEN_RE.finditer(value)]
+
+
+def load_registry(root: Path) -> set[str]:
+    path = root / "patterns" / "registry.json"
+    if not path.is_file():
+        return set()
+    try:
+        data = json.loads(read(path))
+    except (OSError, ValueError):
+        return set()
+    entries = data.get("entries") if isinstance(data, dict) else data
+    if not isinstance(entries, list):
+        return set()
+    return {str(entry.get("id")) for entry in entries if isinstance(entry, dict)}
+
+
+def parse_date(value: str) -> date | None:
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def check_card(root: Path, path: Path, registry: set[str], seen_ids: dict[str, str]) -> tuple[list[str], dict[str, str]]:
+    failures: list[str] = []
+    fields, parse_failures = parse_card(path)
+    failures.extend(parse_failures)
+    if not fields:
+        return failures, fields
+
+    text = read(path)
+    card_id = fields.get("id", "")
+    if not ID_RE.match(card_id):
+        failures.append("%s: malformed id: %r" % (path.name, card_id))
+    elif not path.name.startswith(card_id + "-"):
+        failures.append("%s: filename does not start with the id %s" % (path.name, card_id))
+    if card_id in seen_ids:
+        failures.append("%s: duplicate id %s (also %s)" % (path.name, card_id, seen_ids[card_id]))
+    else:
+        seen_ids[card_id] = path.name
+
+    # The mechanism and the receipt must name something the tree can resolve.
+    for label in ("mechanism", "receipt"):
+        value = fields.get(label, "")
+        tokens = path_tokens(value)
+        if not tokens:
+            failures.append("%s: %s names no path the tree can resolve" % (path.name, label))
+        else:
+            resolved = [token for token in tokens if resolve_token(root, token)]
+            if not resolved:
+                failures.append(
+                    "%s: %s path does not resolve: %s" % (path.name, label, tokens[0])
+                )
+
+    # The falsifier is carved before the sample, or it is a caption.
+    carved = parse_date(fields.get("carved", ""))
+    if carved is None:
+        failures.append("%s: carved is not a date (YYYY-MM-DD)" % path.name)
+    sample_dates = DATE_RE.findall(fields.get("sample", ""))
+    if not sample_dates:
+        failures.append("%s: sample names no date; the count cannot be dated" % path.name)
+    elif carved is not None:
+        sample_date = parse_date(sample_dates[-1])
+        if sample_date is None:
+            failures.append("%s: sample date is malformed: %r" % (path.name, sample_dates[-1]))
+        elif carved > sample_date:
+            failures.append(
+                "%s: falsifier carved %s after the sample %s — a caption, not a test"
+                % (path.name, carved, sample_date)
+            )
+
+    # The sample states its own floor; the pack imports no threshold.
+    if "floor" not in fields.get("sample", "").lower():
+        failures.append("%s: sample states no floor; the reading has no bar" % path.name)
+
+    # The control is the counterfactual, never the mechanism.
+    control = fields.get("control", "").strip().lower()
+    if control in ("", "none", "n/a", "na"):
+        failures.append("%s: control is empty or 'none'" % path.name)
+    elif control == fields.get("mechanism", "").strip().lower():
+        failures.append("%s: control is identical to the mechanism" % path.name)
+    elif control == fields.get("claim", "").strip().lower():
+        failures.append("%s: control restates the claim; it is not a counterfactual" % path.name)
+
+    # Both halves, stated, and never less than the disposition admits.
+    halves_text = fields.get("halves", "")
+    half_states: dict[str, str] = {}
+    for half, state in HALF_RE.findall(halves_text):
+        half_states[half.lower()] = state.lower()
+    for half in ("formed", "fresh"):
+        if half not in half_states:
+            failures.append("%s: halves names no %s state" % (path.name, half))
+
+    # The disposition decides what the halves must show.
+    disposition_text = fields.get("disposition", "").strip()
+    match = re.match(r"^(SHIP|PARK|RETIRE|THIN)\b(.*)$", disposition_text, re.I)
+    disposition = ""
+    if match is None:
+        failures.append("%s: disposition is not SHIP, PARK, RETIRE, or THIN" % path.name)
+    else:
+        disposition = match.group(1).upper()
+        tail = match.group(2)
+        pattern_match = PATTERN_RE.search(tail)
+        if pattern_match is None:
+            failures.append("%s: %s names no pattern=<P-###|A-###>" % (path.name, disposition))
+        elif pattern_match.group(1) not in registry:
+            failures.append(
+                "%s: pattern %s resolves to no registry row" % (path.name, pattern_match.group(1))
+            )
+        if disposition == "SHIP":
+            for half in ("formed", "fresh"):
+                if half_states.get(half) != "green":
+                    failures.append(
+                        "%s: SHIP with a %s half that is %s — only green ships"
+                        % (path.name, half, half_states.get(half, "missing"))
+                    )
+        elif disposition == "PARK":
+            review = REVIEW_RE.search(tail)
+            if review is None:
+                failures.append("%s: PARK with no review=YYYY-MM-DD" % path.name)
+            else:
+                review_date = parse_date(review.group(1))
+                if review_date is None:
+                    failures.append("%s: review date is malformed" % path.name)
+                elif carved is not None and review_date <= carved:
+                    failures.append(
+                        "%s: review date %s is not after the carve date %s"
+                        % (path.name, review_date, carved)
+                    )
+        elif disposition == "RETIRE":
+            refusal = REFUSAL_RE.search(tail)
+            if refusal is None:
+                failures.append("%s: RETIRE with no refusal=<path:line>" % path.name)
+            elif not resolve_token(root, refusal.group(1)):
+                failures.append(
+                    "%s: refusal does not resolve: %s" % (path.name, refusal.group(1))
+                )
+            if "red" not in half_states.values():
+                failures.append("%s: RETIRE with no red half; nothing was refused" % path.name)
+        elif disposition == "THIN":
+            if "green" in half_states.values() or "red" in half_states.values():
+                failures.append(
+                    "%s: THIN quotes a result; a below-floor reading is named, never quoted"
+                    % path.name
+                )
+
+    lowered = text.lower()
+    for token in HYMN_TOKENS:
+        if token in lowered:
+            failures.append("%s: hymn token in the card: %r" % (path.name, token))
+    for token in STUB_TOKENS:
+        if token.lower() in lowered:
+            failures.append("%s: stub token in the card: %r" % (path.name, token))
+
+    return failures, {**fields, "disposition_state": disposition}
+
+
+def collect_cards(root: Path) -> list[Path]:
+    claims = root / "claims"
+    if not claims.is_dir():
+        return []
+    return sorted(
+        path
+        for path in claims.glob("*.md")
+        if path.is_file() and path.name.lower() != "readme.md"
+    )
+
+
+def run_gate(root: Path, rerun: bool) -> int:
+    failures: list[str] = []
+    cards = collect_cards(root)
+    if not cards:
+        print("check-claim: FAILED (claims/ missing or empty; a claim standard with no cards is prose)")
+        return 1
+    registry = load_registry(root)
+    seen_ids: dict[str, str] = {}
+    parsed: list[dict[str, str]] = []
+    for path in cards:
+        card_failures, fields = check_card(root, path, registry, seen_ids)
+        failures.extend(card_failures)
+        if fields:
+            parsed.append(fields)
+
+    if rerun:
+        for fields in parsed:
+            command = fields.get("receipt", "").strip()
+            if not command.startswith(RERUN_PREFIXES):
+                continue
+            if "check-claim" in command:
+                print("%s: rerun skipped (a receipt cannot run the gate that reads it)" % fields.get("id"))
+                continue
+            try:
+                argv = shlex.split(command, posix=False)
+            except ValueError:
+                failures.append("%s: receipt cannot be parsed: %r" % (fields.get("id"), command))
+                continue
+            completed = subprocess.run(
+                argv, cwd=root, capture_output=True, text=True, timeout=300
+            )
+            print("%s: rerun %s -> exit %d" % (fields.get("id"), command, completed.returncode))
+            if completed.returncode != 0:
+                failures.append(
+                    "%s: receipt exits %d: %s"
+                    % (fields.get("id"), completed.returncode, command)
+                )
+
+    if failures:
+        print("check-claim: FAILED (%d issue(s))" % len(failures))
+        for failure in failures:
+            print("  - %s" % failure)
+        return 1
+
+    counts = {state: 0 for state in DISPOSITIONS}
+    for fields in parsed:
+        state = fields.get("disposition_state", "")
+        if state in counts:
+            counts[state] += 1
+    cited = len({PATTERN_RE.search(fields.get("disposition", "")).group(1) for fields in parsed if PATTERN_RE.search(fields.get("disposition", ""))})
+    print(
+        "check-claim: clean (%d cards: %d ship, %d park, %d retire, %d thin; %d patterns cited)"
+        % (
+            len(parsed),
+            counts["SHIP"],
+            counts["PARK"],
+            counts["RETIRE"],
+            counts["THIN"],
+            cited,
+        )
+    )
+    return 0
+
+
+def list_cards(root: Path) -> int:
+    cards = collect_cards(root)
+    if not cards:
+        print("check-claim: no cards")
+        return 1
+    registry = load_registry(root)
+    seen_ids: dict[str, str] = {}
+    for path in cards:
+        _failures, fields = check_card(root, path, registry, seen_ids)
+        disposition = fields.get("disposition", "")
+        print(
+            "%-11s %-34s %s"
+            % (fields.get("id", "?"), path.name, disposition)
+        )
+    return 0
+
+
+def main(argv: list[str]) -> int:
+    root = resolve_root(argv)
+    args = [
+        arg
+        for index, arg in enumerate(argv)
+        if not (arg == "--root" or (index > 0 and argv[index - 1] == "--root"))
+        and not arg.startswith("--root=")
+    ]
+    mode = "--check"
+    for arg in args:
+        if arg in ("--check", "--count", "--list", "--rerun"):
+            mode = arg
+        elif arg.startswith("-"):
+            print("check-claim: usage: [--check|--count|--list|--rerun] [--root <dir>]")
+            return 2
+    if mode == "--count":
+        print(len(collect_cards(root)))
+        return 0
+    if mode == "--list":
+        return list_cards(root)
+    return run_gate(root, rerun=mode == "--rerun")
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

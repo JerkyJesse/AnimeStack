@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+"""release - the click: gate, leak, site, tag, push, live verify.
+
+One command, one chain, evidence at every stage. The script refuses a dirty
+tree, a non-main branch, an existing tag, or a version that disagrees with the
+measurement sample. Every stage prints its command and its tail; the first red
+stops the release. There are no skip flags.
+
+Usage:
+    python scripts/release 2.0.0              preflight + full gate (no tag)
+    python scripts/release 2.0.0 --dry-run    print the plan, run preflight only
+    python scripts/release 2.0.0 --publish    gate, tag, push, publish, verify
+
+The sealed leak tier is read from LEAK_TOKENS (base64 text, one token per
+line) or a --sealed file outside the tree. A release without it is held.
+
+Exit 0 = the requested chain is complete; 1 = a stage failed; 2 = usage.
+Stdlib only; the publish stage uses git and gh, and the verify stage uses the
+network.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import re
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+SITE = "https://animestack.jerkyjesse.com"
+LIVE_PAGES = (
+    ("/", "The 14 laws"),
+    ("/lore/canon.html", "The House Canon"),
+    ("/lore/board.html", "The House Board"),
+    ("/lore/record.html", "The Seat Record"),
+    ("/guide.html", "First task"),
+    ("/sitemap.xml", "<urlset"),
+)
+GATES = (
+    ("python", "scripts/gen-agent-dialects", "--check"),
+    ("python", "scripts/gen-dsh-house", "--check"),
+    ("python", "scripts/gen-site", "--check"),
+    ("python", "scripts/check-site"),
+    ("python", "scripts/check-lore-consistency"),
+    ("python", "scripts/check-board"),
+    ("python", "scripts/check-contract"),
+    ("python", "scripts/check-measurement", "--check-doc"),
+    ("python", "scripts/check-voices"),
+    ("python", "scripts/check-digest"),
+    ("python", "scripts/check-patterns"),
+    ("python", "scripts/check-claim", "--check"),
+    ("python", "scripts/seat_record", "--check"),
+    ("python", "scripts/room_scorecard", "--strict"),
+    ("python", "scripts/check-leak", "--tree"),
+    ("python", "-m", "pytest", "-q"),
+)
+
+
+def run(command: list[str], root: Path) -> int:
+    print("  > %s" % " ".join(command), flush=True)
+    completed = subprocess.run(command, cwd=root, text=True, encoding="utf-8", errors="replace")
+    return completed.returncode
+
+
+def output(command: list[str], root: Path) -> tuple[int, str]:
+    completed = subprocess.run(
+        command, cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace",
+    )
+    return completed.returncode, (completed.stdout + completed.stderr).strip()
+
+
+def preflight(root: Path, version: str) -> int:
+    failures: list[str] = []
+    code, status = output(["git", "status", "--short"], root)
+    if code != 0:
+        failures.append("git status failed: %s" % status)
+    elif status.strip():
+        failures.append("tree is dirty: %s" % status.replace("\n", " | "))
+    code, branch = output(["git", "branch", "--show-current"], root)
+    if code != 0 or branch.strip() != "main":
+        failures.append("branch is %r, not main" % branch.strip())
+    current = (root / "VERSION").read_text(encoding="utf-8").strip() if (root / "VERSION").is_file() else ""
+    if current != version:
+        failures.append("VERSION is %r, the release argument is %r" % (current, version))
+    code, tags = output(["git", "tag", "-l", "v%s" % version], root)
+    if code == 0 and tags.strip():
+        failures.append("tag v%s already exists" % version)
+    sample = (root / "docs" / "measurement.md").read_text(encoding="utf-8", errors="replace")
+    match = re.search(r"release `v(\d+\.\d+\.\d+)` \(`VERSION`\)", sample)
+    if match is None:
+        failures.append("docs/measurement.md has no release sample line")
+    elif match.group(1) != version:
+        failures.append("measurement sample says v%s, the release argument is %s" % (match.group(1), version))
+    if failures:
+        print("release: HELD (%d preflight issue(s))" % len(failures))
+        for failure in failures:
+            print("  - %s" % failure)
+        return 1
+    print("release: preflight clean (v%s on main, tree clean, tag absent)" % version)
+    return 0
+
+
+def gate(root: Path) -> int:
+    for command in GATES:
+        code = run(list(command), root)
+        if code != 0:
+            print("release: HELD (gate failed: %s)" % " ".join(command))
+            return 1
+    print("release: gate clean")
+    return 0
+
+
+def leak(root: Path) -> int:
+    code = run(["python", "scripts/check-leak", "--tree"], root)
+    if code != 0:
+        print("release: HELD (leak tree)")
+        return 1
+    if not os.environ.get("LEAK_TOKENS", "").strip():
+        print("release: HELD (sealed tier absent: set LEAK_TOKENS or pass --sealed <file outside the tree>)")
+        return 1
+    code = run(["python", "scripts/check-leak", "--sealed-required", "--history"], root)
+    if code != 0:
+        print("release: HELD (leak history)")
+        return 1
+    print("release: leak clean (tree and history, sealed tier present)")
+    return 0
+
+
+def publish(root: Path, version: str) -> int:
+    tag = "v%s" % version
+    if run(["git", "tag", "-a", tag, "-m", "AnimeStack %s - the complete public house" % tag], root) != 0:
+        print("release: HELD (tag creation failed)")
+        return 1
+    if run(["git", "push", "origin", "main"], root) != 0:
+        print("release: HELD (push main failed; the tag exists locally)")
+        return 1
+    if run(["git", "push", "origin", tag], root) != 0:
+        print("release: HELD (push tag failed; the tag exists locally)")
+        return 1
+    notes = root / "CHANGELOG.md"
+    command = ["gh", "release", "create", tag, "--title", "AnimeStack %s - the complete public house" % tag]
+    if notes.is_file():
+        command += ["--notes-file", str(notes)]
+    if run(command, root) != 0:
+        print("release: HELD (gh release create failed; the tag is pushed)")
+        return 1
+    print("release: published %s" % tag)
+    return 0
+
+
+def verify(version: str) -> int:
+    headers = {"User-Agent": "AnimeStack-release/%s" % version}
+    last: list[str] = []
+    for attempt in range(1, 9):
+        last = []
+        for path, marker in LIVE_PAGES:
+            url = SITE + path
+            try:
+                request = urllib.request.Request(url, headers=headers)
+                with urllib.request.urlopen(request, timeout=20) as response:
+                    body = response.read().decode("utf-8", "replace")
+                status = getattr(response, "status", 200)
+            except (urllib.error.URLError, OSError) as error:
+                last.append("%s: unread (%s)" % (url, error))
+                continue
+            if status != 200:
+                last.append("%s: status %s" % (url, status))
+            elif marker not in body:
+                last.append("%s: marker %r missing" % (url, marker))
+            elif path != "/sitemap.xml" and "v%s" % version not in body:
+                last.append("%s: release stamp v%s missing" % (url, version))
+        if not last:
+            for path, _marker in LIVE_PAGES:
+                print("  live: %s%s 200" % (SITE, path))
+            print("release: live verified at %s" % time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+            return 0
+        print("release: live attempt %d/8 not ready (%d page(s)); waiting 15s" % (attempt, len(last)), flush=True)
+        time.sleep(15)
+    print("release: HELD (live verify)")
+    for line in last:
+        print("  - %s" % line)
+    return 1
+
+
+def main(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(description="AnimeStack release chain")
+    parser.add_argument("version", help="release version, e.g. 2.0.0")
+    parser.add_argument("--dry-run", action="store_true", help="print the plan; preflight only")
+    parser.add_argument("--publish", action="store_true", help="tag, push, create the release, verify live")
+    args = parser.parse_args(argv)
+    if not re.fullmatch(r"\d+\.\d+\.\d+", args.version):
+        parser.error("version must look like 2.0.0")
+    root = Path(__file__).resolve().parent.parent
+    if preflight(root, args.version) != 0:
+        return 1
+    if args.dry_run:
+        print("release: plan for v%s (dry run; no gate, no tag, no push)" % args.version)
+        for command in GATES:
+            print("  would run: %s" % " ".join(command))
+        print("  would run: python scripts/check-leak --sealed-required --history")
+        print("  would run: git tag -a v%s && git push origin main && git push origin v%s" % (args.version, args.version))
+        print("  would run: gh release create v%s --notes-file CHANGELOG.md" % args.version)
+        print("  would run: live verify %s" % SITE)
+        return 0
+    if gate(root) != 0 or leak(root) != 0:
+        return 1
+    if not args.publish:
+        print("release: gate and leak clean; tag and publish not requested (add --publish)")
+        return 0
+    if publish(root, args.version) != 0:
+        return 1
+    return verify(args.version)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

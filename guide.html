@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<title>First task · AnimeStack</title>
+<meta name="description" content="Five minutes from clone to a closing verdict: install, open one session, hand the house a real task, read eight sentences.">
+<link rel="canonical" href="https://animestack.jerkyjesse.com/guide.html">
+<meta property="og:title" content="First task · AnimeStack">
+<meta property="og:description" content="Five minutes from clone to a closing verdict: install, open one session, hand the house a real task, read eight sentences.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://animestack.jerkyjesse.com/guide.html">
+<meta property="og:image" content="https://animestack.jerkyjesse.com/assets/img/social-preview.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body>
+<div class="shell">
+<nav><span class="brand">ANIMESTACK</span><span class="nav-links"><a href="index.html">House</a><a href="index.html#seats">Seats</a><a href="lore/index.html">Lore</a><a href="lore/board.html">Board</a><a href="lore/record.html">Record</a><a href="lore/playbooks.html">Playbooks</a><a href="guide.html" class="here">Guide</a><a href="lore/dsh.html">DSH</a><a href="https://github.com/JerkyJesse/AnimeStack">GitHub</a></span></nav>
+<header class="page"><div class="kicker">The first task · five minutes</div><h1>First task</h1><p class="one-sentence">“What are we building, in one sentence?”</p><p class="sub">Five minutes from clone to a closing verdict: install, open one session, hand the house a real task, read eight sentences.</p></header>
+<article class="book"><p>The first ship. A stranger clones the repo, runs one command, opens one session, and hands the house a real but small task. This page is that path, step by step, timed. No theory you do not need.</p>
+<h2 id="the-release-in-five-minutes">The release in five minutes</h2>
+<ol><li>Clone the repo.</li><li>Run <code>./setup --host &lt;your host&gt;</code> once.</li><li>Open a new session and say <code>/house</code>.</li><li>Give it a real task. Read the eight sentences. Watch Reika close.</li></ol>
+<p>That is the whole window. The rest of this page is the walkthrough for each step.</p>
+<h2 id="install">Install</h2>
+<pre><code>git clone https://github.com/JerkyJesse/AnimeStack ~/animestack
+cd ~/animestack
+./setup --host &lt;your host&gt;</code></pre>
+<p><code>--host</code> names the coding host whose config directory gets the skills. The supported values are:</p>
+<div class="table-wrap"><table><thead><tr><th>Host</th><th>Where skills land</th><th>Agents</th></tr></thead><tbody><tr><td><code>claude</code></td><td><code>~/.claude/skills</code></td><td><code>~/.claude/agents</code></td></tr><tr><td><code>cursor</code></td><td><code>~/.cursor/skills</code></td><td><code>~/.cursor/agents</code></td></tr><tr><td><code>codex</code></td><td><code>${CODEX_HOME:-~/.codex}/skills</code></td><td><code>${CODEX_HOME:-~/.codex}/agents</code> (TOML)</td></tr><tr><td><code>factory</code></td><td><code>~/.factory/skills</code></td><td><code>~/.factory/droids</code></td></tr><tr><td><code>opencode</code></td><td><code>~/.config/opencode/skills</code></td><td><code>~/.config/opencode/agent</code></td></tr><tr><td><code>kiro</code></td><td><code>~/.kiro/skills</code></td><td><code>~/.kiro/agents</code></td></tr><tr><td><code>slate</code></td><td>reads <code>~/.claude/skills</code> (claude install refreshed)</td><td>reads <code>~/.claude/agents</code></td></tr><tr><td><code>openclaw</code></td><td><code>~/.openclaw/skills/animestack</code> (digest)</td><td>—</td></tr><tr><td><code>hermes</code></td><td><code>~/.hermes/skills/animestack</code> (digest)</td><td>—</td></tr><tr><td><code>gbrain</code></td><td><code>~/.gbrain/skills/animestack</code> (digest)</td><td>—</td></tr><tr><td><code>dsh</code></td><td><code>${DSH_HOME:-~/.dsh}/skills</code> (owned)</td><td><code>${DSH_HOME:-~/.dsh}/animestack-team</code> (8 packs) + <code>${DSH_HOME:-~/.dsh}/animestack</code> (bundle)</td></tr></tbody></table></div>
+<p><code>--host all</code> installs every supported target; <code>--host auto</code> installs only the hosts whose config directories already exist. The default is <code>claude</code>. There are eleven install targets: ten coding hosts plus the DSH team surface. Run <code>./setup --help</code> for the exact list, and check <a href="lore/measurement.html"><code>../measurement.md</code></a> if this table and the script ever disagree — the script is the truth.</p>
+<p>Windows installs by copy, not symlink. The native entry point is <code>powershell -ExecutionPolicy Bypass -File .\setup.ps1 -TargetHost &lt;your host&gt;</code>; same contract as <code>./setup</code>. Re-run the installer after <code>git pull</code> to refresh.</p>
+<h2 id="first-task">First task</h2>
+<p>Open a new session, then hand the house a real but small task:</p>
+<blockquote><p>Add a <code>--dry-run</code> flag to the sync command; it must print what would change and touch nothing.</p></blockquote>
+<p>Say <code>/house</code>. The router picks a playbook, opens the loop, and descends eight seats. A realistic transcript:</p>
+<pre><code>playbook: feature (lead Reika, then Yui)
+
+MEI:    The sync format is the only thing that could obsolete this; pin the
+        preview output shape in the test so the flag fails when the format moves.
+ELO:    Rank the sample before the build: --dry-run is a measurement when it
+        lists exactly the paths that would change, and a hymn when it prints a
+        plan.
+MECHAPIP: Findings first. Print-then-bail is a known shape: three prior commands
+        wear it, and two of them grew a second code path that drifted from the
+        write path inside a release. Share one planning pass between the real
+        run and the dry run — or the drift is a matter of time.
+YUI:    The failure is the missing preview — sync mutates before it reports, so
+        every user guesses. Falsifier first: after a dry run the tree is
+        byte-identical to before.
+NIKO:   The flag lives in the sync module on the write path and touches nothing
+        else: one branch, returns before any write, no shared counter.
+RIN:    The failure is a dry run that writes anyway — accept only if a test
+        asserts the diff is empty after --dry-run.
+ARIA:   The release is the test run: pytest green and git status clean after the
+        dry run.
+REIKA:  Ship the flag with that test. VERDICT: ship. Next failure.
+
+build:  YUI  BUILT: sync.py --dry-run flag + test_sync_dry_run
+review: RIN  ACCEPT
+ship:   ARIA SHIP</code></pre>
+<p>Eight sentences, one each, in order. No skips, no merges. Yui builds, Rin reviews and accepts, Aria releases. Then silence after Reika. With seat agents installed the selected seat leads and the room runs its rounds — a review: independent takes (parallel), then one reply each to affirm, contest a named seat with a fact, or revise (the exchange); a build descent: one seat at a time in loop order, each brief carrying every prior seat's changed files, then the same exchange; this transcript is the inline fallback.</p>
+<p>The falsifier was written before the victory lap, and it is in the pack too — pre-registered in <a href="lore/measurement.html"><code>../measurement.md</code></a> §5: run your own work both ways and count escaped defects under <code>/house</code> against the same under <code>/simple</code>. If there is no measured difference, the pack is prose wearing a coat. Retire it, and say so in your own record.</p>
+<h2 id="what-just-happened">What just happened</h2>
+<p>The loop is the spine. Every material decision descends eight seats in fixed order — Mei, Elo, MechaPip, Yui, Niko, Rin, Aria, Reika — one sentence each. The selected seat leads the room; Reika answers step 8 and signs. A thing is not finished when it is named; it is finished when all eight sentences exist. Missing one means the house is performing intelligence.</p>
+<p>The full spine, the two descents, solo authority, and the waiver are in <a href="lore/canon.html"><code>../loop.md</code></a>. The ring is drawn in <a href="https://github.com/JerkyJesse/AnimeStack/blob/main/assets/img/loop.svg"><code>../../assets/img/loop.svg</code></a>.</p>
+<h2 id="when-to-use-simple">When to use /simple</h2>
+<p><code>/simple</code> is the Operator's waiver: one invocation, no seats, no room, no house voice. It reads, writes, builds, and tests — and it never signs. No <code>ACCEPT</code>, no <code>SHIP</code>, no push, no spend. A full-loop act stays a full-loop act.</p>
+<p>Use it for a plain build where the loop would be costume: a one-line edit, a format pass, a quick read. If the task would move state, production, people, or public words, it is not <code>/simple</code> work.</p>
+<h2 id="tune-it">Tune it</h2>
+<ul><li>Seats ship with <code>mode: all</code>. Make one seat your primary agent to hold a session-long voice without re-reading the room each turn.</li><li>Run <code>/simple</code> when the loop is heavier than the task.</li><li>Uninstall cleanly with <code>./setup --host &lt;name&gt; --uninstall</code>. It removes only items it can prove it owns, and leaves everything else untouched.</li></ul>
+<h2 id="if-the-first-house-fails">If the first /house fails</h2>
+<ul><li><strong>Skill not found.</strong> Re-run <code>./setup --host &lt;your host&gt;</code>. Confirm the skill directory landed where the host table above says it should.</li><li><strong>Windows refresh.</strong> The install copies files, not symlinks. After <code>git pull</code>, re-run <code>./setup --host &lt;your host&gt;</code> before blaming the skill.</li><li><strong>The room never appears.</strong> Open a <em>new</em> session after setup; skills load at session start, not mid-session.</li><li><strong>A count looks wrong.</strong> Run the audit commands in <a href="lore/measurement.html"><code>../measurement.md</code></a> §2 first. A number that disagrees with the table is a defect — report the count that failed, the command you ran, and the host. That is the report. A number that agrees is not a defect.</li></ul>
+<p>The board never posts a number it cannot check.</p></article>
+<footer>
+  ANIMESTACK · v2.0.0 · canon Rev 9 · <a href="https://github.com/JerkyJesse/AnimeStack">github.com/JerkyJesse/AnimeStack</a> · <a href="https://www.jerkyjesse.com">www.jerkyjesse.com</a>
+</footer>
+</div>
+</body>
+</html>

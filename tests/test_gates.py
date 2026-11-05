@@ -1,0 +1,502 @@
+"""Gate self-tests: every maintenance gate must pass clean and fail closed.
+
+The happy paths run against the live checkout, read-only: each script exits 0
+with its clean line. The failure modes run against one throwaway copy of the
+tree (the fixture): a case mutates exactly one thing, asserts exit 1 plus the
+failure it named, and restores the file so cases cannot contaminate each other.
+Nothing here writes to the live tree.
+"""
+
+from __future__ import annotations
+
+import contextlib
+import re
+import shutil
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+from typing import Callable, Iterator
+
+REPO = Path(__file__).resolve().parents[1]
+SCRIPTS = REPO / "scripts"
+FIXTURE: Path | None = None
+
+
+def setUpModule() -> None:
+    global FIXTURE
+    tmp = Path(tempfile.mkdtemp(prefix="animestack-gates-"))
+    FIXTURE = tmp / "repo"
+    shutil.copytree(
+        REPO, FIXTURE, ignore=shutil.ignore_patterns(".git"), symlinks=True
+    )
+
+
+def tearDownModule() -> None:
+    global FIXTURE
+    if FIXTURE is not None:
+        shutil.rmtree(FIXTURE.parent, ignore_errors=True)
+        FIXTURE = None
+
+
+def run_gate(script: str, *args: str, root: Path | None = None) -> subprocess.CompletedProcess:
+    command = [sys.executable, str(SCRIPTS / script)]
+    if root is not None:
+        command += ["--root", str(root)]
+    command += list(args)
+    return subprocess.run(command, capture_output=True, text=True, timeout=300)
+
+
+@contextlib.contextmanager
+def mutated(path: Path, transform: Callable[[str], str]) -> Iterator[None]:
+    original = path.read_bytes()
+    try:
+        text = path.read_text(encoding="utf-8")
+        path.write_text(transform(text), encoding="utf-8")
+        yield
+    finally:
+        path.write_bytes(original)
+
+
+class GateHappyPathTests(unittest.TestCase):
+    def test_every_gate_is_clean_on_the_live_tree(self) -> None:
+        cases = (
+            ("gen-agent-dialects", ("--check",), "in sync"),
+            ("check-lore-consistency", (), "clean"),
+            ("check-board", (), "clean"),
+            ("check-contract", (), "clean"),
+            ("check-measurement", ("--check-doc",), "clean"),
+            ("check-voices", (), "clean"),
+            ("check-digest", (), "clean"),
+            ("check-patterns", (), "clean"),
+            ("gen-dsh-house", ("--check",), "in sync"),
+        )
+        for script, args, marker in cases:
+            with self.subTest(script=script):
+                proc = run_gate(script, *args)
+                self.assertEqual(
+                    proc.returncode,
+                    0,
+                    msg="%s\n%s" % (proc.stdout, proc.stderr),
+                )
+                self.assertIn(marker, proc.stdout)
+
+    def test_every_gate_is_clean_on_the_fixture_root(self) -> None:
+        assert FIXTURE is not None
+        cases = (
+            ("gen-agent-dialects", ("--check",), "in sync"),
+            ("check-lore-consistency", (), "clean"),
+            ("check-board", (), "clean"),
+            ("check-contract", (), "clean"),
+            ("check-measurement", ("--check-doc",), "clean"),
+            ("check-voices", (), "clean"),
+            ("check-digest", (), "clean"),
+            ("check-patterns", (), "clean"),
+            ("gen-dsh-house", ("--check",), "in sync"),
+        )
+        for script, args, marker in cases:
+            with self.subTest(script=script):
+                proc = run_gate(script, *args, root=FIXTURE)
+                self.assertEqual(
+                    proc.returncode,
+                    0,
+                    msg="%s\n%s" % (proc.stdout, proc.stderr),
+                )
+                self.assertIn(marker, proc.stdout)
+
+
+class GenAgentDialectsTests(unittest.TestCase):
+    def test_body_drift_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "agents" / "cursor" / "animestack-reika.md"
+        with mutated(target, lambda text: text + "\ndrift\n"):
+            proc = run_gate("gen-agent-dialects", "--check", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("drift", proc.stdout)
+        self.assertIn("animestack-reika.md", proc.stdout)
+
+    def test_missing_dialect_file_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "agents" / "kiro" / "animestack-elo.md"
+        original = target.read_bytes()
+        try:
+            target.unlink()
+            proc = run_gate("gen-agent-dialects", "--check", root=FIXTURE)
+        finally:
+            target.write_bytes(original)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("missing", proc.stdout)
+
+    def test_extra_dialect_file_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "agents" / "cursor" / "zzz-extra.md"
+        try:
+            target.write_text("---\nname: zzz\n---\n", encoding="utf-8")
+            proc = run_gate("gen-agent-dialects", "--check", root=FIXTURE)
+        finally:
+            target.unlink(missing_ok=True)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("extra", proc.stdout)
+
+
+class LoreConsistencyTests(unittest.TestCase):
+    def test_dropped_credential_key_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "agents" / "opencode" / "animestack-mei.md"
+        with mutated(target, lambda text: text.replace("art: ", "artX: ", 1)):
+            proc = run_gate("check-lore-consistency", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("missing 'art:", proc.stdout)
+
+    def test_drifted_credential_segment_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "docs" / "lore" / "dossiers" / "elo.md"
+        with mutated(target, lambda text: text.replace("(ASA)", "(CFP)", 1)):
+            proc = run_gate("check-lore-consistency", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("elo: credential segment", proc.stdout)
+        self.assertIn("asa", proc.stdout)
+
+    def test_rotted_path_pointer_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "CLAUDE.md"
+        with mutated(target, lambda text: text.replace("docs/measurement.md", "docs/measurementX.md")):
+            proc = run_gate("check-lore-consistency", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("path missing: docs/measurementX.md", proc.stdout)
+
+
+class BoardTests(unittest.TestCase):
+    def test_unresolvable_anchor_phrase_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "docs" / "board.md"
+
+        def break_phrase(text: str) -> str:
+            return re.sub(
+                r"(\[source:\s*[^:\]]+::\s*)([^\]]+)(\])",
+                r"\1zzz does not exist \2\3",
+                text,
+                count=1,
+            )
+
+        with mutated(target, break_phrase):
+            proc = run_gate("check-board", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("anchor not found", proc.stdout)
+
+    def test_malformed_key_line_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "docs" / "board.md"
+        with mutated(target, lambda text: text.replace("[source:", "[sourceX:", 1)):
+            proc = run_gate("check-board", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("missing key line", proc.stdout)
+
+    def test_count_path_is_clean(self) -> None:
+        proc = run_gate("check-board", "--count")
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("112 questions", proc.stdout)
+
+    def test_seat_count_is_derived_not_literal(self) -> None:
+        # Drop one seat section: the count the gate prints must move to seven
+        # and the gate must name the missing seat. A literal eight would pass.
+        assert FIXTURE is not None
+        target = FIXTURE / "docs" / "board.md"
+
+        def drop_elo(text: str) -> str:
+            return re.sub(r"^## Elo .*?(?=^## )", "", text, count=1, flags=re.M | re.DOTALL)
+
+        with mutated(target, drop_elo):
+            count = run_gate("check-board", "--count", root=FIXTURE)
+            gate = run_gate("check-board", root=FIXTURE)
+        self.assertEqual(count.returncode, 0, msg=count.stdout + count.stderr)
+        self.assertIn("7 seats", count.stdout)
+        self.assertEqual(gate.returncode, 1, msg=gate.stdout + gate.stderr)
+        self.assertIn("missing seat section: Elo", gate.stdout)
+
+
+class ContractTests(unittest.TestCase):
+    def test_model_pin_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "agents" / "cursor" / "animestack-yui.md"
+        with mutated(target, lambda text: text.replace("name:", "model: test-pin\nname:", 1)):
+            proc = run_gate("check-contract", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("must omit the model key", proc.stdout)
+
+    def test_lost_ownership_marker_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "agents" / "claude" / "animestack-rin.md"
+        with mutated(target, lambda text: text.replace("<!-- animestack-owned -->", "<!-- not-owned -->")):
+            proc = run_gate("check-contract", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("last line is not the ownership marker", proc.stdout)
+
+    def test_lost_invention_line_fails_closed(self) -> None:
+        # The invention line is load-bearing in every dialect file: stripping
+        # it from one agent must fail the gate naming that file, never a
+        # silent pass. The live tree carries the line in all 48 seat files;
+        # the named pair below can only come from the mutation.
+        assert FIXTURE is not None
+        target = FIXTURE / "agents" / "cursor" / "animestack-mei.md"
+        with mutated(target, lambda text: text.replace("- Invent:", "- InventX:", 1)):
+            proc = run_gate("check-contract", root=FIXTURE)
+        out = proc.stdout.replace("\\", "/")
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("missing the invention line", proc.stdout)
+        self.assertIn("agents/cursor/animestack-mei.md: missing the invention line", out)
+
+    def test_lost_cold_verification_pass_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "agents" / "cursor" / "animestack-yui.md"
+        with mutated(
+            target,
+            lambda text: text.replace("## Cold verification pass", "## Cold verification check", 1),
+        ):
+            proc = run_gate("check-contract", root=FIXTURE)
+        out = proc.stdout.replace("\\", "/")
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("missing the cold verification pass", proc.stdout)
+        self.assertIn("agents/cursor/animestack-yui.md: missing the cold verification pass", out)
+
+    def test_stripped_signature_line_fails_closed(self) -> None:
+        # Exactly one '- Signature -' line per seat file is the contract; the
+        # failure was red-watched by hand at the port, this case pins it. The
+        # mutation strips the prefix match of one line (found 0), never edits
+        # the signature's name.
+        assert FIXTURE is not None
+        target = FIXTURE / "agents" / "cursor" / "animestack-rin.md"
+        with mutated(target, lambda text: text.replace("- Signature -", "- SignatureX -", 1)):
+            proc = run_gate("check-contract", root=FIXTURE)
+        out = proc.stdout.replace("\\", "/")
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("needs exactly one '- Signature -' line", proc.stdout)
+        self.assertIn(
+            "agents/cursor/animestack-rin.md: needs exactly one '- Signature -' line (found 0)",
+            out,
+        )
+
+
+class MeasurementTests(unittest.TestCase):
+    def test_doc_count_mismatch_fails_closed(self) -> None:
+        # The playbooks row is the near-number twin of the laws row and its
+        # count did not move with the port; mutate it, never a row whose count
+        # moved (the laws row is thirteen now, and its fixture went stale).
+        assert FIXTURE is not None
+        target = FIXTURE / "docs" / "measurement.md"
+        with mutated(target, lambda text: text.replace("| 12 | playbooks |", "| 13 | playbooks |", 1)):
+            proc = run_gate("check-measurement", "--check-doc", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("playbooks: doc says 13, tree says 12", proc.stdout)
+
+    def test_missing_doc_row_fails_closed(self) -> None:
+        # A declared class with no row is unmeasured, not free: delete the
+        # canon-sections row and the completeness leg must name the class.
+        assert FIXTURE is not None
+        target = FIXTURE / "docs" / "measurement.md"
+
+        def drop_row(text: str) -> str:
+            return re.sub(r"\n\| 25 \| canon sections \|[^\n]*", "", text, count=1)
+
+        with mutated(target, drop_row):
+            proc = run_gate("check-measurement", "--check-doc", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("no doc row for declared class: canon sections", proc.stdout)
+
+    def test_undeclared_artifact_root_fails_closed(self) -> None:
+        # A new artifact class on disk with no row is the silent failure the
+        # completeness leg exists for: the directory is named, not absorbed.
+        assert FIXTURE is not None
+        mystery = FIXTURE / "mystery"
+        mystery.mkdir()
+        try:
+            (mystery / "artifact.md").write_text("# mystery\n", encoding="utf-8")
+            proc = run_gate("check-measurement", "--check-doc", root=FIXTURE)
+        finally:
+            shutil.rmtree(mystery, ignore_errors=True)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("undeclared artifact root: mystery", proc.stdout)
+
+
+class VoicesTests(unittest.TestCase):
+    def test_sentence_bleed_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "docs" / "seats" / "mei.md"
+        with mutated(
+            target,
+            lambda text: text + '\n\n"What are we building, in one sentence?"\n',
+        ):
+            proc = run_gate("check-voices", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("bleeds", proc.stdout)
+
+    def test_rewritten_sentence_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "voices" / "house.json"
+        with mutated(
+            target,
+            lambda text: text.replace(
+                "What change in the world makes this obsolete?",
+                "What change NOW?",
+                1,
+            ),
+        ):
+            proc = run_gate("check-voices", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("one sentence missing", proc.stdout)
+
+    def test_missing_register_fails_closed(self) -> None:
+        # The eighth register is the port's newest surface: delete the mechapip
+        # block plus its leading comma (the result stays valid JSON, so the
+        # gate reaches the register checks) and the gate must fail closed.
+        assert FIXTURE is not None
+        target = FIXTURE / "voices" / "house.json"
+
+        def drop_machine_register(text: str) -> str:
+            return re.sub(
+                r',\n    "mechapip": \{.*?\n    \}',
+                "",
+                text,
+                count=1,
+                flags=re.DOTALL,
+            )
+
+        with mutated(target, drop_machine_register):
+            proc = run_gate("check-voices", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("expected the eight seats", proc.stdout)
+        self.assertIn("mechapip: register missing", proc.stdout)
+
+    def test_machine_sentence_bleed_fails_closed(self) -> None:
+        # The machine's sentence landing on another seat's seed page is
+        # cross-seat voice: the gate must name the bled seat, not pass it.
+        assert FIXTURE is not None
+        target = FIXTURE / "docs" / "seats" / "mei.md"
+        with mutated(
+            target,
+            lambda text: text + '\n\n"What has this pattern done before?"\n',
+        ):
+            proc = run_gate("check-voices", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("mechapip: one sentence bleeds into mei (digest)", proc.stdout)
+
+
+class DigestTests(unittest.TestCase):
+    def test_loop_row_out_of_order_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "AGENTS.md"
+        with mutated(target, lambda text: text.replace("| 4 | Yui |", "| 8 | Yui |", 1)):
+            proc = run_gate("check-digest", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("Yui sits at row 8", proc.stdout)
+
+    def test_stale_count_claim_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "CLAUDE.md"
+        with mutated(target, lambda text: text.replace("twelve", "thirteen", 1)):
+            proc = run_gate("check-digest", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("thirteen playbooks", proc.stdout)
+
+    def test_version_sample_mismatch_fails_closed(self) -> None:
+        # Anchor the mutation to the sample the measurement doc actually
+        # carries, so the case pins the mismatch itself and never depends on
+        # the release lane having synced VERSION yet.
+        assert FIXTURE is not None
+        target = FIXTURE / "docs" / "measurement.md"
+        sample = re.search(
+            r"release `v(\d+\.\d+\.\d+)`",
+            target.read_text(encoding="utf-8"),
+        )
+        assert sample is not None  # the fixture carries the release sample line
+        sample_version = sample.group(1)
+        with mutated(target, lambda text: text.replace("`v%s`" % sample_version, "`v9.9.9`", 1)):
+            proc = run_gate("check-digest", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("sample says v9.9.9", proc.stdout)
+
+    def test_stale_release_claim_fails_closed(self) -> None:
+        # The rendered kicker is a claim about the release; a page that says a
+        # different version than VERSION is the defect, not a rounding error.
+        assert FIXTURE is not None
+        target = FIXTURE / "index.html"
+        version = (FIXTURE / "VERSION").read_text(encoding="utf-8").strip()
+
+        def bump(text: str) -> str:
+            return text.replace("-\u00b7 v%s -" % version, "-\u00b7 v9.9.9 -", 1).replace(
+                "\u00b7 v%s \u00b7" % version, "\u00b7 v9.9.9 \u00b7", 1
+            )
+
+        with mutated(target, bump):
+            proc = run_gate("check-digest", root=FIXTURE)
+        self.assertIn("claims v9.9.9, VERSION says %s" % version, proc.stdout)
+
+    def test_stale_canon_revision_fails_closed(self) -> None:
+        # canon.md is the source of the revision; every page that claims a
+        # revision must follow it, so a canon bump with no page pass is red.
+        assert FIXTURE is not None
+        target = FIXTURE / "docs" / "lore" / "canon.md"
+
+        def bump(text: str) -> str:
+            return re.sub(r"(\*\*Revision:\*\* )\d+", r"\g<1>99", text, count=1)
+
+        with mutated(target, bump):
+            proc = run_gate("check-digest", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("canon.md says Rev 99", proc.stdout)
+
+
+class ClaimTests(unittest.TestCase):
+    def test_claim_gate_clean_line(self) -> None:
+        proc = run_gate("check-claim", root=FIXTURE)
+        self.assertEqual(proc.returncode, 0, msg=proc.stdout + proc.stderr)
+        self.assertIn("check-claim: clean", proc.stdout)
+
+    def test_claim_missing_falsifier_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "claims" / "claim-001-the-claim-standard.md"
+
+        def drop_falsifier(text: str) -> str:
+            return "\n".join(
+                line for line in text.splitlines() if not line.startswith("falsifier:")
+            )
+
+        with mutated(target, drop_falsifier):
+            proc = run_gate("check-claim", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("missing or empty field: falsifier", proc.stdout)
+
+
+class LeakTests(unittest.TestCase):
+    """The leak gate's integration cases; the full red-once suite is
+    tests/test_leak_gate.py. These two pin the fail-closed edges that a fixture
+    copy of the live tree can prove: an empty rulebook and an absent sealed tier."""
+
+    def test_empty_rulebook_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        target = FIXTURE / "security" / "leak-patterns.txt"
+        with mutated(target, lambda text: "# no rules\n"):
+            proc = run_gate("check-leak", root=FIXTURE)
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("no rules", proc.stdout)
+
+    def test_required_sealed_tier_fails_closed(self) -> None:
+        assert FIXTURE is not None
+        import os
+
+        environment = dict(os.environ)
+        environment.pop("LEAK_TOKENS", None)
+        proc = subprocess.run(
+            [sys.executable, str(SCRIPTS / "check-leak"), "--root", str(FIXTURE), "--sealed-required"],
+            capture_output=True,
+            text=True,
+            timeout=300,
+            env=environment,
+        )
+        self.assertEqual(proc.returncode, 1, msg=proc.stdout + proc.stderr)
+        self.assertIn("sealed: required but absent", proc.stdout)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<title>The DSH Surface · AnimeStack</title>
+<meta name="description" content="The eleventh install target: eight seat packs, eleven Agent presets, two operator commands, and the owned-dir install with an opt-in profile merge.">
+<link rel="canonical" href="https://animestack.jerkyjesse.com/lore/dsh.html">
+<meta property="og:title" content="The DSH Surface · AnimeStack">
+<meta property="og:description" content="The eleventh install target: eight seat packs, eleven Agent presets, two operator commands, and the owned-dir install with an opt-in profile merge.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://animestack.jerkyjesse.com/lore/dsh.html">
+<meta property="og:image" content="https://animestack.jerkyjesse.com/assets/img/social-preview.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body>
+<div class="shell">
+<nav><span class="brand">ANIMESTACK</span><span class="nav-links"><a href="../index.html">House</a><a href="../index.html#seats">Seats</a><a href="../lore/index.html">Lore</a><a href="../lore/board.html">Board</a><a href="../lore/record.html">Record</a><a href="../lore/playbooks.html">Playbooks</a><a href="../guide.html">Guide</a><a href="../lore/dsh.html" class="here">DSH</a><a href="https://github.com/JerkyJesse/AnimeStack">GitHub</a></span></nav>
+<header class="page"><div class="kicker">The team · eight seats as durable teammates</div><h1>The DSH Surface</h1><p class="one-sentence"></p><p class="sub">The eleventh install target: eight seat packs, eleven Agent presets, two operator commands, and the owned-dir install with an opt-in profile merge.</p></header>
+<div class="numbers"><span><strong>8</strong> seat packs</span><span><strong>11</strong> presets</span><span><strong>11</strong> install targets</span></div>
+<article class="book"><p>&lt;!-- animestack canon rev 9 :: inputs sha256=4cb4abe5e46ad8172d874d2af5f40bc5a85a99c7f436dda08fbf6d5c4c0bd9ca --&gt;</p>
+<h1 id="the-dsh-surface-animestack-on-deepseek-harness">The DSH surface - AnimeStack on DeepSeek Harness</h1>
+<p><em>The eleventh install target, and the only one that ships a team: eight seat packs, eleven Agent presets, and two operator commands, generated from the public canon.</em></p>
+<p>AnimeStack installs ten coding-host dialects under <code>agents/</code>. This directory is the DeepSeek Harness surface: it does not add a seventh dialect, it adds a house. The surface has three parts, and the installer owns all three.</p>
+<h2 id="what-lands-where">What lands where</h2>
+<div class="table-wrap"><table><thead><tr><th>Part</th><th>Source</th><th>Installs to</th></tr></thead><tbody><tr><td>The ten skills</td><td><code>skills/</code></td><td><code>$DSH_HOME/skills/&lt;name&gt;/SKILL.md</code></td></tr><tr><td>The eight seat packs</td><td><code>dsh/animestack-team/</code></td><td><code>$DSH_HOME/animestack-team/&lt;seat&gt;.md</code></td></tr><tr><td>The preset bundle</td><td><code>dsh/animestack-house/</code></td><td><code>$DSH_HOME/animestack/</code></td></tr></tbody></table></div>
+<p><code>$DSH_HOME</code> is the host's home: <code>DSH_HOME</code> when set, else <code>%USERPROFILE%\.dsh</code> on Windows and <code>~/.dsh</code> elsewhere. The installer writes nothing outside the host it can prove it owns: skills carry <code>.animestack-owned</code>, packs end with the ownership marker, and the bundle is a directory carrying <code>.animestack-owned</code>.</p>
+<h2 id="install">Install</h2>
+<pre><code>git clone https://github.com/JerkyJesse/AnimeStack ~/animestack &amp;&amp; cd ~/animestack
+./setup --host dsh
+# Windows: powershell -ExecutionPolicy Bypass -File .\setup.ps1 -TargetHost dsh</code></pre>
+<p>The default install writes the owned files and prints the two-key merge. It never edits the host profile: <code>cordis.patch.yml</code> is the file a bad write turns into a host with no presets, so the installer writes only what it can prove it owns.</p>
+<h2 id="the-two-key-merge">The two-key merge</h2>
+<p>In <code>$DSH_HOME/profiles/&lt;profile&gt;/package.json</code>, add the dependency and append to <code>dsh.profile.bundles</code>:</p>
+<pre><code>{
+  "dsh": { "profile": { "bundles": [
+    "... every bundle already listed ...",
+    "animestack-house-presets"
+  ] } },
+  "dependencies": {
+    "animestack-house-presets": "link:&lt;repo&gt;/dsh/animestack-house"
+  }
+}</code></pre>
+<p>Then raise the roster cap once, in <code>cordis.patch.yml</code>, if the profile does not already carry an <code>agent-team</code> row - <code>dsh/animestack-house/profile.patch.yml</code> is the exact block:</p>
+<pre><code>- id: agent-team
+  name: '@deepseek-ai/dsh-experimental-agent-team'
+  config:
+    maxMembers: 9</code></pre>
+<p><code>setup --host dsh --merge-profile</code> performs both edits for you: it parses the profile JSON, backs it up beside itself, appends the dependency and the bundle only when absent, re-parses to validate, and appends the <code>agent-team</code> block only when that row is absent. <code>--uninstall</code> removes exactly those three things and nothing else. Every other key in the profile survives byte-identical; the installer never rewrites a file it did not write.</p>
+<h2 id="use">Use</h2>
+<ul><li>A thread that names no preset opens on the profile default. Set <code>default: animestack-team</code> in the <code>agent-preset-registry</code> row to make the house the default room.</li><li><code>/house</code> queues the whole-room router; <code>/simple</code> queues the waiver for one invocation.</li><li><code>animestack-house</code> is the declared subagent room; <code>animestack-team</code> is the Agent Teams surface. The two are never mixed in one room, and a missing <code>spawn_teammate</code> is named in one line, never fallen back from silently.</li></ul>
+<h2 id="uninstall">Uninstall</h2>
+<pre><code>./setup --host dsh --uninstall
+# with the profile merge reversed as well:
+./setup --host dsh --uninstall --merge-profile</code></pre>
+<h2 id="prove-it">Prove it</h2>
+<pre><code>python scripts/gen-dsh-house --check      # packs, commands, patch, locale in sync
+python scripts/check-contract             # the DSH branch: 8 packs, 11 presets
+python -m pytest tests/test_dsh_surface.py -q</code></pre>
+<p>The generated files are never hand-edited: edit the canon, the seat agents, the seat pages, or the command sources, run <code>scripts/gen-agent-dialects</code> and then <code>scripts/gen-dsh-house</code>, and commit both trees. A stale pack fails <code>--check</code>.</p></article>
+<footer>
+  ANIMESTACK · v2.0.0 · canon Rev 9 · <a href="https://github.com/JerkyJesse/AnimeStack">github.com/JerkyJesse/AnimeStack</a> · <a href="https://www.jerkyjesse.com">www.jerkyjesse.com</a>
+</footer>
+</div>
+</body>
+</html>

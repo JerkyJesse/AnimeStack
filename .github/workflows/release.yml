@@ -1,0 +1,51 @@
+name: release
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      LEAK_TOKENS: ${{ secrets.LEAK_TOKENS }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --disable-pip-version-check pytest
+      - name: the tag names the tree
+        run: test "v$(cat VERSION)" = "${GITHUB_REF_NAME}"
+      - run: python scripts/gen-agent-dialects --check
+      - run: python scripts/gen-dsh-house --check
+      - run: python scripts/gen-site --check
+      - run: python scripts/check-site
+      - run: python scripts/check-lore-consistency
+      - run: python scripts/check-board
+      - run: python scripts/check-contract
+      - run: python scripts/check-measurement --check-doc
+      - run: python scripts/check-voices
+      - run: python scripts/check-digest
+      - run: python scripts/check-patterns
+      - run: python scripts/check-claim --check
+      - run: python scripts/seat_record --check
+      - run: python scripts/room_scorecard --strict
+      - run: python scripts/check-leak --tree
+      - run: python -m pytest -q
+      - name: the sealed history gate
+        run: python scripts/check-leak --sealed-required --history
+      - name: publish the release notes when the release does not exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release create "${GITHUB_REF_NAME}" \
+              --title "AnimeStack ${GITHUB_REF_NAME} - the complete public house" \
+              --notes-file CHANGELOG.md
+          fi

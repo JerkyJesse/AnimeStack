@@ -1,0 +1,404 @@
+#!/usr/bin/env python3
+"""check-contract - the pack's shipped-agent contract, checked in CI.
+
+The installer refuses a pack that violates its rules; this gate makes the same
+rules visible and local. It checks all six dialect trees - eight seats across
+the six dialects, plus the two house commands - for the role trio, the seat
+signature, the close grammar, the ownership marker, the invention line, the
+cold verification pass, the engineer's layer, the optimizer's ledger, and the
+model rule.
+
+It also checks the DeepSeek Harness surface (dsh/): the eight seat packs (seat
+identity, one sentence, review / build / team protocols, close grammar,
+ownership marker last, no model pin, no permission block) and the preset bundle
+(five-file shape, the eleven preset ids, the two command specs), and it runs
+the surface's own generator in --check mode so a hand-edited pack or a stale
+bundle fails here too.
+
+Unknown shapes fail closed: a directory under agents/ that is not one of the
+six dialects, a file at the root of agents/, or a child of dsh/ that is not the
+surface's declared set is a defect, not a rounding error.
+
+Usage: python scripts/check-contract [--root <dir>]   (--root is a test hook)
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+ROOT = _resolve_root(sys.argv[1:])
+AGENTS = ROOT / "agents"
+
+DIALECTS = {
+    "claude": "md",
+    "cursor": "md",
+    "factory": "md",
+    "kiro": "md",
+    "opencode": "md",
+    "codex": "toml",
+}
+
+SEATS = {
+    "mei": "What change in the world makes this obsolete?",
+    "elo": "What does the crowd refuse to measure correctly?",
+    "mechapip": "What has this pattern done before?",
+    "yui": "What failure does this prevent, and what would falsify it?",
+    "niko": "Where does it live, and what must it never touch?",
+    "rin": "How does this fail, and how fast?",
+    "aria": "What ships, and what triggers it?",
+    "reika": "What are we building, in one sentence?",
+}
+
+CLOSES = {
+    "mei": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "elo": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "mechapip": ("VERDICT: MATCH", "VERDICT: NO MATCH"),
+    "yui": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "niko": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "rin": ("VERDICT: ACCEPT", "VERDICT: END"),
+    "aria": ("VERDICT: SHIP", "VERDICT: STAND DOWN"),
+    "reika": ("close with the verdict in your own voice",),
+}
+
+# The eight techniques (canon section XIII): one distinct signature per seat.
+SIGNATURES = {
+    "mei": "The Weather Read",
+    "elo": "The Measurement",
+    "mechapip": "The Graveyard Pass",
+    "yui": "The Second Sample",
+    "niko": "The Cage",
+    "rin": "The Red Once",
+    "aria": "The 47-Second Click",
+    "reika": "The First Sentence",
+}
+
+ROLE_MARKERS = ("## Role and autonomy", "## Role - auto-picked from the brief")
+
+# ─── DeepSeek Harness surface ─────────────────────────────────
+DSH_DIR = ROOT / "dsh"
+DSH_TEAM = DSH_DIR / "animestack-team"
+DSH_HOUSE = DSH_DIR / "animestack-house"
+DSH_CHILDREN = frozenset({"README.md", "animestack-team", "animestack-house"})
+BUNDLE_FILES = (
+    "package.json",
+    "index.js",
+    "commands.generated.js",
+    "cordis.patch.yml",
+    "profile.patch.yml",
+    "locale/en.json",
+    "icon.svg",
+)
+PACK_SECTIONS = (
+    "## Seat protocol",
+    "## Review protocol (team seat)",
+    "## Build protocol (team seat)",
+    "## Team protocol (Agent Teams surface)",
+    "## The close",
+)
+PACK_CLOSES = {
+    "mei": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "elo": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "mechapip": ("VERDICT: MATCH", "VERDICT: NO MATCH"),
+    "yui": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "niko": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "rin": ("VERDICT: ACCEPT", "VERDICT: END"),
+    "aria": ("VERDICT: SHIP", "VERDICT: STAND DOWN"),
+    "reika": ("VERDICT: SHIP", "VERDICT: RETIRE", "VERDICT: STAND DOWN"),
+}
+PRESET_IDS = (
+    ("animestack-house", "animestack-team")
+    + tuple("animestack-%s" % seat for seat in ("mei", "elo", "mechapip", "yui", "niko", "rin", "aria", "reika"))
+    + ("animestack-simple",)
+)
+STAMP_RE = re.compile(r"^<!-- animestack canon rev \d+ :: inputs sha256=[0-9a-f]{64} -->$")
+
+MD_SECTIONS = (
+    "## Seat protocol",
+    "## Room protocol",
+    "## Review protocol",
+    "## Build protocol",
+)
+
+LAYER_SECTIONS = (
+    "## The Engineer's Layer",
+    "## The Optimizer's Ledger",
+)
+
+MODEL_INHERIT = {"claude", "factory"}
+
+
+def read(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def check_agent(dialect: str, ext: str, seat: str, failures: list[str]) -> None:
+    path = AGENTS / dialect / ("animestack-%s.%s" % (seat, ext))
+    if not path.is_file():
+        failures.append("missing agent: %s" % path.relative_to(ROOT))
+        return
+    text = read(path)
+    if not any(marker in text for marker in ROLE_MARKERS):
+        failures.append("%s: missing the role section" % path.relative_to(ROOT))
+    for section in MD_SECTIONS:
+        if section not in text:
+            failures.append("%s: missing %r" % (path.relative_to(ROOT), section))
+    if "- Invent:" not in text:
+        failures.append("%s: missing the invention line" % path.relative_to(ROOT))
+    if "## Cold verification pass" not in text:
+        failures.append("%s: missing the cold verification pass" % path.relative_to(ROOT))
+    for section in LAYER_SECTIONS:
+        if section not in text:
+            failures.append("%s: missing %r" % (path.relative_to(ROOT), section))
+    signature_lines = [
+        line for line in text.splitlines() if line.startswith("- Signature -")
+    ]
+    if len(signature_lines) != 1:
+        failures.append(
+            "%s: needs exactly one '- Signature -' line (found %d)"
+            % (path.relative_to(ROOT), len(signature_lines))
+        )
+    elif SIGNATURES[seat] not in signature_lines[0]:
+        failures.append(
+            "%s: signature is not the seat's: expected 'Signature - %s'"
+            % (path.relative_to(ROOT), SIGNATURES[seat])
+        )
+    if not any(line.startswith("- Opt:") for line in text.splitlines()):
+        failures.append("%s: missing the '- Opt:' line" % path.relative_to(ROOT))
+    sentence = SEATS[seat]
+    if sentence not in text:
+        failures.append("%s: missing the one sentence: %r" % (path.relative_to(ROOT), sentence))
+    for close in CLOSES[seat]:
+        if close not in text:
+            failures.append("%s: missing close token %r" % (path.relative_to(ROOT), close))
+    marker = "<!-- animestack-owned -->" if ext == "md" else "# animestack-owned"
+    lines = [line for line in text.splitlines() if line.strip()]
+    if not lines or lines[-1].strip() != marker:
+        failures.append("%s: last line is not the ownership marker" % path.relative_to(ROOT))
+    if ext == "md":
+        if "permission:" in text or ": deny" in text:
+            failures.append("%s: carries a permission block or deny row" % path.relative_to(ROOT))
+        model_lines = [line for line in text.splitlines() if re.match(r"^model\s*:", line)]
+        if dialect in MODEL_INHERIT:
+            if model_lines != ["model: inherit"]:
+                failures.append("%s: must carry exactly one 'model: inherit'" % path.relative_to(ROOT))
+        elif model_lines:
+            failures.append("%s: must omit the model key" % path.relative_to(ROOT))
+    else:
+        if re.search(r"(?m)^\s*model(_reasoning_effort)?\s*=", text):
+            failures.append("%s: must omit model keys" % path.relative_to(ROOT))
+        if "deny" in text:
+            failures.append("%s: carries a deny row" % path.relative_to(ROOT))
+
+
+def check_pack(seat: str, failures: list[str]) -> None:
+    path = DSH_TEAM / ("animestack-%s.md" % seat)
+    rel = path.relative_to(ROOT).as_posix()
+    if not path.is_file():
+        failures.append("missing seat pack: %s" % rel)
+        return
+    text = read(path)
+    lines = text.splitlines()
+    if not lines or not STAMP_RE.match(lines[0]):
+        failures.append("%s: the line 1 provenance stamp is missing or malformed" % rel)
+    if "# SEAT: %s" % seat not in text:
+        failures.append("%s: missing the 'SEAT: %s' header" % (rel, seat))
+    if SEATS[seat] not in text:
+        failures.append("%s: missing the one sentence" % rel)
+    for section in PACK_SECTIONS:
+        if section not in text:
+            failures.append("%s: missing %r" % (rel, section))
+    for token in PACK_CLOSES[seat]:
+        if token not in text:
+            failures.append("%s: missing close token %r" % (rel, token))
+    if "do not sign for another seat" not in text:
+        failures.append("%s: missing the seat/chair boundary" % rel)
+    if "team_task_update" not in text:
+        failures.append("%s: missing the task-claim protocol" % rel)
+    body = [line for line in lines if line.strip()]
+    if not body or body[-1].strip() != "<!-- animestack-owned -->":
+        failures.append("%s: last line is not the ownership marker" % rel)
+    if re.search(r"(?m)^model\s*:", text):
+        failures.append("%s: carries a model pin" % rel)
+    if "permission:" in text or ": deny" in text:
+        failures.append("%s: carries a permission block or deny row" % rel)
+
+
+def check_bundle(failures: list[str]) -> None:
+    for name in BUNDLE_FILES:
+        path = DSH_HOUSE / name
+        if not path.is_file():
+            failures.append("missing bundle file: %s" % path.relative_to(ROOT).as_posix())
+    readme = DSH_DIR / "README.md"
+    if not readme.is_file():
+        failures.append("missing dsh/README.md")
+    else:
+        readme_text = read(readme)
+        first = readme_text.splitlines()[0] if readme_text else ""
+        if not STAMP_RE.match(first):
+            failures.append("dsh/README.md: the line 1 provenance stamp is missing or malformed")
+
+    package = DSH_HOUSE / "package.json"
+    if package.is_file():
+        try:
+            data = json.loads(read(package))
+        except ValueError:
+            data = None
+        if data is None:
+            failures.append("dsh/animestack-house/package.json does not parse")
+        else:
+            if data.get("name") != "animestack-house-presets":
+                failures.append("package.json: name is not animestack-house-presets")
+            if data.get("dsh", {}).get("bundle", {}).get("patch") != "./cordis.patch.yml":
+                failures.append("package.json: dsh.bundle.patch is not ./cordis.patch.yml")
+            if not str(data.get("version", "")).count("."):
+                failures.append("package.json: version is missing")
+
+    index = DSH_HOUSE / "index.js"
+    if index.is_file():
+        body = read(index)
+        if 'export const inject = ["commands"]' not in body:
+            failures.append("index.js: the command registry is not the injected service")
+        if "export function apply(ctx)" not in body:
+            failures.append("index.js: no apply(ctx) export")
+
+    commands = DSH_HOUSE / "commands.generated.js"
+    if commands.is_file():
+        body = read(commands)
+        for name in ('name: "house"', 'name: "simple"'):
+            if name not in body:
+                failures.append("commands.generated.js: missing %s" % name)
+        if "export default [" not in body:
+            failures.append("commands.generated.js: no default export array")
+
+    patch = DSH_HOUSE / "cordis.patch.yml"
+    if patch.is_file():
+        body = read(patch)
+        found = re.findall(r"(?m)^    - id: preset-([a-z0-9-]+)$", body)
+        if found != list(PRESET_IDS):
+            failures.append(
+                "cordis.patch.yml: preset ids are %s, expected %s"
+                % (", ".join(found) or "none", ", ".join(PRESET_IDS))
+            )
+        if "- id: animestack-house-commands" not in body:
+            failures.append("cordis.patch.yml: missing the command row")
+        if "name: 'animestack-house-presets'" not in body:
+            failures.append("cordis.patch.yml: the command row does not name the bundle")
+
+    locale = DSH_HOUSE / "locale" / "en.json"
+    if locale.is_file():
+        try:
+            data = json.loads(read(locale))
+        except ValueError:
+            data = None
+        if data is None:
+            failures.append("locale/en.json does not parse")
+        elif sorted(data.get("presets", {})) != sorted(PRESET_IDS):
+            failures.append("locale/en.json: preset names do not cover the eleven presets")
+
+    profile = DSH_HOUSE / "profile.patch.yml"
+    if profile.is_file():
+        body = read(profile)
+        for marker in ("# >>> animestack >>>", "# <<< animestack <<<"):
+            if marker not in body:
+                failures.append("profile.patch.yml: missing the %r marker" % marker)
+        if "- id: agent-team" not in body or "maxMembers: 9" not in body:
+            failures.append("profile.patch.yml: missing the agent-team roster-cap row")
+
+
+def check_shapes(failures: list[str]) -> None:
+    agents = AGENTS
+    if agents.is_dir():
+        for path in sorted(agents.iterdir()):
+            if path.is_dir() and path.name not in DIALECTS:
+                failures.append("unknown agents/ shape: %s is not a dialect" % path.name)
+            elif path.is_file():
+                failures.append("unknown agents/ shape: a file at the root of agents/ (%s)" % path.name)
+        for dialect in DIALECTS:
+            directory = agents / dialect
+            if not directory.is_dir():
+                continue
+            for path in sorted(directory.iterdir()):
+                if path.is_dir() and path.name != "command":
+                    failures.append(
+                        "unknown agents/%s/ shape: %s" % (dialect, path.name)
+                    )
+    if DSH_DIR.is_dir():
+        for path in sorted(DSH_DIR.iterdir()):
+            if path.name not in DSH_CHILDREN:
+                failures.append("unknown dsh/ shape: %s" % path.name)
+
+
+def check_generated(failures: list[str]) -> None:
+    """The surface's own generator decides what 'in sync' means."""
+    script = ROOT / "scripts" / "gen-dsh-house"
+    if not script.is_file():
+        failures.append("missing generator: scripts/gen-dsh-house")
+        return
+    proc = subprocess.run(
+        [sys.executable, str(script), "--check", "--root", str(ROOT)],
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    if proc.returncode != 0:
+        tail = (proc.stdout + proc.stderr).strip().splitlines()
+        failures.append(
+            "gen-dsh-house --check failed: %s" % (tail[0] if tail else "no output")
+        )
+
+
+def run_gate() -> int:
+    failures: list[str] = []
+    total = 0
+    for dialect, ext in DIALECTS.items():
+        directory = AGENTS / dialect
+        if not directory.is_dir():
+            failures.append("missing dialect: %s" % dialect)
+            continue
+        present = sorted(
+            path.name for path in directory.glob("animestack-*") if path.is_file()
+        )
+        expected = sorted("animestack-%s.%s" % (seat, ext) for seat in SEATS)
+        if present != expected:
+            failures.append("%s: roster mismatch: %s" % (dialect, ", ".join(present) or "empty"))
+        for seat in SEATS:
+            check_agent(dialect, ext, seat, failures)
+            total += 1
+    for command in (AGENTS / "opencode" / "command" / "house.md", AGENTS / "factory" / "command" / "house.md"):
+        if not command.is_file():
+            failures.append("missing command: %s" % command.relative_to(ROOT))
+        elif "house" not in read(command):
+            failures.append("%s: no house router text" % command.relative_to(ROOT))
+    check_shapes(failures)
+    for seat in ("mei", "elo", "mechapip", "yui", "niko", "rin", "aria", "reika"):
+        check_pack(seat, failures)
+    check_bundle(failures)
+    check_generated(failures)
+    if failures:
+        print("check-contract: FAILED (%d issue(s))" % len(failures))
+        for failure in failures:
+            print("  - %s" % failure)
+        return 1
+    print(
+        "check-contract: clean (%d agents across %d dialects, 2 commands, 8 packs, 11 presets)"
+        % (total, len(DIALECTS))
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(run_gate())

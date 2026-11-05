@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<title>Security: the zero-leak gate · AnimeStack</title>
+<meta name="description" content="The two-tier leak gate, the asset class, the history proof, the CI surface, and the red-first rule that keeps the gate honest.">
+<link rel="canonical" href="https://animestack.jerkyjesse.com/lore/security.html">
+<meta property="og:title" content="Security: the zero-leak gate · AnimeStack">
+<meta property="og:description" content="The two-tier leak gate, the asset class, the history proof, the CI surface, and the red-first rule that keeps the gate honest.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://animestack.jerkyjesse.com/lore/security.html">
+<meta property="og:image" content="https://animestack.jerkyjesse.com/assets/img/social-preview.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../assets/css/site.css">
+</head>
+<body>
+<div class="shell">
+<nav><span class="brand">ANIMESTACK</span><span class="nav-links"><a href="../index.html">House</a><a href="../index.html#seats">Seats</a><a href="../lore/index.html" class="here">Lore</a><a href="../lore/board.html">Board</a><a href="../lore/record.html">Record</a><a href="../lore/playbooks.html">Playbooks</a><a href="../guide.html">Guide</a><a href="../lore/dsh.html">DSH</a><a href="https://github.com/JerkyJesse/AnimeStack">GitHub</a></span></nav>
+<header class="page"><div class="kicker">The gate · nothing private crosses</div><h1>Security: the zero-leak gate</h1><p class="one-sentence"></p><p class="sub">The two-tier leak gate, the asset class, the history proof, the CI surface, and the red-first rule that keeps the gate honest.</p></header>
+
+<article class="book"><p>The pack is public. Nothing from the private reference repository may cross into it: no name, path, ticker, venue, strategy, money unit, credential, fleet, desk, ledger number, channel variable, or record number. That boundary is not a habit and not a review note. It is <code>scripts/check-leak</code>, and it is the gate every other gate is a special case of.</p>
+<h2 id="1-what-runs">1. What runs</h2>
+<pre><code>python scripts/check-leak --tree                     # every push
+python scripts/check-leak --sealed-required --history # release</code></pre>
+<p><code>--tree</code> is the default. <code>--history</code> adds the git history, and it is the release gate. Both are read-only, stdlib only, and never touch the network.</p>
+<p>Exit <code>0</code> clean; <code>1</code> a hit, an unreadable history, a required tier that is absent, or an asset manifest that does not account for the tree; <code>2</code> usage.</p>
+<p>The gate scans tracked files plus untracked, non-ignored files, and every path: bytes for binary files, lines for text, path strings for both. <code>--history</code> scans every reachable revision's full patch stream (which carries each tree's added lines, including a root commit's entire content), every commit message, every historical path, and - when the sealed tier is present - <code>git grep</code> over every revision so binary blobs are included too.</p>
+<h2 id="2-the-two-tiers">2. The two tiers</h2>
+<p>A rulebook is a liability if it spells what it forbids. This gate keeps the rulebook and the facts apart.</p>
+<p><strong>The pattern tier</strong> is <code>security/leak-patterns.txt</code>, public by design. One rule per line: <code>rule-id</code>, a tab, a Python regular expression. The rules are <em>shapes</em> a later commit could reintroduce - a series identifier, a guard variable, a channel variable, a machine home path, an upper-case ledger filename, a chat platform, a decimal money figure, a credential file. A shape names no fact. The rulebook counts as a measurement row (<code>docs/measurement.md</code>, floor of one rule) because a gate with no rule cannot fail.</p>
+<p><strong>The sealed tier</strong> is never committed. The literal tokens of the private reference arrive as base64 in <code>LEAK_TOKENS</code> (a CI repository secret) or as a <code>--sealed &lt;file&gt;</code> outside the tree. A literal pasted into this repository is the leak the tier exists to catch, so the gate refuses a token file that resolves inside the checkout: <code>sealed: the token file is inside the tree</code>.</p>
+<p>When the sealed tier is absent, the gate says so - <code>sealed: unread (no LEAK_TOKENS, no --sealed)</code> - and a run with <code>--sealed-required</code> exits <code>1</code>. A fork pull request has no secret and prints <code>sealed: unread</code>; it never prints a clean zero for a tier it could not read. The house's own workflow requires the tier on every push to the default branch.</p>
+<p>The rulebook itself is scanned by the sealed tier only: a pattern rule matching its own source text is noise, but a literal pasted among the rules is a leak.</p>
+<h2 id="3-the-asset-class">3. The asset class</h2>
+<p>No text gate reads pixels. A name, a path, a ticker, a money figure, or a channel burned into a render is invisible to every scanner here, so the asset class has its own instrument: <code>assets/REVIEW.md</code>, one row per file under <code>art/</code> and <code>assets/</code> with path, sha256, reviewer, date, and verdict.</p>
+<p>The machine checks the facts: every shipped file has exactly one row, every row names a file, every sha256 matches the bytes, and every verdict is <code>PASS</code>, <code>HOLD</code>, or <code>UNREVIEWED</code>. The human checks the picture. <code>UNREVIEWED</code> is named in every run and is never counted as a pass; <code>HOLD</code> fails the release run until the chair resolves it - regenerate the render, or accept it on the record and flip the verdict with a date.</p>
+<h2 id="4-the-history">4. The history</h2>
+<p>The tree is the easy case. The history is the one that keeps leaking after a rewrite, because the company a repository keeps is every blob it ever wrote.</p>
+<p>The gate treats an unreadable history as a failure, not a pass: a shallow clone cannot see history, so <code>--history</code> exits <code>1</code> with <code>history: unread (shallow clone; a history gate needs the full graph - fetch-depth 0)</code>. CI must check out with <code>fetch-depth: 0</code>. An unread history is named, never zeroed.</p>
+<p>At the v2.0.0 build the live history is <strong>not clean</strong>: 38 revisions, hundreds of pattern hits, concentrated in the releases before the first public rewrite. That is a fact, not a backlog item.</p>
+<h3 id="the-rewrite-a-force-class-act">The rewrite (a force-class act)</h3>
+<p>The chair signs this; the build seat does not. It is one act, in this order:</p>
+<ol><li>Choose the last tree that is clean under <code>--sealed-required --history</code> (the release whose rewrite removed the private material). Take that tree as a new root: <code>git commit-tree &lt;tree&gt; -m "&lt;the release message&gt;"</code>.</li><li>Replay every commit after it onto the new root: <code>git rebase --onto &lt;new-root&gt; &lt;old-release&gt; main</code>. Because the new root's tree is byte-identical to the old release tree, every later patch applies unchanged. Fallback with no external tooling: <code>git replace --graft &lt;old-release&gt;</code> to make it a root, then <code>git filter-branch -- --all</code> to bake the graft in.</li><li>The lineage before that release is dropped, not scrubbed: those commits <em>are</em> the leak. Losing them loses release lore, not release truth.</li><li>Force-push with <code>--force-with-lease</code>. This is the force-class step.</li></ol>
+<h3 id="what-proves-it">What proves it</h3>
+<p>The working checkout is not the proof: a rewritten branch leaves the old blobs unreachable-but-present until reflog expiry. The proof is a fresh clone of the rewritten remote, because a clone fetches only reachable objects:</p>
+<pre><code>git clone --no-local &lt;remote&gt; /tmp/proof &amp;&amp; cd /tmp/proof
+python scripts/check-leak --sealed-required --history    # 0 hits, exit 0
+git log --all -p --format='%H %s' | grep -Eci '&lt;rule set and literals&gt;'  # 0</code></pre>
+<p>Then, in the house checkout, <code>git reflog expire --expire=now --all</code> and <code>git gc --prune=now</code> so an archive of the working directory cannot carry the old objects either.</p>
+<p><strong>The residual, named.</strong> A rewrite does not retract what was already fetched. Any clone, fork, mirror, or cached page that read the repository before the rewrite keeps the copy; a hosting provider may keep unreachable objects addressable by their old identifiers. The rewrite removes the <em>future</em> copy. It does not remove the <em>past</em> exposure, and no report may say it did.</p>
+<h2 id="5-ci">5. CI</h2>
+<p>In <code>.github/workflows/gate.yml</code>, checkout must carry history and the release run must require the sealed tier:</p>
+<pre><code>      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python scripts/check-leak --tree
+      - run: python scripts/check-leak --sealed-required --history
+        env:
+          LEAK_TOKENS: ${{ secrets.LEAK_TOKENS }}</code></pre>
+<p>The tree run is cheap and runs on every push and pull request. The history run is the release gate; without <code>fetch-depth: 0</code> it fails closed by design.</p>
+<h2 id="6-limits">6. Limits</h2>
+<p>A gate is a claim about what it can see. These are the edges:</p>
+<ul><li><strong>Prose.</strong> A paraphrase carries no token: a sentence describing the private book in ordinary words passes. The pattern tier catches shapes, the sealed tier catches literals, and a reviewer catches the rest.</li><li><strong>Pixels.</strong> Covered by the manifest and a human, never by a scan.</li><li><strong>Encodings.</strong> A token base64-encoded, hex-encoded, or split across lines is not caught. The tier matches text.</li><li><strong>Outside the tree.</strong> Repository description, topics, release notes, pull request bodies, and hosting settings are not files. The gate cannot see them; they are reviewed by hand at release.</li><li><strong>Reachable refs.</strong> History mode reads <code>git rev-list --all</code>. A ref deleted before the run is unreachable and therefore invisible - which is why the proof is a fresh clone and why the rewrite is done once, in the open.</li></ul>
+<h2 id="7-the-red-first-rule">7. The red-first rule</h2>
+<p>Every rule and every mode has a case in <code>tests/test_leak_gate.py</code> that watches it fail before it is trusted: a token in a markdown body, in an image's bytes, in a filename, in a generated seat pack, in a claim card, in the pattern registry, and in a commit; a clean tree where <code>§5</code> and a seat name must not trip; a shallow clone and an absent required tier that must both exit <code>1</code>.</p>
+<p>A rule that cannot be made to fail is deleted. A gate that has never been red is a rumor with a green line.</p></article>
+<footer>
+  ANIMESTACK · v2.0.0 · canon Rev 9 · <a href="https://github.com/JerkyJesse/AnimeStack">github.com/JerkyJesse/AnimeStack</a> · <a href="https://www.jerkyjesse.com">www.jerkyjesse.com</a>
+</footer>
+</div>
+</body>
+</html>

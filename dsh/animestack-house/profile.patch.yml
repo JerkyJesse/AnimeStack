@@ -1,0 +1,16 @@
+# animestack canon rev 9 :: inputs sha256=4cb4abe5e46ad8172d874d2af5f40bc5a85a99c7f436dda08fbf6d5c4c0bd9ca
+# AnimeStack - the roster-cap row the bundle cannot raise by itself.
+# The Agent Teams profile brings the `agent-team` row with its own default cap;
+# this block raises it to nine (a chair and eight seats; seven answering seats
+# is the room's working roster). Merge it into the profile patch only when
+# `agent-team` is absent: `setup --host dsh --merge-profile` appends exactly this
+# block between the two markers and `--uninstall` removes exactly that block.
+# >>> animestack >>>
+- id: agent-team
+  name: '@deepseek-ai/dsh-experimental-agent-team'
+  config:
+    maxMembers: 9
+    maxTasks: 256
+    maxMessageBytes: 65536
+    disposalTimeoutMs: 5000
+# <<< animestack <<<

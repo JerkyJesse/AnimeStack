@@ -1,0 +1,466 @@
+#!/usr/bin/env python3
+"""check-leak - the zero-leak gate: nothing private crosses into this pack.
+
+Two tiers, because the rulebook cannot be the leak it forbids:
+
+  - the PATTERN tier is public (`security/leak-patterns.txt`): shapes a later
+    commit could reintroduce - a series identifier, a guard variable, a channel
+    variable, a machine path, a ledger filename, a decimal money figure, a chat
+    platform. A shape names no fact.
+  - the SEALED tier is never committed: the literal tokens of the private
+    reference, supplied as base64 in `LEAK_TOKENS` (CI repository secret) or as
+    a `--sealed <file>` outside the tree. A literal pasted into this repository
+    is the leak the tier exists to catch, so the tiers are separate by design.
+
+What it scans, in `--tree` mode (the default): every tracked file plus every
+untracked, non-ignored file - text and binary bytes alike - and every path.
+Binary files are matched against the sealed literals only; the pattern tier is
+text-shaped and a compressed byte stream is not prose (a decimal-dollars rule
+false-positives on JPEG entropy, and a gate that cries wolf is a gate nobody
+reads). The asset class is covered by `assets/REVIEW.md`: coverage and hashes
+are machine-checked here, the picture itself is reviewed by a human.
+
+`--history` adds the git history and is the release gate. It scans every
+reachable revision's full patch stream (which carries each tree's added lines,
+including a root commit's entire content), every commit message, every
+historical path, and - when the sealed tier is present - `git grep` over every
+revision so binary blobs are included. A shallow clone cannot see history and
+fails closed: an unread history is named, never zeroed.
+
+Exit 0 = clean; 1 = a hit, an unreadable history, a missing required sealed
+tier, or an asset manifest that does not account for the tree; 2 = usage.
+Stdlib only; read-only; no network.
+"""
+
+from __future__ import annotations
+
+import base64
+import hashlib
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+PATTERNS = Path("security") / "leak-patterns.txt"
+MANIFEST = Path("assets") / "REVIEW.md"
+MANIFEST_ROOTS = ("art", "assets")
+MANIFEST_VERDICTS = ("PASS", "HOLD", "UNREVIEWED")
+# The manifest covers pictures, not stylesheets or vector chrome: a human
+# review reads pixels, and a line-ending-normalized CSS file is not an asset.
+MANIFEST_SUFFIXES = (".jpg", ".jpeg", ".png", ".gif", ".webp")
+# The rulebook is scanned by the sealed tier only: a pattern rule matching its
+# own source text is noise, but a literal token pasted among the rules is a leak.
+PATTERN_SELF = "security/leak-patterns.txt"
+BINARY_SUFFIXES = {
+    ".jpg", ".jpeg", ".png", ".gif", ".webp", ".ico", ".pdf", ".zip", ".mp4",
+}
+RULE_RE = re.compile(r"^(?P<id>[a-z][a-z0-9-]*)\t(?P<regex>.+)$")
+MANIFEST_ROW_RE = re.compile(r"^\|\s*`?(?P<path>[^|`]+?)`?\s*\|\s*`?(?P<sha>[0-9a-fA-F]{64})`?\s*\|")
+
+
+def resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+def strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+def load_patterns(root: Path) -> tuple[list[tuple[str, re.Pattern[str]]], list[str]]:
+    """Parse the rulebook. A malformed or non-compiling rule fails closed."""
+    path = root / PATTERNS
+    failures: list[str] = []
+    rules: list[tuple[str, re.Pattern[str]]] = []
+    if not path.is_file():
+        return [], ["%s: missing; the pattern tier has no rulebook" % PATTERNS.as_posix()]
+    seen: set[str] = set()
+    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        match = RULE_RE.match(line)
+        if match is None:
+            failures.append("%s:%d: not <rule-id><TAB><regex>" % (PATTERNS.as_posix(), number))
+            continue
+        rule_id = match.group("id")
+        if rule_id in seen:
+            failures.append("%s:%d: duplicate rule id %s" % (PATTERNS.as_posix(), number, rule_id))
+            continue
+        seen.add(rule_id)
+        try:
+            rules.append((rule_id, re.compile(match.group("regex"))))
+        except re.error as error:
+            failures.append("%s:%d: rule %s does not compile: %s" % (PATTERNS.as_posix(), number, rule_id, error))
+    if not rules:
+        failures.append("%s: no rules; a gate with no rule cannot fail" % PATTERNS.as_posix())
+    return rules, failures
+
+
+def load_sealed(argv: list[str], root: Path) -> tuple[list[str], str, list[str]]:
+    """The sealed literals: (literals, source note, failures)."""
+    failures: list[str] = []
+    sealed_path: str | None = None
+    for index, arg in enumerate(argv):
+        if arg == "--sealed" and index + 1 < len(argv):
+            sealed_path = argv[index + 1]
+        elif arg.startswith("--sealed="):
+            sealed_path = arg.split("=", 1)[1]
+    if sealed_path is not None:
+        path = Path(sealed_path).expanduser().resolve()
+        try:
+            path.relative_to(root.resolve())
+        except ValueError:
+            pass
+        else:
+            return [], "", [
+                "sealed: the token file is inside the tree (%s) - a literal in the "
+                "repository is the leak" % path
+            ]
+        if not path.is_file():
+            return [], "", ["sealed: --sealed file does not exist: %s" % path]
+        text = path.read_text(encoding="utf-8", errors="replace")
+        source = "file outside the tree"
+    elif os.environ.get("LEAK_TOKENS", "").strip():
+        encoded = os.environ["LEAK_TOKENS"].strip()
+        try:
+            text = base64.b64decode(encoded, validate=False).decode("utf-8", "replace")
+        except (ValueError, UnicodeDecodeError) as error:
+            return [], "", ["sealed: LEAK_TOKENS is not valid base64 text: %s" % error]
+        source = "LEAK_TOKENS"
+    else:
+        return [], "", []
+    literals = [line.strip() for line in text.splitlines() if line.strip() and not line.strip().startswith("#")]
+    if not literals:
+        return [], source, ["sealed: the %s tier is present but empty" % source]
+    return literals, source, failures
+
+
+def repo_files(root: Path) -> tuple[list[str], str]:
+    """Tracked plus untracked-not-ignored files, or a walk when git is absent."""
+    completed = subprocess.run(
+        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+        cwd=root,
+        capture_output=True,
+        timeout=300,
+    )
+    if completed.returncode == 0:
+        names = [name for name in completed.stdout.decode("utf-8", "replace").split("\0") if name]
+        return sorted(set(names)), "git ls-files"
+    names: list[str] = []
+    for path in root.rglob("*"):
+        if not path.is_file():
+            continue
+        parts = set(path.relative_to(root).parts)
+        if ".git" in parts or ".pytest_cache" in parts or "__pycache__" in parts:
+            continue
+        names.append(path.relative_to(root).as_posix())
+    return sorted(names), "walk"
+
+
+def is_binary(path: Path) -> bool:
+    if path.suffix.lower() in BINARY_SUFFIXES:
+        return True
+    try:
+        with path.open("rb") as handle:
+            return b"\0" in handle.read(8192)
+    except OSError:
+        return False
+
+
+def scan_text(text: str, rules, literals) -> list[str]:
+    """Return ['rule:<id>'] or ['sealed'] tags for one text body."""
+    tags: list[str] = []
+    for rule_id, pattern in rules:
+        if pattern.search(text):
+            tags.append("rule:%s" % rule_id)
+    lowered = text.lower()
+    for literal in literals:
+        if literal.lower() in lowered:
+            tags.append("sealed")
+            break
+    return tags
+
+
+def scan_line(line: str, rules, literals) -> list[str]:
+    tags: list[str] = []
+    for rule_id, pattern in rules:
+        if pattern.search(line):
+            tags.append("rule:%s" % rule_id)
+    lowered = line.lower()
+    for literal in literals:
+        if literal.lower() in lowered:
+            tags.append("sealed")
+            break
+    return tags
+
+
+def tree_pass(root: Path, rules, literals) -> tuple[list[str], int, int, str]:
+    hits: list[str] = []
+    names, source = repo_files(root)
+    text_files = 0
+    binary_files = 0
+    for name in names:
+        path = root / name
+        if not path.is_file():
+            continue
+        relative = path.relative_to(root).as_posix()
+        path_tags = scan_line(relative, rules if relative != PATTERN_SELF else [], literals)
+        for tag in path_tags:
+            hits.append("%s:1: %s (path)" % (relative, tag))
+        try:
+            data = path.read_bytes()
+        except OSError as error:
+            hits.append("%s: unreadable: %s" % (relative, error))
+            continue
+        if is_binary(path):
+            binary_files += 1
+            body = data.decode("latin-1").lower()
+            for literal in literals:
+                offset = body.find(literal.lower())
+                if offset >= 0:
+                    hits.append("%s:byte %d: sealed" % (relative, offset))
+        else:
+            text_files += 1
+            text = data.decode("utf-8", "replace")
+            file_rules = [] if relative == PATTERN_SELF else rules
+            for number, line in enumerate(text.splitlines(), start=1):
+                for tag in scan_line(line, file_rules, literals):
+                    hits.append("%s:%d: %s" % (relative, number, tag))
+    return hits, text_files, binary_files, source
+
+
+def parse_manifest(root: Path) -> tuple[dict[str, tuple[str, str]], list[str]]:
+    """path -> (sha256, verdict), plus parse failures."""
+    path = root / MANIFEST
+    rows: dict[str, tuple[str, str]] = {}
+    failures: list[str] = []
+    if not path.is_file():
+        return rows, ["%s: missing; the asset class has no review manifest" % MANIFEST.as_posix()]
+    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip().startswith("|"):
+            continue
+        match = MANIFEST_ROW_RE.match(line)
+        if match is None:
+            continue
+        cells = [cell.strip().strip("`") for cell in line.strip().strip("|").split("|")]
+        if len(cells) < 5:
+            failures.append("%s:%d: a manifest row needs path, sha256, reviewer, date, verdict" % (MANIFEST.as_posix(), number))
+            continue
+        verdict = cells[4].upper()
+        if verdict not in MANIFEST_VERDICTS:
+            failures.append("%s:%d: verdict %r is not one of %s" % (MANIFEST.as_posix(), number, cells[4], "/".join(MANIFEST_VERDICTS)))
+            continue
+        manifest_path = cells[0].replace("\\", "/")
+        if manifest_path in rows:
+            failures.append("%s:%d: duplicate row for %s" % (MANIFEST.as_posix(), number, manifest_path))
+            continue
+        rows[manifest_path] = (cells[1].lower(), verdict)
+    return rows, failures
+
+
+def manifest_pass(root: Path) -> tuple[list[str], list[str], int, int]:
+    """Coverage and hashes are machine facts; the picture is a human one."""
+    failures: list[str] = []
+    holds: list[str] = []
+    if not any((root / directory).is_dir() for directory in MANIFEST_ROOTS):
+        return failures, holds, 0, 0
+    rows, parse_failures = parse_manifest(root)
+    failures.extend(parse_failures)
+    if not rows and parse_failures:
+        return failures, holds, 0, 0
+    on_disk: list[str] = []
+    for directory in MANIFEST_ROOTS:
+        base = root / directory
+        if not base.is_dir():
+            continue
+        for path in sorted(base.rglob("*")):
+            if not path.is_file() or path.name == "README.md":
+                continue
+            if path.suffix.lower() not in MANIFEST_SUFFIXES:
+                continue
+            if path.resolve() == (root / MANIFEST).resolve():
+                continue
+            on_disk.append(path.relative_to(root).as_posix())
+    for relative in on_disk:
+        if relative not in rows:
+            failures.append("%s: no review row; an unreviewed asset is named, never zeroed" % relative)
+            continue
+        digest = hashlib.sha256((root / relative).read_bytes()).hexdigest()
+        recorded, verdict = rows[relative]
+        if recorded != digest:
+            failures.append("%s: sha256 mismatch (row %s..., file %s...)" % (relative, recorded[:12], digest[:12]))
+        if verdict == "HOLD":
+            holds.append(relative)
+    for relative in rows:
+        if relative not in on_disk:
+            failures.append("%s: review row names no file" % relative)
+    return failures, holds, len(on_disk), len(rows)
+
+
+def git(root: Path, *args: str, timeout: int = 600) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ["git", *args],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=timeout,
+    )
+
+
+def is_shallow(root: Path) -> bool:
+    completed = git(root, "rev-parse", "--is-shallow-repository")
+    if completed.returncode == 0:
+        return completed.stdout.strip() == "true"
+    return (root / ".git" / "shallow").exists()
+
+
+def history_pass(root: Path, rules, literals) -> tuple[list[str], int, str]:
+    """Scan every revision: patch stream, messages, paths, and binary literals."""
+    hits: list[str] = []
+    if not (root / ".git").exists():
+        return [], 0, "history: unread (no git repository at %s)" % root
+    if is_shallow(root):
+        return [], 0, "history: unread (shallow clone; a history gate needs the full graph - fetch-depth 0)"
+    revisions = git(root, "rev-list", "--all")
+    if revisions.returncode != 0:
+        return [], 0, "history: unread (git rev-list failed: %s)" % revisions.stderr.strip()
+    revs = [line.strip() for line in revisions.stdout.splitlines() if line.strip()]
+    if not revs:
+        return [], 0, "history: unread (no reachable revisions)"
+
+    patch = git(root, "log", "--all", "-p", "--no-color", "--no-ext-diff", "--format=commit %H")
+    if patch.returncode != 0:
+        return [], len(revs), "history: unread (git log failed: %s)" % patch.stderr.strip()
+    current = "?"
+    for number, line in enumerate(patch.stdout.splitlines(), start=1):
+        if line.startswith("commit ") and len(line) > 7:
+            current = line.split()[1][:12]
+            continue
+        for tag in scan_line(line, rules, literals):
+            hits.append("history:%s: patch line %d: %s" % (current, number, tag))
+
+    messages = git(root, "log", "--all", "--format=%H%n%B%n---")
+    if messages.returncode != 0:
+        return hits, len(revs), "history: unread (git log --format failed)"
+    current = "?"
+    for line in messages.stdout.splitlines():
+        if re.fullmatch(r"[0-9a-f]{40}", line.strip()):
+            current = line.strip()[:12]
+            continue
+        for tag in scan_line(line, rules, literals):
+            hits.append("history:%s: message: %s" % (current, tag))
+
+    names = git(root, "log", "--all", "--name-only", "--format=")
+    if names.returncode == 0:
+        for name in {line.strip() for line in names.stdout.splitlines() if line.strip()}:
+            for tag in scan_line(name, rules, literals):
+                hits.append("history:path %s: %s" % (name, tag))
+
+    if literals:
+        handle = tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".tokens", delete=False)
+        try:
+            handle.write("\n".join(literals) + "\n")
+            handle.close()
+            completed = subprocess.run(
+                ["git", "grep", "-n", "-i", "-F", "-f", handle.name, *revs],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=900,
+            )
+            for line in completed.stdout.splitlines():
+                hits.append("history:blob %s: sealed" % line.split(":", 1)[0][:12])
+        finally:
+            os.unlink(handle.name)
+
+    return hits, len(revs), ""
+
+
+def main(argv: list[str]) -> int:
+    root = resolve_root(argv)
+    args = strip_root(argv)
+    mode_tree = "--tree" in args or "--history" not in args
+    mode_history = "--history" in args
+    sealed_required = "--sealed-required" in args
+    for arg in args:
+        if arg in ("--tree", "--history", "--sealed-required"):
+            continue
+        if arg.startswith("-") and arg not in ("--sealed",):
+            print("check-leak: usage: [--tree] [--history] [--sealed-required] [--sealed <file>] [--root <dir>]")
+            return 2
+
+    rules, failures = load_patterns(root)
+    literals, sealed_source, sealed_failures = load_sealed(args, root)
+    failures.extend(sealed_failures)
+
+    sealed_note = sealed_source if literals else "unread (no LEAK_TOKENS, no --sealed)"
+    if sealed_required and not literals and not sealed_failures:
+        failures.append(
+            "sealed: required but absent - set LEAK_TOKENS (base64) or pass --sealed <file outside the tree>"
+        )
+
+    total = 0
+    if mode_tree:
+        hits, text_files, binary_files, sources = tree_pass(root, rules, literals)
+        failures.extend(hits)
+        total += len(hits)
+        print(
+            "check-leak: tree %d file(s) (%d text, %d binary; %s), %d rule(s), sealed: %s"
+            % (text_files + binary_files, text_files, binary_files, sources, len(rules), sealed_note)
+        )
+
+    manifest_failures, holds, assets, rows = manifest_pass(root)
+    if mode_tree or mode_history:
+        failures.extend(manifest_failures)
+        print(
+            "check-leak: manifest %d asset(s), %d row(s), %d hold(s)"
+            % (assets, rows, len(holds))
+            + (" - " + ", ".join(holds) if holds else "")
+        )
+        if mode_history and holds:
+            failures.append(
+                "manifest: %d hold(s) unresolved at release - the chair resolves a hold or it does not ship" % len(holds)
+            )
+
+    if mode_history:
+        hits, revs, history_note = history_pass(root, rules, literals)
+        failures.extend(hits)
+        total += len(hits)
+        if history_note:
+            failures.append(history_note)
+        else:
+            print("check-leak: history %d revision(s), %d hit(s)" % (revs, len(hits)))
+
+    if failures:
+        print("check-leak: FAILED (%d hit(s) and issue(s))" % len(failures))
+        for failure in failures:
+            print("  - %s" % failure)
+        return 1
+
+    print("check-leak: clean (%d rule(s), sealed: %s, 0 hits)" % (len(rules), sealed_note))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

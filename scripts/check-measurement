@@ -1,0 +1,374 @@
+#!/usr/bin/env python3
+"""check-measurement - the counts table, made machine-checkable.
+
+`docs/measurement.md` is the narrative form; this script is the machine form.
+Every declared artifact class has exactly one doc row and exactly one computer
+here, and the gate fails closed when the two disagree: a class with no row is
+unmeasured, not free, and a row with no computer is prose wearing a number.
+
+Row grammar: an exact cell (`| 8 | seats |`) is a fact of the tree at this
+release; a floor cell (`| >=8 | record rows |`) is a bar the descent must meet.
+A floor cannot be born lying and cannot go stale between lanes; an exact row
+must move with the tree, and where the two disagree the tree is right.
+
+The completeness assertion has three legs:
+  - every declared class resolves to exactly one doc row, and every doc row to
+    a declared class (no silent class, no uncomputed claim, no duplicate row);
+  - the doc's Owner cell matches the declared owner (a red row names a seat);
+  - every top-level directory on disk is either declared or allowlisted: a new
+    artifact root with no row fails, which is how a class goes unmeasured.
+
+Usage:
+    python scripts/check-measurement                  compute and print every count
+    python scripts/check-measurement --check-doc      fail on any doc/tree mismatch
+    python scripts/check-measurement --json           print the counts as JSON
+    python scripts/check-measurement --root <dir>     run against another checkout (test hook)
+
+Exit 0 = clean (or plain print mode); 1 = a mismatch or a completeness failure.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import sys
+from pathlib import Path
+
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+def _strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+ROOT = _resolve_root(sys.argv[1:])
+MEASUREMENT = ROOT / "docs" / "measurement.md"
+
+HOSTS = (
+    "claude", "cursor", "codex", "factory", "opencode", "kiro",
+    "slate", "openclaw", "hermes", "gbrain", "dsh",
+)
+SEATS = ("mei", "elo", "mechapip", "yui", "niko", "rin", "aria", "reika")
+
+# Every top-level directory the pack ships from, and the allowlist for things
+# that are not artifacts (CI, VCS, local caches). A directory on disk that is
+# in neither set is an undeclared class: the gate fails naming it.
+DECLARED_ROOTS = frozenset({
+    "agents", "art", "assets", "claims", "docs", "dsh", "lore", "patterns",
+    "principles", "record", "scripts", "seats", "security", "skills",
+    "tests", "voices",
+})
+ALLOWED_ROOTS = frozenset({".git", ".github", ".pytest_cache", ".ruff_cache"})
+
+
+def _count_files(directory: Path, pattern: str = "*") -> int:
+    if not directory.is_dir():
+        return 0
+    return sum(1 for path in directory.glob(pattern) if path.is_file())
+
+
+def _count_lines(path: Path, *, skip_comments: bool = False) -> int:
+    if not path.is_file():
+        return 0
+    total = 0
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if skip_comments and stripped.startswith("#"):
+            continue
+        total += 1
+    return total
+
+
+def _read(path: Path) -> str:
+    return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+
+def count_canon_sections() -> int:
+    return len(re.findall(r"^##\s+[IVX]+\.", _read(ROOT / "docs" / "lore" / "canon.md"), re.M))
+
+
+def count_board_questions() -> int:
+    return len(re.findall(r"^\*\*Q\d+\.\*\*", _read(ROOT / "docs" / "board.md"), re.M))
+
+
+def count_board_seats() -> int:
+    """The board's seat count, derived from its `## <seat> - ...` sections."""
+    total = 0
+    for line in _read(ROOT / "docs" / "board.md").splitlines():
+        if line.startswith("## ") and line[3:].strip():
+            total += 1
+    return total
+
+
+def count_install_targets() -> int:
+    setup = _read(ROOT / "setup")
+    return sum(1 for host in HOSTS if re.search(r"(?<![a-z])" + host + r"(?![a-z])", setup))
+
+
+def count_registry_entries() -> int:
+    path = ROOT / "patterns" / "registry.json"
+    if not path.is_file():
+        return 0
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return 0
+    if isinstance(data, list):
+        return len(data)
+    if isinstance(data, dict):
+        entries = data.get("entries", data.get("patterns"))
+        if isinstance(entries, list):
+            return len(entries)
+        return len(data)
+    return 0
+
+
+def count_decisions() -> int:
+    return len(re.findall(r"^##\s+\d{4}-\d{2}-\d{2}\b", _read(ROOT / "DECISION_LOG.md"), re.M))
+
+
+def count_site_pages() -> int:
+    pages = list((ROOT).glob("*.html"))
+    pages += list((ROOT / "seats").glob("*.html"))
+    pages += list((ROOT / "lore").glob("*.html"))
+    return len([path for path in pages if path.is_file()])
+
+
+def build_rows() -> list[dict]:
+    """The declared rows: (label, owner, target, floor, computer)."""
+    lore = ROOT / "docs" / "lore"
+    agents = ROOT / "agents"
+    art = ROOT / "art"
+    skills = ROOT / "skills"
+    principles = ROOT / "principles"
+    art_cards = _count_files(art / "dossiers")
+    art_sheets = _count_files(art / "sheets")
+    art_walls = _count_files(art / "wallpapers")
+    lore_pages = sum(1 for p in lore.glob("*.md") if p.name != "README.md")
+    lore_dossiers = _count_files(lore / "dossiers", "*.md")
+    art_total = sum(
+        1
+        for path in art.rglob("*")
+        if path.is_file() and path.name != "README.md"
+    )
+    rows = [
+        ("seats", "Mei", 8, False, lambda: _count_files(ROOT / "docs" / "seats", "*.md")),
+        ("skills", "Niko", 10, False,
+         lambda: sum(1 for p in skills.iterdir() if p.is_dir()) if skills.is_dir() else 0),
+        ("playbooks", "Niko", 12, False,
+         lambda: _count_files(skills / "house" / "playbooks")),
+        ("laws", "Reika", 14, False,
+         lambda: len(list(principles.glob("law-*.md"))) if principles.is_dir() else 0),
+        ("doctrine pieces", "Mei", 23, False, lambda: _count_files(principles / "doctrine")),
+        ("install targets", "Niko", 11, False, count_install_targets),
+        ("agents, claude host", "Niko", 8, False,
+         lambda: _count_files(agents / "claude", "animestack-*")),
+        ("agents, cursor host", "Niko", 8, False,
+         lambda: _count_files(agents / "cursor", "animestack-*.md")),
+        ("agents, factory host", "Niko", 8, False,
+         lambda: _count_files(agents / "factory", "animestack-*.md")),
+        ("agents, codex host", "Niko", 8, False,
+         lambda: _count_files(agents / "codex", "animestack-*.toml")),
+        ("agents, kiro host", "Niko", 8, False,
+         lambda: _count_files(agents / "kiro", "animestack-*.md")),
+        ("agents, opencode host", "Niko", 8, False,
+         lambda: _count_files(agents / "opencode", "animestack-*.md")),
+        ("agent files, all dialects", "Niko", 48, False,
+         lambda: sum(
+             1 for path in agents.glob("*/*")
+             if path.is_file() and path.suffix in (".md", ".toml")
+         ) if agents.is_dir() else 0),
+        ("house command, opencode", "Niko", 1, False,
+         lambda: _count_files(agents / "opencode" / "command", "*.md")),
+        ("house command, factory", "Niko", 1, False,
+         lambda: _count_files(agents / "factory" / "command", "*.md")),
+        ("commands, all hosts", "Niko", 2, False,
+         lambda: sum(1 for path in agents.glob("*/command/*.md") if path.is_file())),
+        ("lore pages", "MechaPip", 8, False, lambda: lore_pages),
+        ("lore dossiers", "Mei", 17, False, lambda: lore_dossiers),
+        ("lore total", "Mei", 25, False, lambda: lore_pages + lore_dossiers),
+        ("canon sections", "Mei", 25, False, count_canon_sections),
+        ("docs pages", "Reika", 5, False, lambda: _count_files(ROOT / "docs", "*.md")),
+        ("board questions", "Elo", 112, False, count_board_questions),
+        ("board seats", "Elo", 8, False, count_board_seats),
+        ("seat pages", "Aria", 8, False, lambda: _count_files(ROOT / "seats", "*.html")),
+        ("site pages", "Aria", 20, True, count_site_pages),
+        ("site art images", "Aria", 18, False,
+         lambda: _count_files(ROOT / "assets" / "img", "*.jpg")),
+        ("site thumbnails", "Aria", 32, False,
+         lambda: sum(
+             1 for path in (ROOT / "assets" / "thumbs").rglob("*") if path.is_file()
+         ) if (ROOT / "assets" / "thumbs").is_dir() else 0),
+        ("art dossier cards", "Aria", 8, False, lambda: art_cards),
+        ("art character cards", "Aria", 8, False, lambda: art_sheets),
+        ("art wallpapers", "Aria", 8, False, lambda: art_walls),
+        ("art library, total", "Aria", 24, False, lambda: art_total),
+        ("voices", "Rin", 1, False, lambda: 1 if (ROOT / "voices" / "house.json").is_file() else 0),
+        ("gate scripts", "Rin", 6, True,
+         lambda: _count_files(ROOT / "scripts", "check-*")),
+        ("test files", "Rin", 3, True, lambda: _count_files(ROOT / "tests", "*.py")),
+        ("record rows", "Yui", 8, True,
+         lambda: _count_lines(ROOT / "record" / "seat_record.jsonl")),
+        ("decisions logged", "Yui", 1, True, count_decisions),
+        ("claim cards", "Yui", 1, True, lambda: _count_files(ROOT / "claims", "*.md")),
+        ("pattern registry entries", "MechaPip", 1, True, count_registry_entries),
+        ("seat packs", "Niko", 8, True, lambda: _count_files(ROOT / "dsh" / "animestack-team", "*.md")),
+        ("leak patterns", "Rin", 1, True,
+         lambda: _count_lines(ROOT / "security" / "leak-patterns.txt", skip_comments=True)),
+    ]
+    return [
+        {"label": label, "owner": owner, "target": target, "floor": floor, "count": computer()}
+        for label, owner, target, floor, computer in rows
+    ]
+
+
+COUNT_ROW_RE = re.compile(r"^\|\s*(>=)?\s*(\d+)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|")
+
+
+def parse_doc_rows() -> tuple[dict[str, dict], list[str]]:
+    """The doc's count rows: label -> {target, floor, owner}; plus duplicates."""
+    rows: dict[str, dict] = {}
+    duplicates: list[str] = []
+    for line in _read(MEASUREMENT).splitlines():
+        match = COUNT_ROW_RE.match(line)
+        if not match:
+            continue
+        floor_flag, number, label, owner = match.groups()
+        label = label.strip()
+        if label in rows:
+            duplicates.append(label)
+            continue
+        rows[label] = {
+            "target": int(number),
+            "floor": bool(floor_flag),
+            "owner": owner.strip(),
+        }
+    return rows, duplicates
+
+
+def match_row(label: str, rows: list[dict]) -> dict | None:
+    exact = [row for row in rows if row["label"] == label]
+    if len(exact) == 1:
+        return exact[0]
+    candidates = [(len(row["label"]), row) for row in rows if row["label"] in label]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda item: item[0])[1]
+
+
+def check_declaration(rows: list[dict], doc: dict[str, dict], duplicates: list[str]) -> list[str]:
+    failures = ["doc row duplicated: %s" % label for label in duplicates]
+    declared = {row["label"]: row for row in rows}
+    for label, row in declared.items():
+        entry = doc.get(label)
+        if entry is None:
+            failures.append("no doc row for declared class: %s" % label)
+            continue
+        if entry["owner"] != row["owner"]:
+            failures.append(
+                "%s: doc owner %s, declared owner %s"
+                % (label, entry["owner"], row["owner"])
+            )
+    for label in doc:
+        if label not in declared:
+            failures.append("no computer for doc row: %s" % label)
+    return failures
+
+
+def check_roots() -> list[str]:
+    failures: list[str] = []
+    for path in sorted(ROOT.iterdir()):
+        if not path.is_dir():
+            continue
+        name = path.name
+        if name in DECLARED_ROOTS or name in ALLOWED_ROOTS:
+            continue
+        failures.append(
+            "undeclared artifact root: %s (a class with no row is unmeasured)" % name
+        )
+    return failures
+
+
+def render_json(rows: list[dict]) -> str:
+    return json.dumps(
+        {
+            "release": _read(ROOT / "VERSION").strip(),
+            "rows": [
+                {
+                    "label": row["label"],
+                    "owner": row["owner"],
+                    "target": row["target"],
+                    "floor": row["floor"],
+                    "count": row["count"],
+                    "met": row["count"] >= row["target"] if row["floor"] else row["count"] == row["target"],
+                }
+                for row in rows
+            ],
+        },
+        indent=2,
+    )
+
+
+def main(argv: list[str]) -> int:
+    check_doc = "--check-doc" in argv
+    emit_json = "--json" in argv
+    rows = build_rows()
+    if emit_json:
+        print(render_json(rows))
+        return 0
+    for row in rows:
+        mark = ">=" if row["floor"] else "  "
+        print("%5s%-2d  %-30s %s" % (mark, row["target"], row["label"], row["owner"]))
+    if not check_doc:
+        return 0
+    doc, duplicates = parse_doc_rows()
+    failures = check_declaration(rows, doc, duplicates)
+    for row in rows:
+        entry = doc.get(row["label"])
+        if entry is None:
+            continue
+        if entry["floor"] and not row["floor"]:
+            failures.append("%s: doc row is a floor, the computer is exact" % row["label"])
+            continue
+        if entry["floor"]:
+            if row["count"] < entry["target"]:
+                failures.append(
+                    "%s: doc says >=%d, tree has %d" % (row["label"], entry["target"], row["count"])
+                )
+            continue
+        if row["count"] != entry["target"]:
+            failures.append(
+                "%s: doc says %d, tree says %d" % (row["label"], entry["target"], row["count"])
+            )
+    failures.extend(check_roots())
+    if failures:
+        print("check-measurement: FAILED (%d issue(s))" % len(failures))
+        for failure in failures:
+            print("  - %s" % failure)
+        return 1
+    print("check-measurement: clean (%d rows agree with docs/measurement.md)" % len(doc))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(_strip_root(sys.argv[1:])))

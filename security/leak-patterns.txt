@@ -1,0 +1,28 @@
+# The public pattern tier of scripts/check-leak.
+#
+# One rule per line: <rule-id><TAB><python-regular-expression>.
+# Blank lines and lines starting with # are not rules; the measurement row
+# counts the rules, not the prose.
+#
+# These are SHAPES, not facts. The literal tokens of the private reference are
+# never written here: they live in the sealed tier (the LEAK_TOKENS secret, or
+# a --sealed file outside the tree). A pattern that spells a token would make
+# this file the leak it exists to catch. A shape describes a class of leak that
+# a later commit could reintroduce: a credential variable, a machine path, a
+# series identifier, a ledger file, a channel name, a money figure.
+#
+# Add a rule only with its red-first case in tests/test_leak_gate.py. A rule
+# that cannot be made to fail is deleted, not kept for comfort.
+
+series-id	\bKX[A-Z0-9]{2,10}15M\b
+guard-env	\b(?:LIVE|FUND)_GUARD_[A-Z0-9_]+\b
+gate-env	\bGATE_(?:ARMED|REARM_[A-Z0-9_]+|PROFIT_[A-Z0-9_]+|LEADER_[A-Z0-9_]+|MAX_[A-Z0-9_]+)\b
+channel-env	\b[A-Z][A-Z0-9_]*_URL\b
+event-env	\bEVENT_[A-Z]{4,}\b
+fix-pair	\bFIX/[a-z][a-z-]+\b
+ledger-file	\b[A-Z][A-Z0-9_]{5,}\.MD\b
+private-lib	\b[A-Za-z]+Lore/
+cred-file	\b(?:credentials|secrets)\.json\b|\b[a-z0-9_-]+\.pem\b
+machine-path	[A-Za-z]:\\Users\\|/home/[a-z][a-z0-9_-]*/
+decimal-dollars	\$\d+\.\d+
+chat-channel	(?i)\bdiscord\b

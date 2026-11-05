@@ -1,0 +1,355 @@
+#!/usr/bin/env python3
+"""check-patterns - the archive's gate: registry, page, anchors, citations.
+
+`patterns/registry.json` is the machine copy of the house's archive; the reader's
+copy is `docs/lore/ARCHIVE.md`. This gate fails closed when:
+
+  - the registry is missing, unreadable, or not the documented shape;
+  - a row is missing a field, or carries a sample, a shape, a regime, or a
+    killing fact too thin to be a sample (a tombstone with no body);
+  - an id is malformed, duplicated, or a name is duplicated (nothing is renamed);
+  - a verdict does not fit its family: P rows are RETIRED or PARKED, A rows are
+    ADOPTED;
+  - an anchor does not resolve: `file:line` against the live tree, `git:<sha>`
+    against the repository when present, `https://` against the public source
+    allowlist (no network at gate time);
+  - the page and the machine disagree: an id on the page with no row, or a row
+    with no line on the page carrying its name;
+  - a citation `P-###` or `A-###` anywhere in the lore, skills, or root digests
+    resolves to no row;
+  - an adopted row's name is absent from the canon's adopted-failures block.
+
+Usage:
+    python3 scripts/check-patterns                 run the gate
+    python3 scripts/check-patterns --count         print the row count
+    python3 scripts/check-patterns --show P-002    print one row
+    python3 scripts/check-patterns --root <dir>    run against another checkout
+
+Exit 0 = clean; 1 = failures printed; 2 = usage.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+from urllib.parse import urlparse
+
+ID_RE = re.compile(r"^(P|A)-\d{3}$")
+CITATION_RE = re.compile(r"\b([PA]-\d{3})\b")
+SEATS = frozenset(
+    {"reika", "mei", "elo", "mechapip", "yui", "niko", "rin", "aria"}
+)
+FIELDS = (
+    "id",
+    "name",
+    "kind",
+    "shape",
+    "sample",
+    "regime",
+    "verdict",
+    "killing",
+    "killing_date",
+    "anchor",
+    "owner",
+)
+P_VERDICTS = frozenset({"RETIRED", "PARKED"})
+A_VERDICTS = frozenset({"ADOPTED"})
+PUBLIC_HOSTS = frozenset({"en.wikipedia.org"})
+ANCHOR_HOSTS = PUBLIC_HOSTS
+MIN_SHAPE = 30
+MIN_SAMPLE = 40
+MIN_REGIME = 10
+MIN_KILLING = 30
+DATE_RE = re.compile(r"^\d{4}(-\d{2}(-\d{2})?)?$")
+CITATION_FILES = (
+    "docs/lore/*.md",
+    "docs/seats/*.md",
+    "skills/*/SKILL.md",
+    "skills/house/playbooks/*.md",
+    "principles/*.md",
+    "README.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+)
+
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parents[1]
+
+
+def _strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+ROOT = _resolve_root(sys.argv[1:])
+REGISTRY = ROOT / "patterns" / "registry.json"
+PAGE = ROOT / "docs" / "lore" / "ARCHIVE.md"
+CANON = ROOT / "docs" / "lore" / "canon.md"
+
+
+def read(path: Path) -> str:
+    return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+
+def load_registry(failures: list[str]) -> dict:
+    if not REGISTRY.is_file():
+        failures.append("patterns/registry.json missing")
+        return {}
+    try:
+        data = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        failures.append("patterns/registry.json unreadable: %s" % error)
+        return {}
+    if not isinstance(data, dict):
+        failures.append("patterns/registry.json: top level must be an object")
+        return {}
+    meta = data.get("_meta")
+    if not isinstance(meta, dict):
+        failures.append("patterns/registry.json: _meta missing")
+    else:
+        if meta.get("keeper") not in SEATS:
+            failures.append("registry: _meta.keeper is not a seat: %r" % meta.get("keeper"))
+        if not str(meta.get("rule", "")).strip():
+            failures.append("registry: _meta.rule is empty")
+    entries = data.get("entries")
+    if not isinstance(entries, list) or not entries:
+        failures.append("patterns/registry.json: entries missing or empty")
+        return {}
+    return data
+
+
+def anchor_failures(entry_id: str, anchor: str, failures: list[str]) -> int:
+    """Resolve one anchor. Returns the number of checks performed."""
+    if not isinstance(anchor, str) or not anchor.strip():
+        failures.append("%s: anchor is empty" % entry_id)
+        return 1
+    anchor = anchor.strip()
+    if anchor.startswith(("http://", "https://")):
+        parsed = urlparse(anchor)
+        if parsed.scheme != "https":
+            failures.append("%s: anchor must be https: %s" % (entry_id, anchor))
+        elif parsed.hostname not in ANCHOR_HOSTS:
+            failures.append(
+                "%s: anchor host not on the public allowlist: %s"
+                % (entry_id, parsed.hostname)
+            )
+        return 1
+    if anchor.startswith("git:"):
+        sha = anchor[4:]
+        if not re.fullmatch(r"[0-9a-f]{7,40}", sha):
+            failures.append("%s: malformed git anchor: %s" % (entry_id, anchor))
+        elif not (ROOT / ".git").exists():
+            failures.append(
+                "%s: git anchor cannot resolve outside a repository: %s"
+                % (entry_id, anchor)
+            )
+        else:
+            proc = subprocess.run(
+                ["git", "-C", str(ROOT), "cat-file", "-e", sha + "^{commit}"],
+                capture_output=True,
+                text=True,
+            )
+            if proc.returncode != 0:
+                failures.append("%s: git anchor does not resolve: %s" % (entry_id, anchor))
+        return 1
+    if ":" in anchor:
+        path_text, _, line_text = anchor.rpartition(":")
+        if not line_text.isdigit():
+            failures.append("%s: malformed file anchor: %s" % (entry_id, anchor))
+            return 1
+        target = ROOT / path_text
+        if not target.is_file():
+            failures.append("%s: anchor path missing: %s" % (entry_id, path_text))
+            return 1
+        line = int(line_text)
+        total = len(target.read_text(encoding="utf-8").splitlines())
+        if line < 1 or line > total:
+            failures.append(
+                "%s: anchor line out of range: %s (file has %d lines)"
+                % (entry_id, anchor, total)
+            )
+        return 1
+    failures.append("%s: anchor is not file:line, git:<sha>, or https: %s" % (entry_id, anchor))
+    return 1
+
+
+def canon_adopted_block(canon: str) -> str:
+    marker = "**The adopted failures.**"
+    start = canon.find(marker)
+    if start < 0:
+        return ""
+    rest = canon[start + len(marker):]
+    end = rest.find("\n## ")
+    return rest if end < 0 else rest[:end]
+
+
+def main() -> int:
+    if _strip_root(sys.argv[1:]) not in ([], ["--count"]) and not (
+        len(_strip_root(sys.argv[1:])) == 2
+        and _strip_root(sys.argv[1:])[0] == "--show"
+    ):
+        print(
+            "usage: python3 scripts/check-patterns [--count | --show <id>] [--root <dir>]",
+            file=sys.stderr,
+        )
+        return 2
+
+    failures: list[str] = []
+    anchors = 0
+    citations = 0
+    data = load_registry(failures)
+    entries = data.get("entries", []) if isinstance(data, dict) else []
+
+    ids: list[str] = []
+    names: list[str] = []
+    rows: dict[str, dict] = {}
+    for entry in entries:
+        if not isinstance(entry, dict):
+            failures.append("registry: entry is not an object")
+            continue
+        entry_id = str(entry.get("id", "")).strip()
+        missing = [field for field in FIELDS if not str(entry.get(field, "")).strip()]
+        if missing:
+            failures.append("%s: missing field(s): %s" % (entry_id or "?", ", ".join(missing)))
+            continue
+        if not ID_RE.match(entry_id):
+            failures.append("%s: malformed id" % entry_id)
+        ids.append(entry_id)
+        rows[entry_id] = entry
+        name = str(entry["name"]).strip()
+        if name in names:
+            failures.append("%s: duplicate name (nothing is renamed): %s" % (entry_id, name))
+        names.append(name)
+        verdict = str(entry["verdict"]).strip()
+        if ID_RE.match(entry_id):
+            family = "P" if entry_id.startswith("P-") else "A"
+            allowed = P_VERDICTS if family == "P" else A_VERDICTS
+            if verdict not in allowed:
+                failures.append(
+                    "%s: verdict %r does not fit family %s" % (entry_id, verdict, family)
+                )
+        owner = str(entry["owner"]).strip().lower()
+        if owner not in SEATS:
+            failures.append("%s: owner is not a seat: %r" % (entry_id, owner))
+        for field, floor in (
+            ("shape", MIN_SHAPE),
+            ("sample", MIN_SAMPLE),
+            ("regime", MIN_REGIME),
+            ("killing", MIN_KILLING),
+        ):
+            if len(str(entry[field]).strip()) < floor:
+                failures.append(
+                    "%s: %s too thin (%d chars, floor %d)"
+                    % (entry_id, field, len(str(entry[field]).strip()), floor)
+                )
+        if not DATE_RE.match(str(entry["killing_date"]).strip()):
+            failures.append(
+                "%s: killing_date is not a date or month: %r"
+                % (entry_id, entry["killing_date"])
+            )
+        anchors += anchor_failures(entry_id, str(entry["anchor"]), failures)
+
+    for entry_id in sorted({i for i in ids if ids.count(i) > 1}):
+        failures.append("%s: duplicate id" % entry_id)
+
+    page = read(PAGE)
+    if not page:
+        failures.append("docs/lore/ARCHIVE.md missing")
+    else:
+        for entry_id, entry in rows.items():
+            if entry_id not in page:
+                failures.append("%s: row absent from docs/lore/ARCHIVE.md" % entry_id)
+                continue
+            anchors += 1
+            if str(entry["name"]).strip() not in page:
+                failures.append(
+                    "%s: name %r absent from docs/lore/ARCHIVE.md"
+                    % (entry_id, entry["name"])
+                )
+        for cited in sorted(set(CITATION_RE.findall(page))):
+            citations += 1
+            if cited not in rows:
+                failures.append("docs/lore/ARCHIVE.md cites unknown id: %s" % cited)
+
+    canon = read(CANON)
+    adopted = canon_adopted_block(canon)
+    if not adopted:
+        failures.append("canon: the adopted-failures block is missing")
+    else:
+        for entry_id, entry in rows.items():
+            if not entry_id.startswith("A-"):
+                continue
+            citations += 1
+            if str(entry["name"]).strip() not in adopted:
+                failures.append(
+                    "%s: adopted name absent from canon XVI: %r"
+                    % (entry_id, entry["name"])
+                )
+
+    seen_files: set[Path] = set()
+    for pattern in CITATION_FILES:
+        for path in sorted(ROOT.glob(pattern)):
+            if not path.is_file() or path in seen_files or path == REGISTRY:
+                continue
+            seen_files.add(path)
+            text = read(path)
+            for cited in sorted(set(CITATION_RE.findall(text))):
+                citations += 1
+                if cited not in rows:
+                    failures.append(
+                        "%s: cites unknown id: %s" % (path.relative_to(ROOT).as_posix(), cited)
+                    )
+
+    if failures:
+        print(
+            "check-patterns: FAILED (%d issue(s), %d rows, %d anchors, %d citations)"
+            % (len(failures), len(rows), anchors, citations)
+        )
+        for failure in failures:
+            print("  - %s" % failure)
+        return 1
+
+    stripped = _strip_root(sys.argv[1:])
+    if stripped == ["--count"]:
+        print(len(rows))
+        return 0
+    if stripped[:1] == ["--show"]:
+        wanted = stripped[1].upper()
+        if wanted not in rows:
+            print("check-patterns: no row %s" % wanted, file=sys.stderr)
+            return 1
+        entry = rows[wanted]
+        print(
+            "%s | %s | %s | %s"
+            % (entry["id"], entry["name"], entry["verdict"], entry["killing"])
+        )
+        return 0
+
+    print(
+        "check-patterns: clean (%d rows, %d anchors, %d citations)"
+        % (len(rows), anchors, citations)
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

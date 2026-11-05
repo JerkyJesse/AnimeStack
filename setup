@@ -1,0 +1,1061 @@
+#!/usr/bin/env bash
+# AnimeStack setup - install the eight-seat house skills, agents, and the
+# opencode and factory /house commands into supported AI coding hosts, plus the
+# DeepSeek Harness surface (seat packs + the preset bundle). No network, no bun,
+# no sudo, no node.
+#
+# The cage rule: never delete or edit a target without proof that we own it.
+# A skill target is ours when it is a symlink resolving into this repo, or a
+# directory carrying the .animestack-owned marker. An agent or seat-pack file is
+# ours when its last line is the ownership marker. The DSH bundle is a directory
+# carrying the same marker. The host profile (package.json, cordis.patch.yml) is
+# never written by the default install: --merge-profile is the explicit opt-in
+# that parses, backs up, appends only what is absent, re-parses to validate, and
+# uninstalls exactly the three things it added.
+#
+# The model rule: no shipped agent names a concrete model. claude and factory
+# agents carry `model: inherit` (the host's same-model-as-the-conversation
+# form); opencode, cursor, and kiro agents omit the `model` key (the host
+# inherits the session model); codex agents omit `model` and
+# `model_reasoning_effort` (codex inherits the spawning session's model by
+# default). Setup refuses to install from a pack that violates this.
+set -e
+
+ROOT="$(cd "$(dirname "$0")" && pwd -P)"
+
+IS_WINDOWS=0
+case "$(uname -s)" in
+  MINGW*|MSYS*|CYGWIN*|Windows_NT) IS_WINDOWS=1 ;;
+esac
+
+QUIET=0
+UNINSTALL=0
+CHECK=0
+MERGE_PROFILE=0
+HOST="claude"
+
+SKILLS="house reika mei elo mechapip yui niko rin aria simple"
+ALL_HOSTS="claude cursor codex factory opencode kiro slate openclaw hermes gbrain dsh"
+AUTO_HOSTS="claude cursor codex factory opencode kiro openclaw hermes gbrain dsh"
+
+OWN_MARKER="<!-- animestack-owned -->"
+TOML_MARKER="# animestack-owned"
+OWN_FLAG=".animestack-owned"
+ROOT_FLAG=".animestack-root"
+
+# ─── Counters (final summary) ─────────────────────────────────
+SKILL_COUNT=0
+AGENT_COUNT=0
+COMMAND_COUNT=0
+DIGEST_COUNT=0
+PACK_COUNT=0
+BUNDLE_COUNT=0
+MERGE_COUNT=0
+SKIP_COUNT=0
+PATHS=""
+DONE_HOSTS=" "
+
+
+usage() {
+  cat <<'EOF'
+AnimeStack setup - install the eight-seat house skills, agents, and the
+opencode and factory /house commands into AI hosts
+
+Usage: ./setup [options]
+
+Options:
+  --host <name>     Target host: claude, cursor, codex, factory, opencode,
+                    kiro, slate, openclaw, hermes, gbrain, dsh, all, auto.
+                    Default: claude. `dsh` is the DeepSeek Harness surface:
+                    the ten skills, the eight seat packs, and the preset
+                    bundle, installed under $DSH_HOME (else ~/.dsh).
+  --uninstall       Remove only provably-owned AnimeStack items for the
+                    selected host(s). Everything else is left untouched.
+  --check           Dry run: validate the pack and print what would be
+                    installed per host; writes nothing.
+  --merge-profile   DSH only: also merge the bundle into the host profile
+                    (package.json link + bundle entry, and the agent-team row
+                    when absent). Parses, backs up, re-parses to validate, and
+                    --uninstall removes exactly what this flag added.
+  -q, --quiet       Suppress progress output; print only the final summary.
+  -h, --help        Show this help and exit.
+
+Examples:
+  ./setup                          # install for Claude Code
+  ./setup --host opencode          # opencode skills + agents
+  ./setup --host dsh               # DSH skills + seat packs + bundle (no profile write)
+  ./setup --host dsh --merge-profile   # ...and merge the two profile keys
+  ./setup --host all               # every supported host
+  ./setup --host auto              # hosts whose config dir already exists
+  ./setup --host claude --uninstall
+EOF
+}
+
+# Short-circuit help before any other work.
+for _arg in "$@"; do
+  case "$_arg" in
+    -h|--help) usage; exit 0 ;;
+  esac
+done
+
+# ─── Argument parsing ──────────────────────────────────────────
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --host)
+      if [ $# -lt 2 ]; then
+        echo "Error: --host needs a value" >&2
+        usage >&2
+        exit 1
+      fi
+      HOST="$2"
+      shift 2
+      ;;
+    --host=*) HOST="${1#--host=}"; shift ;;
+    --uninstall) UNINSTALL=1; shift ;;
+    --check) CHECK=1; shift ;;
+    --merge-profile) MERGE_PROFILE=1; shift ;;
+    -q|--quiet) QUIET=1; shift ;;
+    *)
+      echo "Error: unknown flag: $1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+case "$HOST" in
+  claude|cursor|codex|factory|opencode|kiro|slate|openclaw|hermes|gbrain|dsh|all|auto) ;;
+  *)
+    echo "Error: unknown --host value: $HOST" >&2
+    usage >&2
+    exit 1
+    ;;
+esac
+
+if [ "$MERGE_PROFILE" -eq 1 ] && [ "$HOST" != "dsh" ] && [ "$HOST" != "all" ]; then
+  echo "Error: --merge-profile only applies to the dsh host" >&2
+  exit 1
+fi
+
+log() { [ "$QUIET" -eq 0 ] && echo "$@" || true; }
+
+# ─── Host directory mapping ────────────────────────────────────
+_host_config_dir() {
+  case "$1" in
+    claude)   printf '%s\n' "$HOME/.claude" ;;
+    cursor)   printf '%s\n' "$HOME/.cursor" ;;
+    codex)    printf '%s\n' "${CODEX_HOME:-$HOME/.codex}" ;;
+    factory)  printf '%s\n' "$HOME/.factory" ;;
+    opencode) printf '%s\n' "$HOME/.config/opencode" ;;
+    kiro)     printf '%s\n' "$HOME/.kiro" ;;
+    openclaw) printf '%s\n' "$HOME/.openclaw" ;;
+    hermes)   printf '%s\n' "$HOME/.hermes" ;;
+    gbrain)   printf '%s\n' "$HOME/.gbrain" ;;
+    dsh)      printf '%s\n' "${DSH_HOME:-$HOME/.dsh}" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_skills_dir() {
+  case "$1" in
+    claude)   printf '%s\n' "$HOME/.claude/skills" ;;
+    cursor)   printf '%s\n' "$HOME/.cursor/skills" ;;
+    codex)    printf '%s\n' "${CODEX_HOME:-$HOME/.codex}/skills" ;;
+    factory)  printf '%s\n' "$HOME/.factory/skills" ;;
+    opencode) printf '%s\n' "$HOME/.config/opencode/skills" ;;
+    kiro)     printf '%s\n' "$HOME/.kiro/skills" ;;
+    dsh)      printf '%s\n' "$(_host_config_dir dsh)/skills" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_agents_dir() {
+  case "$1" in
+    claude)   printf '%s\n' "$HOME/.claude/agents" ;;
+    cursor)   printf '%s\n' "$HOME/.cursor/agents" ;;
+    codex)    printf '%s\n' "${CODEX_HOME:-$HOME/.codex}/agents" ;;
+    factory)  printf '%s\n' "$HOME/.factory/droids" ;;
+    opencode) printf '%s\n' "$HOME/.config/opencode/agent" ;;
+    kiro)     printf '%s\n' "$HOME/.kiro/agents" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_agents_src() {
+  case "$1" in
+    claude)   printf '%s\n' "$ROOT/agents/claude" ;;
+    cursor)   printf '%s\n' "$ROOT/agents/cursor" ;;
+    codex)    printf '%s\n' "$ROOT/agents/codex" ;;
+    factory)  printf '%s\n' "$ROOT/agents/factory" ;;
+    opencode) printf '%s\n' "$ROOT/agents/opencode" ;;
+    kiro)     printf '%s\n' "$ROOT/agents/kiro" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_commands_dir() {
+  case "$1" in
+    factory)  printf '%s\n' "$HOME/.factory/commands" ;;
+    opencode) printf '%s\n' "$HOME/.config/opencode/command" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_commands_src() {
+  case "$1" in
+    factory)  printf '%s\n' "$ROOT/agents/factory/command" ;;
+    opencode) printf '%s\n' "$ROOT/agents/opencode/command" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+# ─── DeepSeek Harness surface ──────────────────────────────────
+# The DSH host is a coding host for the ten skills and, unlike the others, a
+# team surface: eight seat packs and one preset bundle. Its home is DSH_HOME
+# when the host sets it, else ~/.dsh. The bundle is installed into an owned
+# directory; the host profile is only touched by --merge-profile.
+_host_packs_src() {
+  case "$1" in
+    dsh) printf '%s\n' "$ROOT/dsh/animestack-team" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_packs_dir() {
+  case "$1" in
+    dsh) printf '%s\n' "$(_host_config_dir dsh)/animestack-team" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_bundle_src() {
+  case "$1" in
+    dsh) printf '%s\n' "$ROOT/dsh/animestack-house" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+_host_bundle_dir() {
+  case "$1" in
+    dsh) printf '%s\n' "$(_host_config_dir dsh)/animestack" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+# The profile directory: DSH_PROFILE when set, else the only profile on disk,
+# else `desktop`. Never guessed twice: no profile dir means no merge.
+_dsh_profile_dir() {
+  local home profile
+  home="$(_host_config_dir dsh)"
+  if [ -n "${DSH_PROFILE:-}" ] && [ -d "$home/profiles/$DSH_PROFILE" ]; then
+    printf '%s\n' "$home/profiles/$DSH_PROFILE"
+    return 0
+  fi
+  local count=0 last=""
+  for profile in "$home/profiles"/*; do
+    [ -d "$profile" ] || continue
+    count=$((count + 1))
+    last="$profile"
+  done
+  if [ "$count" -eq 1 ]; then printf '%s\n' "$last"; return 0; fi
+  if [ -d "$home/profiles/desktop" ]; then printf '%s\n' "$home/profiles/desktop"; return 0; fi
+  printf '%s\n' "$home/profiles/desktop"
+}
+
+_host_digest_dir() {
+  case "$1" in
+    openclaw) printf '%s\n' "$HOME/.openclaw/skills/animestack" ;;
+    hermes)   printf '%s\n' "$HOME/.hermes/skills/animestack" ;;
+    gbrain)   printf '%s\n' "$HOME/.gbrain/skills/animestack" ;;
+    *) printf '%s\n' "" ;;
+  esac
+}
+
+# Expand the requested host into a concrete, ordered list.
+expand_hosts() {
+  case "$HOST" in
+    all)
+      printf '%s\n' $ALL_HOSTS
+      ;;
+    auto)
+      local h d
+      for h in $AUTO_HOSTS; do
+        d="$(_host_config_dir "$h")"
+        if [ -d "$d" ]; then printf '%s\n' "$h"; fi
+      done
+      ;;
+    *)
+      printf '%s\n' "$HOST"
+      ;;
+  esac
+}
+
+# ─── Ownership proof ───────────────────────────────────────────
+# A target is provably ours when:
+#   - it is a symlink that resolves into $ROOT, or
+#   - it is a directory containing the .animestack-owned marker.
+# Nothing is ever removed or edited without passing this gate.
+_is_ours() {
+  local t="$1"
+  if [ ! -e "$t" ] && [ ! -L "$t" ]; then return 1; fi
+  if [ -L "$t" ]; then
+    local link resolved
+    link="$(readlink "$t" 2>/dev/null || true)"
+    case "$link" in
+      "$ROOT"/*) return 0 ;;
+    esac
+    resolved="$(cd -P "$t" 2>/dev/null && pwd -P 2>/dev/null || true)"
+    if [ -z "$resolved" ]; then return 1; fi
+    case "$resolved" in
+      "$ROOT"/*) return 0 ;;
+    esac
+    return 1
+  fi
+  if [ -d "$t" ] && [ -f "$t/$OWN_FLAG" ]; then return 0; fi
+  return 1
+}
+
+# Remove a target only when provably owned. Returns 1 when not ours.
+_remove_owned() {
+  local t="$1"
+  if _is_ours "$t"; then
+    if [ -L "$t" ]; then rm -f "$t"; else rm -rf "$t"; fi
+    return 0
+  fi
+  return 1
+}
+
+# Install one skill dir as symlink (unix) or copy (windows / link fallback).
+_copy_skill() {
+  local name="$1" target="$2"
+  mkdir -p "$(dirname "$target")"
+  if [ "$IS_WINDOWS" -eq 1 ]; then
+    cp -R "$ROOT/skills/$name" "$target"
+    printf '%s\n' "$ROOT" > "$target/$ROOT_FLAG"
+    printf '%s\n' "animestack-owned" > "$target/$OWN_FLAG"
+    return 1
+  fi
+  if ln -snf "$ROOT/skills/$name" "$target" 2>/dev/null; then
+    return 0
+  fi
+  cp -R "$ROOT/skills/$name" "$target"
+  printf '%s\n' "$ROOT" > "$target/$ROOT_FLAG"
+  printf '%s\n' "animestack-owned" > "$target/$OWN_FLAG"
+  return 1
+}
+
+_install_skill() {
+  local name="$1" target="$2"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    if _is_ours "$target"; then
+      _remove_owned "$target"
+    else
+      log "Not registered (a skill you own already uses the name; left untouched): $name"
+      SKIP_COUNT=$((SKIP_COUNT + 1))
+      return 0
+    fi
+  fi
+  local copied=0
+  if _copy_skill "$name" "$target"; then
+    copied=0
+  else
+    copied=1
+  fi
+  SKILL_COUNT=$((SKILL_COUNT + 1))
+  PATHS="$PATHS
+  $target"
+  if [ "$copied" -eq 1 ]; then
+    log "Installed (copy): $name -> $target"
+  else
+    log "Installed (link): $name -> $target"
+  fi
+}
+
+_install_digest() {
+  local host="$1" target="$2"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    if _is_ours "$target"; then
+      _remove_owned "$target"
+    else
+      log "Not registered (a directory you own already uses the name; left untouched): $host/animestack"
+      SKIP_COUNT=$((SKIP_COUNT + 1))
+      return 0
+    fi
+  fi
+  mkdir -p "$target"
+  if ! cp -f "$ROOT/AGENTS.md" "$target/AGENTS.md" || [ ! -s "$target/AGENTS.md" ]; then
+    echo "Error: the digest source $ROOT/AGENTS.md is missing or empty; refusing to install a digest that claims a file it does not carry ($host)" >&2
+    exit 1
+  fi
+  cat > "$target/README.md" <<EOF
+# AnimeStack (digest for $host)
+
+AnimeStack is installed here as a rules-only digest: the house voice lives in
+AGENTS.md, and the full skill pack (eight seat skills, the /house router, the
+/simple waiver, playbooks, principles, and agents) lives in the source repo.
+
+Repo: https://github.com/JerkyJesse/AnimeStack
+
+Refresh: re-run ./setup --host $host from a clone of the repo.
+EOF
+  printf '%s\n' "animestack-owned" > "$target/$OWN_FLAG"
+  DIGEST_COUNT=$((DIGEST_COUNT + 1))
+  PATHS="$PATHS
+  $target"
+  log "Installed digest: $host -> $target"
+}
+
+# Ownership marker for an agent file: markdown agents end with the HTML
+# comment, codex TOML agents end with a TOML comment (TOML has no HTML
+# comments). A file is ours only when its last line is the right marker.
+_own_marker_for() {
+  case "$1" in
+    *.toml) printf '%s\n' "$TOML_MARKER" ;;
+    *) printf '%s\n' "$OWN_MARKER" ;;
+  esac
+}
+
+_install_agents() {
+  local host="$1" srcdir="$2" targetdir="$3"
+  if [ ! -d "$srcdir" ]; then return 0; fi
+  mkdir -p "$targetdir"
+  local src base dst last marker
+  for src in "$srcdir"/*; do
+    [ -f "$src" ] || continue
+    base="$(basename "$src")"
+    dst="$targetdir/$base"
+    marker="$(_own_marker_for "$dst")"
+    if [ -e "$dst" ]; then
+      last="$(tail -n 1 "$dst" 2>/dev/null | sed 's/[[:space:]]*$//' || true)"
+      if [ "$last" != "$marker" ]; then
+        log "Not registered (an agent file you own already uses the name; left untouched): $base"
+        SKIP_COUNT=$((SKIP_COUNT + 1))
+        continue
+      fi
+    fi
+    cp -f "$src" "$dst"
+    AGENT_COUNT=$((AGENT_COUNT + 1))
+    log "Installed agent: $base -> $dst"
+  done
+}
+
+_uninstall_skill() {
+  local name="$1" target="$2"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    if _remove_owned "$target"; then
+      SKILL_COUNT=$((SKILL_COUNT + 1))
+      log "Removed: $target"
+    else
+      log "Skipped (not provably ours; left untouched): $target"
+      SKIP_COUNT=$((SKIP_COUNT + 1))
+    fi
+  fi
+}
+
+_uninstall_digest() {
+  local target="$1"
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    if _remove_owned "$target"; then
+      DIGEST_COUNT=$((DIGEST_COUNT + 1))
+      log "Removed: $target"
+    else
+      log "Skipped (not provably ours; left untouched): $target"
+      SKIP_COUNT=$((SKIP_COUNT + 1))
+    fi
+  fi
+}
+
+_uninstall_agents() {
+  local targetdir="$1"
+  if [ ! -d "$targetdir" ]; then return 0; fi
+  local f last marker
+  for f in "$targetdir"/*; do
+    [ -f "$f" ] || continue
+    marker="$(_own_marker_for "$f")"
+    last="$(tail -n 1 "$f" 2>/dev/null | sed 's/[[:space:]]*$//' || true)"
+    if [ "$last" = "$marker" ]; then
+      rm -f "$f"
+      AGENT_COUNT=$((AGENT_COUNT + 1))
+      log "Removed: $f"
+    fi
+  done
+}
+
+_install_commands() {
+  local host="$1" srcdir="$2" targetdir="$3"
+  if [ ! -d "$srcdir" ]; then return 0; fi
+  mkdir -p "$targetdir"
+  local src base dst last
+  for src in "$srcdir"/*.md; do
+    [ -e "$src" ] || continue
+    base="$(basename "$src")"
+    dst="$targetdir/$base"
+    if [ -e "$dst" ]; then
+      last="$(tail -n 1 "$dst" 2>/dev/null | sed 's/[[:space:]]*$//' || true)"
+      if [ "$last" != "$OWN_MARKER" ]; then
+        log "Not registered (a command file you own already uses the name; left untouched): $base"
+        SKIP_COUNT=$((SKIP_COUNT + 1))
+        continue
+      fi
+    fi
+    cp -f "$src" "$dst"
+    COMMAND_COUNT=$((COMMAND_COUNT + 1))
+    log "Installed command: $base -> $dst"
+  done
+}
+
+_uninstall_commands() {
+  local targetdir="$1"
+  if [ ! -d "$targetdir" ]; then return 0; fi
+  local f last
+  for f in "$targetdir"/*.md; do
+    [ -e "$f" ] || continue
+    last="$(tail -n 1 "$f" 2>/dev/null | sed 's/[[:space:]]*$//' || true)"
+    if [ "$last" = "$OWN_MARKER" ]; then
+      rm -f "$f"
+      COMMAND_COUNT=$((COMMAND_COUNT + 1))
+      log "Removed: $f"
+    fi
+  done
+}
+
+# ─── DSH: seat packs, bundle, profile merge ────────────────────
+# Seat packs are files with the ownership marker on the last line, exactly like
+# agent files. The bundle is a directory carrying the ownership flag. The host
+# profile is not ours: --merge-profile is the only path that writes it, and it
+# parses, backs up, appends only what is absent, and validates before replacing.
+_install_packs() {
+  local srcdir="$1" targetdir="$2"
+  if [ ! -d "$srcdir" ] || [ -z "$targetdir" ]; then return 0; fi
+  mkdir -p "$targetdir"
+  local src base dst last
+  for src in "$srcdir"/animestack-*.md; do
+    [ -f "$src" ] || continue
+    base="$(basename "$src")"
+    dst="$targetdir/$base"
+    if [ -e "$dst" ]; then
+      last="$(tail -n 1 "$dst" 2>/dev/null | sed 's/[[:space:]]*$//' || true)"
+      if [ "$last" != "$OWN_MARKER" ]; then
+        log "Not registered (a seat pack you own already uses the name; left untouched): $base"
+        SKIP_COUNT=$((SKIP_COUNT + 1))
+        continue
+      fi
+    fi
+    cp -f "$src" "$dst"
+    PACK_COUNT=$((PACK_COUNT + 1))
+    log "Installed seat pack: $base -> $dst"
+  done
+}
+
+_uninstall_packs() {
+  local targetdir="$1"
+  if [ ! -d "$targetdir" ]; then return 0; fi
+  local f last
+  for f in "$targetdir"/animestack-*.md; do
+    [ -f "$f" ] || continue
+    last="$(tail -n 1 "$f" 2>/dev/null | sed 's/[[:space:]]*$//' || true)"
+    if [ "$last" = "$OWN_MARKER" ]; then
+      rm -f "$f"
+      PACK_COUNT=$((PACK_COUNT + 1))
+      log "Removed: $f"
+    fi
+  done
+  # The packs directory is ours by name: an empty one is an orphan, not a target.
+  if [ -d "$targetdir" ] && [ -z "$(ls -A "$targetdir" 2>/dev/null)" ]; then
+    rmdir "$targetdir" 2>/dev/null || true
+  fi
+}
+
+_install_bundle() {
+  local srcdir="$1" targetdir="$2"
+  if [ ! -d "$srcdir" ] || [ -z "$targetdir" ]; then return 0; fi
+  if [ -e "$targetdir" ]; then
+    if _is_ours "$targetdir"; then
+      _remove_owned "$targetdir"
+    else
+      log "Not registered (a directory you own already uses the name; left untouched): $targetdir"
+      SKIP_COUNT=$((SKIP_COUNT + 1))
+      return 0
+    fi
+  fi
+  mkdir -p "$targetdir"
+  cp -R "$srcdir"/. "$targetdir"/
+  printf '%s\n' "animestack-owned" > "$targetdir/$OWN_FLAG"
+  BUNDLE_COUNT=$((BUNDLE_COUNT + 1))
+  PATHS="$PATHS
+  $targetdir"
+  log "Installed bundle: $targetdir"
+}
+
+_uninstall_bundle() {
+  local targetdir="$1"
+  if [ -e "$targetdir" ]; then
+    if _remove_owned "$targetdir"; then
+      BUNDLE_COUNT=$((BUNDLE_COUNT + 1))
+      log "Removed: $targetdir"
+    else
+      log "Skipped (not provably ours; left untouched): $targetdir"
+      SKIP_COUNT=$((SKIP_COUNT + 1))
+    fi
+  fi
+}
+
+_python_bin() {
+  if command -v python3 >/dev/null 2>&1; then
+    printf '%s\n' python3
+  elif command -v python >/dev/null 2>&1; then
+    printf '%s\n' python
+  else
+    printf '%s\n' ""
+  fi
+}
+
+_print_merge() {
+  local bundle_dir json patch profile_dir
+  bundle_dir="$(_host_bundle_dir dsh)"
+  profile_dir="$(_dsh_profile_dir)"
+  json="$profile_dir/package.json"
+  patch="$profile_dir/cordis.patch.yml"
+  log ""
+  log "The DSH surface is installed. To load it, add two keys to the host profile"
+  log "(the default install never edits a file it cannot prove it owns):"
+  log "  $json"
+  log "    dependencies:  \"animestack-house-presets\": \"link:$bundle_dir\""
+  log "    dsh.profile.bundles:  append \"animestack-house-presets\""
+  log "  $patch"
+  log "    append the agent-team row from $bundle_dir/profile.patch.yml (only when absent)"
+  log "  Re-run with --merge-profile to perform exactly those edits, or paste them by hand."
+}
+
+_merge_profile() {
+  local bundle_dir="$1" profile_dir="$2"
+  local py json
+  py="$(_python_bin)"
+  json="$profile_dir/package.json"
+  if [ -z "$py" ]; then
+    log "Skipped profile merge (no python on PATH to parse JSON safely); merge by hand."
+    SKIP_COUNT=$((SKIP_COUNT + 1))
+    return 0
+  fi
+  if [ ! -f "$json" ]; then
+    log "Skipped profile merge (no package.json at $json)"
+    SKIP_COUNT=$((SKIP_COUNT + 1))
+    return 0
+  fi
+  if "$py" - "$json" "$bundle_dir" <<'PYEOF'
+import json
+import os
+import shutil
+import sys
+
+path, bundle = sys.argv[1], sys.argv[2]
+with open(path, encoding="utf-8") as handle:
+    data = json.load(handle)
+profile = data.setdefault("dsh", {}).setdefault("profile", {})
+bundles = profile.setdefault("bundles", [])
+deps = data.setdefault("dependencies", {})
+link = "link:" + bundle.replace("\\", "/")
+changed = False
+if "animestack-house-presets" not in deps:
+    deps["animestack-house-presets"] = link
+    changed = True
+if "animestack-house-presets" not in bundles:
+    bundles.append("animestack-house-presets")
+    changed = True
+if not changed:
+    print("already")
+    raise SystemExit(10)
+backup = path + ".animestack-bak"
+if not os.path.exists(backup):
+    shutil.copy2(path, backup)
+tmp = path + ".animestack-tmp"
+with open(tmp, "w", encoding="utf-8") as handle:
+    json.dump(data, handle, indent=2)
+    handle.write("\n")
+with open(tmp, encoding="utf-8") as handle:
+    json.load(handle)
+os.replace(tmp, path)
+print("merged")
+PYEOF
+  then
+    MERGE_COUNT=$((MERGE_COUNT + 1))
+    log "Merged the bundle into $json (backup: $json.animestack-bak)"
+  else
+    local rc=$?
+    if [ "$rc" -eq 10 ]; then
+      log "Profile already carries the bundle; nothing to merge."
+    else
+      log "Skipped profile merge (the profile JSON did not parse, or the write failed); merge by hand."
+      SKIP_COUNT=$((SKIP_COUNT + 1))
+    fi
+  fi
+}
+
+_merge_profile_patch() {
+  local profile_dir="$1" block="$2"
+  local patch
+  patch="$profile_dir/cordis.patch.yml"
+  if [ -f "$patch" ] && grep -q '^# >>> animestack >>>$' "$patch" 2>/dev/null; then
+    log "Profile patch already carries the animestack block; nothing to merge."
+    return 0
+  fi
+  if [ -f "$patch" ] && grep -Eq '^[[:space:]]*- id: agent-team[[:space:]]*$' "$patch"; then
+    log "Profile patch already carries an agent-team row; the roster cap is left as the host set it."
+    return 0
+  fi
+  if [ ! -f "$patch" ]; then
+    log "Skipped the agent-team row (no cordis.patch.yml at $patch)."
+    SKIP_COUNT=$((SKIP_COUNT + 1))
+    return 0
+  fi
+  {
+    printf '\n'
+    sed -n '/^# >>> animestack >>>$/,/^# <<< animestack <<<$/p' "$block"
+  } >> "$patch"
+  MERGE_COUNT=$((MERGE_COUNT + 1))
+  log "Merged the agent-team roster row into $patch"
+}
+
+_unmerge_profile() {
+  local profile_dir="$1"
+  local py json
+  py="$(_python_bin)"
+  json="$profile_dir/package.json"
+  if [ -z "$py" ] || [ ! -f "$json" ]; then return 0; fi
+  if "$py" - "$json" <<'PYEOF'
+import json
+import sys
+
+path = sys.argv[1]
+with open(path, encoding="utf-8") as handle:
+    data = json.load(handle)
+changed = False
+deps = data.get("dependencies", {})
+if "animestack-house-presets" in deps:
+    del deps["animestack-house-presets"]
+    changed = True
+bundles = data.get("dsh", {}).get("profile", {}).get("bundles", [])
+while "animestack-house-presets" in bundles:
+    bundles.remove("animestack-house-presets")
+    changed = True
+if not changed:
+    raise SystemExit(10)
+tmp = path + ".animestack-tmp"
+with open(tmp, "w", encoding="utf-8") as handle:
+    json.dump(data, handle, indent=2)
+    handle.write("\n")
+with open(tmp, encoding="utf-8") as handle:
+    json.load(handle)
+import os
+os.replace(tmp, path)
+PYEOF
+  then
+    MERGE_COUNT=$((MERGE_COUNT + 1))
+    log "Removed the bundle keys from $json"
+  else
+    local rc=$?
+    if [ "$rc" -ne 10 ]; then
+      log "Skipped profile unmerge (the profile JSON did not parse); remove the two keys by hand."
+      SKIP_COUNT=$((SKIP_COUNT + 1))
+    fi
+  fi
+}
+
+_unmerge_profile_patch() {
+  local profile_dir="$1"
+  local patch tmp
+  patch="$profile_dir/cordis.patch.yml"
+  if [ ! -f "$patch" ] || ! grep -q '^# >>> animestack >>>$' "$patch" 2>/dev/null; then
+    return 0
+  fi
+  tmp="$patch.animestack-tmp"
+  sed '/^# >>> animestack >>>$/,/^# <<< animestack <<<$/d' "$patch" > "$tmp"
+  mv "$tmp" "$patch"
+  MERGE_COUNT=$((MERGE_COUNT + 1))
+  log "Removed the animestack block from $patch"
+}
+
+# ─── Per-host dispatch ─────────────────────────────────────────
+# One host, one install: slate is a compatibility alias for claude, and a host
+# that has already been installed in this run is not installed twice (that was
+# how `--host all` printed 70 skills and 56 agents against a tree of 60 and 48).
+_do_host() {
+  local host="$1"
+  case "$DONE_HOSTS" in
+    *" $host "*) return 0 ;;
+  esac
+  DONE_HOSTS="$DONE_HOSTS$host "
+  case "$host" in
+    slate)
+      # Slate reads Claude Code skills as a compatibility fallback.
+      _do_host claude
+      log "Slate reads .claude/skills; claude install refreshed."
+      ;;
+    openclaw|hermes|gbrain)
+      if [ "$UNINSTALL" -eq 1 ]; then
+        _uninstall_digest "$(_host_digest_dir "$host")"
+      else
+        _install_digest "$host" "$(_host_digest_dir "$host")"
+      fi
+      ;;
+    dsh)
+      local sdir n
+      sdir="$(_host_skills_dir dsh)"
+      if [ "$UNINSTALL" -eq 1 ]; then
+        if [ -n "$sdir" ]; then
+          for n in $SKILLS; do
+            _uninstall_skill "$n" "$sdir/$n"
+          done
+        fi
+        _uninstall_packs "$(_host_packs_dir dsh)"
+        _uninstall_bundle "$(_host_bundle_dir dsh)"
+        if [ "$MERGE_PROFILE" -eq 1 ]; then
+          _unmerge_profile "$(_dsh_profile_dir)"
+          _unmerge_profile_patch "$(_dsh_profile_dir)"
+        fi
+      else
+        if [ -n "$sdir" ]; then
+          for n in $SKILLS; do
+            _install_skill "$n" "$sdir/$n"
+          done
+        fi
+        _install_packs "$(_host_packs_src dsh)" "$(_host_packs_dir dsh)"
+        _install_bundle "$(_host_bundle_src dsh)" "$(_host_bundle_dir dsh)"
+        _print_merge
+        if [ "$MERGE_PROFILE" -eq 1 ]; then
+          _merge_profile "$(_host_bundle_dir dsh)" "$(_dsh_profile_dir)"
+          _merge_profile_patch "$(_dsh_profile_dir)" "$(_host_bundle_src dsh)/profile.patch.yml"
+        fi
+      fi
+      ;;
+    *)
+      local sdir adir asrc cdir csrc
+      sdir="$(_host_skills_dir "$host")"
+      if [ "$UNINSTALL" -eq 1 ]; then
+        if [ -n "$sdir" ]; then
+          local n
+          for n in $SKILLS; do
+            _uninstall_skill "$n" "$sdir/$n"
+          done
+        fi
+        adir="$(_host_agents_dir "$host")"
+        if [ -n "$adir" ]; then _uninstall_agents "$adir"; fi
+        cdir="$(_host_commands_dir "$host")"
+        if [ -n "$cdir" ]; then _uninstall_commands "$cdir"; fi
+      else
+        if [ -n "$sdir" ]; then
+          local n
+          for n in $SKILLS; do
+            _install_skill "$n" "$sdir/$n"
+          done
+        fi
+        asrc="$(_host_agents_src "$host")"
+        adir="$(_host_agents_dir "$host")"
+        if [ -n "$asrc" ] && [ -n "$adir" ]; then
+          _install_agents "$host" "$asrc" "$adir"
+        fi
+        csrc="$(_host_commands_src "$host")"
+        cdir="$(_host_commands_dir "$host")"
+        if [ -n "$csrc" ] && [ -n "$cdir" ]; then
+          _install_commands "$host" "$csrc" "$cdir"
+        fi
+      fi
+      ;;
+  esac
+}
+
+# ─── Model-pin gate ────────────────────────────────────────────
+# No shipped agent names a concrete model: claude and factory agents carry
+# `model: inherit`; opencode, cursor, and kiro agents omit the `model` key;
+# codex agents omit `model` and `model_reasoning_effort`. A pack that
+# violates this never touches a host.
+_frontmatter_of() {
+  tr -d '\r' < "$1" | sed -n '2,/^---$/p'
+}
+
+_assert_no_model_pins() {
+  local f fm bad=0 n_model
+  for f in "$ROOT"/agents/opencode/*.md; do
+    [ -e "$f" ] || continue
+    fm="$(_frontmatter_of "$f")"
+    if printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:'; then
+      echo "Error: model pin in shipped opencode agent (omit the key; opencode inherits the session model): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  for f in "$ROOT"/agents/opencode/command/*.md; do
+    [ -e "$f" ] || continue
+    fm="$(_frontmatter_of "$f")"
+    if printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:'; then
+      echo "Error: model pin in shipped opencode command (omit the key; opencode inherits the session model): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  for f in "$ROOT"/agents/cursor/*.md "$ROOT"/agents/kiro/*.md; do
+    [ -e "$f" ] || continue
+    fm="$(_frontmatter_of "$f")"
+    if printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:'; then
+      echo "Error: model pin in shipped agent (omit the key; the host inherits the session model): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  for f in "$ROOT"/agents/factory/*.md; do
+    [ -e "$f" ] || continue
+    fm="$(_frontmatter_of "$f")"
+    n_model="$(printf '%s\n' "$fm" | grep -Ec '^[[:space:]]*model[[:space:]]*:')" || true
+    if [ "$n_model" -ne 1 ]; then
+      echo "Error: shipped factory droid needs exactly one 'model: inherit' line (found $n_model): ${f#"$ROOT"/}" >&2
+      bad=1
+    elif ! printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:[[:space:]]*inherit[[:space:]]*$'; then
+      echo "Error: concrete model pin in shipped factory droid (only 'model: inherit' is allowed): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  for f in "$ROOT"/agents/factory/command/*.md; do
+    [ -e "$f" ] || continue
+    fm="$(_frontmatter_of "$f")"
+    if printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:'; then
+      echo "Error: model pin in shipped factory command (omit the key; the host inherits the session model): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  for f in "$ROOT"/agents/codex/*.toml; do
+    [ -e "$f" ] || continue
+    if grep -Eq '^[[:space:]]*model(_reasoning_effort)?[[:space:]]*=' "$f"; then
+      echo "Error: model pin in shipped codex agent (omit model and model_reasoning_effort; codex inherits the spawning session's model): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  for f in "$ROOT"/agents/claude/*.md; do
+    [ -e "$f" ] || continue
+    fm="$(_frontmatter_of "$f")"
+    # grep -c exits 1 on a zero count; keep set -e alive while counting.
+    n_model="$(printf '%s\n' "$fm" | grep -Ec '^[[:space:]]*model[[:space:]]*:')" || true
+    if [ "$n_model" -ne 1 ]; then
+      echo "Error: shipped claude agent needs exactly one 'model: inherit' line (found $n_model): ${f#"$ROOT"/}" >&2
+      bad=1
+    elif ! printf '%s\n' "$fm" | grep -Eq '^[[:space:]]*model[[:space:]]*:[[:space:]]*inherit[[:space:]]*$'; then
+      echo "Error: concrete model pin in shipped claude agent (only 'model: inherit' is allowed): ${f#"$ROOT"/}" >&2
+      bad=1
+    fi
+  done
+  if [ "$bad" -ne 0 ]; then
+    echo "Refusing to install from this pack: fix the agent frontmatter first." >&2
+    exit 1
+  fi
+}
+
+# ─── Run ───────────────────────────────────────────────────────
+_dry_run() {
+  local hosts h n count
+  hosts="$(expand_hosts)"
+  log "AnimeStack check: no files will be written."
+  log "Root: $ROOT"
+  log ""
+  if [ -z "$hosts" ]; then
+    log "No hosts matched (auto found no existing config dirs). Nothing would be done."
+    log ""
+    log "check: pack valid; nothing written."
+    return 0
+  fi
+  for h in $hosts; do
+    case "$h" in
+      slate)
+        log "host slate: delegates to claude"
+        ;;
+      openclaw|hermes|gbrain)
+        log "host $h: digest -> $(_host_digest_dir "$h")"
+        ;;
+      dsh)
+        local packcount bundlecount dshcfg
+        dshcfg="$(_host_config_dir dsh)"
+        count=0
+        for n in $SKILLS; do count=$((count + 1)); done
+        packcount=0
+        for n in "$ROOT"/dsh/animestack-team/animestack-*.md; do
+          [ -f "$n" ] && packcount=$((packcount + 1))
+        done
+        bundlecount="$(find "$ROOT/dsh/animestack-house" -type f | wc -l | tr -d ' ')"
+        log "host dsh: skills $count -> $dshcfg/skills; packs $packcount -> $dshcfg/animestack-team; bundle $bundlecount -> $dshcfg/animestack"
+        log "host dsh: profile merge printed only (no writes); --merge-profile performs it"
+        ;;
+      *)
+        local asrc adir csrc cdir acount ccount
+        count=0
+        for n in $SKILLS; do count=$((count + 1)); done
+        asrc="$(_host_agents_src "$h")"
+        adir="$(_host_agents_dir "$h")"
+        acount=0
+        if [ -n "$asrc" ] && [ -d "$asrc" ]; then
+          for n in "$asrc"/*; do [ -f "$n" ] && acount=$((acount + 1)); done
+        fi
+        csrc="$(_host_commands_src "$h")"
+        cdir="$(_host_commands_dir "$h")"
+        ccount=0
+        if [ -n "$csrc" ] && [ -d "$csrc" ]; then
+          for n in "$csrc"/*.md; do [ -e "$n" ] && ccount=$((ccount + 1)); done
+        fi
+        log "host $h: skills $count -> $(_host_skills_dir "$h"); agents $acount -> $adir; commands $ccount -> $cdir"
+        ;;
+    esac
+  done
+  log ""
+  log "check: pack valid; nothing written."
+}
+
+if [ "$UNINSTALL" -eq 0 ] || [ "$CHECK" -eq 1 ]; then
+  _assert_no_model_pins
+fi
+
+if [ "$CHECK" -eq 1 ]; then
+  _dry_run
+  exit 0
+fi
+
+log "AnimeStack: root $ROOT"
+log ""
+
+HOSTS="$(expand_hosts)"
+
+if [ -z "$HOSTS" ]; then
+  log "No hosts matched (auto found no existing config dirs). Nothing to do."
+fi
+
+for _h in $HOSTS; do
+  _do_host "$_h"
+done
+
+if [ "$IS_WINDOWS" -eq 1 ] && [ "$UNINSTALL" -eq 0 ]; then
+  log ""
+  log "Copied (no symlinks). Re-run ./setup after git pull to refresh."
+fi
+
+log ""
+
+# ─── Final summary ─────────────────────────────────────────────
+if [ "$UNINSTALL" -eq 1 ]; then
+  echo "AnimeStack uninstall complete."
+  echo "  skills removed:   $SKILL_COUNT"
+  echo "  agents removed:   $AGENT_COUNT"
+  echo "  commands removed: $COMMAND_COUNT"
+  echo "  digests removed:  $DIGEST_COUNT"
+  echo "  seat packs removed: $PACK_COUNT"
+  echo "  bundles removed:  $BUNDLE_COUNT"
+  echo "  profile edits reversed: $MERGE_COUNT"
+  echo "  skipped (not ours): $SKIP_COUNT"
+else
+  echo "AnimeStack setup complete."
+  echo "  skills installed:  $SKILL_COUNT"
+  echo "  agents installed:  $AGENT_COUNT"
+  echo "  commands installed: $COMMAND_COUNT"
+  echo "  digests installed: $DIGEST_COUNT"
+  echo "  seat packs installed: $PACK_COUNT"
+  echo "  bundles installed: $BUNDLE_COUNT"
+  echo "  profile edits made: $MERGE_COUNT"
+  echo "  skipped (not ours): $SKIP_COUNT"
+  if [ -n "$PATHS" ]; then
+    echo "Targets:"
+    printf '%s\n' "$PATHS" | sed 's/^[[:space:]]*/  /' | sed '/^[[:space:]]*$/d'
+  fi
+  echo "Open a new session and run /house."
+fi

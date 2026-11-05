@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="AnimeStack">
+  <rect width="64" height="64" rx="12" fill="#0b0f14"/>
+  <path d="M12 30 32 14l20 16v20a2 2 0 0 1-2 2H14a2 2 0 0 1-2-2V30Z" fill="none" stroke="#38d2e6" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="32" cy="38" r="7" fill="none" stroke="#38d2e6" stroke-width="3"/>
+  <circle cx="32" cy="38" r="2.5" fill="#38d2e6"/>
+  <path d="M32 14v6M24.5 45.5 20 50M39.5 45.5 44 50" stroke="#38d2e6" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

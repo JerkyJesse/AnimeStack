@@ -1,0 +1,50 @@
+{
+  "_stamp": "animestack canon rev 9 :: inputs sha256=4cb4abe5e46ad8172d874d2af5f40bc5a85a99c7f436dda08fbf6d5c4c0bd9ca",
+  "bundle": "AnimeStack",
+  "presets": {
+    "animestack-house": {
+      "name": "AnimeStack House - the room",
+      "description": "The AnimeStack house on the declared subagent surface: spawns the eight seats as subagents, runs the two rounds, and lets Reika sign. Use when the Agent Teams surface is absent or the work is a plain room."
+    },
+    "animestack-team": {
+      "name": "AnimeStack Team - the Agent Teams chair",
+      "description": "The AnimeStack house on the Agent Teams surface: the lead seat frames the brief, spawns the seven answering seats as durable teammates, runs the takes and the exchange, and Reika signs the close. Requires the Agent Teams profile bundle."
+    },
+    "animestack-mei": {
+      "name": "AnimeStack Mei - Keeper of Climate & Context",
+      "description": "The Mei seat of the AnimeStack house: What change in the world makes this obsolete?. One sentence, one close, one lane - review and build, never the room."
+    },
+    "animestack-elo": {
+      "name": "AnimeStack Elo - Keeper of Rankings & Measurement",
+      "description": "The Elo seat of the AnimeStack house: What does the crowd refuse to measure correctly?. One sentence, one close, one lane - review and build, never the room."
+    },
+    "animestack-mechapip": {
+      "name": "AnimeStack MechaPip - the Pattern Engine",
+      "description": "The MechaPip seat of the AnimeStack house: What has this pattern done before?. One sentence, one close, one lane - review and build, never the room."
+    },
+    "animestack-yui": {
+      "name": "AnimeStack Yui - Head of Mechanisms",
+      "description": "The Yui seat of the AnimeStack house: What failure does this prevent, and what would falsify it?. One sentence, one close, one lane - review and build, never the room."
+    },
+    "animestack-niko": {
+      "name": "AnimeStack Niko - Keeper of the Body",
+      "description": "The Niko seat of the AnimeStack house: Where does it live, and what must it never touch?. One sentence, one close, one lane - review and build, never the room."
+    },
+    "animestack-rin": {
+      "name": "AnimeStack Rin - Keeper of Failure",
+      "description": "The Rin seat of the AnimeStack house: How does this fail, and how fast?. One sentence, one close, one lane - review and build, never the room."
+    },
+    "animestack-aria": {
+      "name": "AnimeStack Aria - Head of Release",
+      "description": "The Aria seat of the AnimeStack house: What ships, and what triggers it?. One sentence, one close, one lane - review and build, never the room."
+    },
+    "animestack-reika": {
+      "name": "AnimeStack Reika - Founder & Chief Architect",
+      "description": "The Reika seat of the AnimeStack house: What are we building, in one sentence?. One sentence, one close, one lane - review and build, never the room."
+    },
+    "animestack-simple": {
+      "name": "AnimeStack Simple - the waiver",
+      "description": "One invocation of plain build mode: no seats, no room, no house voice. It reads, writes, builds, and tests, and it never signs."
+    }
+  }
+}

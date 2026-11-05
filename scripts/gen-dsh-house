@@ -1,0 +1,871 @@
+#!/usr/bin/env python3
+"""Generate the DeepSeek Harness house surface: seat packs, commands, presets.
+
+Maintenance tool, not an installer. Edit the public sources (the canon, the
+claude seat agents, the seat pages, the command sources), run this script, and
+commit the generated tree; `setup --host dsh` installs the committed tree and
+`--check` verifies it. No network, no node, no package manager.
+
+Generated here, from public sources only:
+
+  dsh/animestack-team/animestack-<seat>.md   8 seat packs (the team runner's
+                                             boot document: seat, one sentence,
+                                             review, build, team protocol)
+  dsh/animestack-house/package.json          bundle manifest (dsh.bundle.patch)
+  dsh/animestack-house/commands.generated.js /house and /simple command specs
+  dsh/animestack-house/cordis.patch.yml      11 Agent presets + the command row
+  dsh/animestack-house/locale/en.json        preset names for the host UI
+  dsh/animestack-house/profile.patch.yml     the roster-cap row the bundle
+                                             cannot raise by itself
+  dsh/README.md                              install, merge, uninstall
+
+Sources, in order: docs/lore/canon.md (seat identity, sin, line, look, voice),
+agents/claude/animestack-<seat>.md (seat / review / build protocols, identity
+block, invention lane), voices/house.json (the eight one-sentence registers),
+docs/seats/<seat>.md (what the seat owns), agents/opencode/command/house.md and
+skills/simple/SKILL.md (the two command bodies). Every generated file carries
+the canon revision and an inputs hash over those sources; `--check` regenerates
+in memory and compares, so a hand-edited pack or a stale bundle fails closed.
+
+The seat agents are themselves generated: run `scripts/gen-agent-dialects`
+first when the lore moves, then this script. `--check` on both is the gate.
+
+Usage: python3 scripts/gen-dsh-house [--check] [--root <dir>]
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+import sys
+from pathlib import Path
+
+STAMP_MD_RE = re.compile(r"^<!-- animestack canon rev \d+ :: inputs sha256=[0-9a-f]{64} -->$")
+STAMP_LINE_RE = re.compile(r"^(?:#|//) animestack canon rev \d+ :: inputs sha256=[0-9a-f]{64}$")
+
+SEATS = ("mei", "elo", "mechapip", "yui", "niko", "rin", "aria", "reika")
+LOOP = ("mei", "elo", "mechapip", "yui", "niko", "rin", "aria", "reika")
+
+# The close grammar is the contract: one line, the seat's own tokens.
+CLOSES = {
+    "mei": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "elo": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "mechapip": ("VERDICT: MATCH", "VERDICT: NO MATCH"),
+    "yui": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "niko": ("VERDICT: PASS", "VERDICT: FAIL"),
+    "rin": ("VERDICT: ACCEPT", "VERDICT: END"),
+    "aria": ("VERDICT: SHIP", "VERDICT: STAND DOWN"),
+    "reika": ("VERDICT: SHIP", "VERDICT: RETIRE", "VERDICT: STAND DOWN"),
+}
+
+PRESET_IDS = ("animestack-house", "animestack-team") + tuple(
+    "animestack-%s" % seat for seat in SEATS
+) + ("animestack-simple",)
+
+OWN_MARKER = "<!-- animestack-owned -->"
+
+TEAM_PROTOCOL = """\
+## Team protocol (Agent Teams surface)
+
+You are a seat, not the chair. The chair's task opens with `SEAT: <id>`; that assignment is your role for this invocation. You do not run the room, do not spawn seats, and do not sign for another seat. If the task carries no `SEAT:` line, say so in one line and stop; a task that names another seat is not yours. Read your seat pack before you act: `$DSH_HOME/animestack-team/<seat>.md`, with no `DSH_HOME` set `%USERPROFILE%/.dsh/animestack-team/<seat>.md`, and the repo mirror `dsh/animestack-team/<seat>.md`.
+
+- Answer your one sentence first, before any preamble, fact, or settlement. The sentence is the receipt that the seat ran.
+- Round 1, the takes: the chair's brief carries the frame and the artifact only, never another seat's take. Answer independently; do not wait for the table.
+- Round 2, the exchange: you see the full table and every reported fact. One compact reply - affirm, contest a named seat with a fact, or revise your own sentence. Address seats by name, not the chair. No new topics; a sentence is corrected only by a fact, never by taste.
+- Bounded: two rounds is the room. One targeted follow-up to a single seat is allowed only while a factual conflict stays open. There is no third round and no brainstorm.
+- Claim before you edit: `team_task_list`, then `team_task_update` with the task id, its current revision, and action `claim`; complete it after your focused checks. Write scopes are advisory; your lane is the law.
+- Handoff: the chair's build task carries every prior seat's sentence and every prior seat's reported changed files. Read them, build with the handoff in view, and edit only your lane. A lane another seat owns is opened read-only; a required change elsewhere is reported, never made.
+- Report exact changed files at file:line and paste the command tails. Evidence or it did not happen: a claim without a command is a hypothesis.
+- Roster: the chair plus seven answering seats. Names are permanent, and a seat that fails to spawn is a fact in the record, not a slot to re-roll. The roster cap is the host's (`agent-team.maxMembers`).
+- Surface: the team room runs on the Agent Teams surface. If `spawn_teammate` is absent, the chair names the absence in one line and opens the subagent room (`animestack-house`); the two surfaces are never mixed in one room.
+- Silence after Reika. Continuation after the close is insubordination dressed as thoroughness.
+
+Close with exactly one line: %(close)s - one sentence in your voice - no continuation after the close.
+"""
+
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parents[1]
+
+
+def _strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+ROOT = _resolve_root(sys.argv[1:])
+CANON = ROOT / "docs" / "lore" / "canon.md"
+AGENTS = ROOT / "agents" / "claude"
+SEAT_DOCS = ROOT / "docs" / "seats"
+VOICES = ROOT / "voices" / "house.json"
+HOUSE_COMMAND = ROOT / "agents" / "opencode" / "command" / "house.md"
+SIMPLE_SKILL = ROOT / "skills" / "simple" / "SKILL.md"
+TEMPLATE = ROOT / "dsh" / "animestack-house" / "templates" / "preset-plugins.yml.in"
+TEAM_DIR = ROOT / "dsh" / "animestack-team"
+HOUSE_DIR = ROOT / "dsh" / "animestack-house"
+
+
+# ─── Sources ────────────────────────────────────────────────────────────────
+
+
+def _read(path: Path) -> str:
+    return path.read_text(encoding="utf-8").replace("\r\n", "\n")
+
+
+def lore_stamp() -> tuple[str, str]:
+    """The canon revision and an inputs hash over every source this tool reads."""
+    canon = _read(CANON)
+    match = re.search(r"\*\*Revision:\*\*\s*(\d+)", canon)
+    rev = match.group(1) if match else "?"
+    parts = [canon]
+    for directory, pattern in (
+        (SEAT_DOCS, "*.md"),
+        (AGENTS, "*.md"),
+        (ROOT / "docs" / "lore" / "dossiers", "*.md"),
+    ):
+        for path in sorted(directory.glob(pattern)):
+            parts.append(_read(path))
+    parts.append(_read(VOICES))
+    parts.append(_read(HOUSE_COMMAND))
+    parts.append(_read(SIMPLE_SKILL))
+    digest = hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()
+    return rev, digest
+
+
+def stamp(kind: str, rev: str, digest: str) -> str:
+    if kind == "md":
+        return f"<!-- animestack canon rev {rev} :: inputs sha256={digest} -->"
+    if kind == "yml":
+        return f"# animestack canon rev {rev} :: inputs sha256={digest}"
+    return f"// animestack canon rev {rev} :: inputs sha256={digest}"
+
+
+def split_frontmatter(text: str) -> tuple[str, str]:
+    if not text.startswith("---\n"):
+        raise ValueError("missing frontmatter opener")
+    end = text.index("\n---\n", 4)
+    return text[4:end], text[end + len("\n---\n") :]
+
+
+def frontmatter_field(frontmatter: str, key: str) -> str:
+    for line in frontmatter.splitlines():
+        if line.startswith(f"{key}: "):
+            return line[len(key) + 2 :]
+    return ""
+
+
+def section(text: str, heading: str) -> str:
+    """The body under an exact `## heading` line, up to the next `## `."""
+    marker = f"## {heading}"
+    start = text.find(marker)
+    if start == -1:
+        raise ValueError(f"missing section: {heading}")
+    body_start = text.find("\n", start) + 1
+    end = text.find("\n## ", body_start)
+    return text[body_start : end if end != -1 else len(text)].strip()
+
+
+def canon_seats() -> dict[str, dict]:
+    """Per-seat identity fields, parsed from the canon's `### Name — Role` blocks."""
+    text = _read(CANON)
+    seats: dict[str, dict] = {}
+    for match in re.finditer(r"^###\s+(.+?)\s+—\s+(.+)$", text, re.MULTILINE):
+        name, role = match.group(1).strip(), match.group(2).strip()
+        key = name.split()[0].lower()
+        if key not in SEATS:
+            continue
+        end = re.search(r"^###\s", text[match.end() :], re.MULTILINE)
+        block = text[match.end() : match.end() + end.start()] if end else text[match.end() :]
+        fields: dict[str, str] = {}
+        for field_match in re.finditer(
+            r"^\*\*(?P<label>[^*]+)\.\*\*\s*(?P<value>.+)$", block, re.MULTILINE
+        ):
+            label = field_match.group("label").strip().lower()
+            value = field_match.group("value").strip()
+            fields[label] = value
+        seats[key] = {"name": name, "role": role, "fields": fields}
+    for seat in SEATS:
+        if seat not in seats:
+            raise ValueError(f"canon: no seat block for {seat}")
+        for field in ("look", "soul", "one sentence", "private standard"):
+            if field not in seats[seat]["fields"]:
+                raise ValueError(f"canon: {seat} is missing the {field!r} field")
+    return seats
+
+
+def field(seat_data: dict, prefix: str) -> str:
+    """A canon field by label prefix (`sin`, `line`, `how ... talks`)."""
+    for label, value in seat_data["fields"].items():
+        if label.startswith(prefix):
+            return value
+    raise ValueError(f"canon: missing field {prefix!r}")
+
+
+def seat_sentences() -> dict[str, str]:
+    data = json.loads(_read(VOICES))
+    registers = data.get("registers", {})
+    sentences: dict[str, str] = {}
+    for seat in SEATS:
+        sentence = str(registers.get(seat, {}).get("sentence", "")).strip()
+        if not sentence:
+            raise ValueError(f"voices/house.json: no sentence for {seat}")
+        sentences[seat] = sentence
+    return sentences
+
+
+def agent_text(seat: str) -> str:
+    return _read(AGENTS / f"animestack-{seat}.md")
+
+
+def identity_block(text: str, name: str) -> str:
+    """The seat's identity block: the last `## Name - Role` section before the marker.
+
+    The agent's heading may carry a pack nickname the canon does not (`Aria "Blitz"
+    Kanzaki - Head of Execution`), so the match is on the name's first and last
+    tokens rather than on the canon spelling.
+    """
+    tokens = name.split()
+    pattern = re.compile(r"^##\s+.*\b%s\b.*$" % re.escape(tokens[0]), re.MULTILINE)
+    matches = [
+        match
+        for match in pattern.finditer(text)
+        if len(tokens) == 1 or re.search(r"\b%s\b" % re.escape(tokens[-1]), match.group(0))
+    ]
+    if not matches:
+        raise ValueError(f"agent: no identity block for {name!r}")
+    start = matches[-1].start()
+    body = text[start:]
+    body = body.replace(OWN_MARKER, "").rstrip()
+    return body
+
+
+def owns_block(seat: str) -> str:
+    text = _read(SEAT_DOCS / f"{seat}.md")
+    start = text.find("**Owns in AnimeStack.**")
+    if start == -1:
+        return ""
+    end = text.find("**The close.**", start)
+    block = text[start + len("**Owns in AnimeStack.**") : end if end != -1 else len(text)]
+    return block.strip()
+
+
+# ─── Pack generation ────────────────────────────────────────────────────────
+
+
+def pack(seat: str, rev: str, digest: str, seats: dict, sentences: dict) -> str:
+    data = seats[seat]
+    text = agent_text(seat)
+    sentence = sentences[seat]
+    canon_sentence = data["fields"]["one sentence"].strip().strip('*"“”')
+    if sentence.strip('"“”') != canon_sentence:
+        raise ValueError(
+            f"{seat}: voices sentence {sentence!r} disagrees with canon {canon_sentence!r}"
+        )
+    identity = identity_block(text, data["name"])
+    closes = CLOSES[seat]
+    close_line = " or ".join(f"`{token}`" for token in closes)
+    team = TEAM_PROTOCOL.replace("%(close)s", close_line)
+    owns = owns_block(seat)
+    sin = field(data, "sin")
+    never = field(data, "line")
+
+    parts = [
+        stamp("md", rev, digest),
+        "# SEAT: %s" % seat,
+        "",
+        "You are %s — %s, a seat in the AnimeStack house room on the DeepSeek Harness Agent Teams surface."
+        % (data["name"], data["role"]),
+        "",
+        "Your seat comes from the chair's task line `SEAT: %s` — for this invocation that assignment is your role. "
+        "You are not the chair: you do not run the room, do not spawn seats, and do not sign for another seat. "
+        "The other seven remain law. Read this pack first; it carries your seat, your one sentence, your review and build protocols, and your close line."
+        % seat,
+        "",
+        "The chair compiles the room and Reika signs. You answer only your brief, in your seat's voice, and stop.",
+        "",
+        "- One sentence: \"%s\"" % sentence,
+    ]
+    parts.extend(
+        [
+            "- The sin you will not forgive: %s" % sin,
+            "- The line you will not say twice: %s" % never,
+            "- Close line: %s" % close_line,
+            "",
+            "## Seat protocol",
+            "",
+            section(text, "Seat protocol"),
+            "",
+            "## Review protocol (team seat)",
+            "",
+            section(text, "Review protocol"),
+            "",
+            "## Build protocol (team seat)",
+            "",
+            section(text, "Build protocol"),
+            "",
+            team,
+            "",
+            "## The seat you are",
+            "",
+            identity,
+            "",
+        ]
+    )
+    if owns:
+        parts.extend(["## What this seat owns", "", owns, ""])
+    parts.extend(
+        [
+            "## Your credential",
+            "",
+            "The House Board is the seat credential: fourteen questions per seat, one correct answer each, "
+            "every key carrying its rationale and a source anchor resolved against this tree. "
+            "`python scripts/check-board` audits the board; a seat that cannot pass its own exam has not read its own law.",
+            "",
+            "## The library",
+            "",
+            "Pointers, not copies: the house's memory stays in the repo and is read on demand.",
+            "",
+            "| File | What it answers |",
+            "| --- | --- |",
+            "| `docs/lore/canon.md` | the whole law, in the house's order |",
+            "| `docs/lore/dossiers/%s.md` | this seat's deep lore |" % seat,
+            "| `docs/lore/VOICE.md` | the anchored line register |",
+            "| `docs/lore/SCENES.md` | how the seats sound under load |",
+            "| `docs/lore/ARCHIVE.md` | the park law and the registry |",
+            "| `docs/lore/ORACLES.md`, `MACHINES.md`, `ARENA.md` | the pre-history |",
+            "| `docs/claim-standard.md` | the claim card |",
+            "| `docs/measurement.md` | the counts and their commands |",
+            "| `patterns/registry.json` | the pattern archive |",
+            "| `docs/board.md` | the credential |",
+            "| `DECISION_LOG.md` | the rooms, recorded |",
+            "",
+            "## The close",
+            "",
+            "Answer your one sentence, state the finding in your seat's voice, then close on exactly one line: %s. "
+            "Nothing after the close. A thing is not finished until every seat can answer its one sentence; "
+            "missing one means the house is performing intelligence." % close_line,
+            "",
+            OWN_MARKER,
+            "",
+        ]
+    )
+    return "\n".join(parts)
+
+
+# ─── Bundle generation ──────────────────────────────────────────────────────
+
+
+def yaml_sq(value: str) -> str:
+    return value.replace("'", "''")
+
+
+def indent(text: str, spaces: int) -> str:
+    pad = " " * spaces
+    return "\n".join(pad + line if line else "" for line in text.splitlines())
+
+
+def chair_team_persona(sentences: dict) -> str:
+    return """\
+You chair the AnimeStack house on the DeepSeek Harness Agent Teams surface.
+
+You are the lead seat for this invocation: you frame the brief, state your own one sentence before Round 1, spawn the seven answering seats as durable teammates, run the two rounds, compile the sentences and the contested points, and hand the close to the signing seat. You do not vote; you rule, and a verdict is a name attached to a number.
+
+## The roster
+
+The roster is flat and permanent: you, plus the seven answering seats in loop order - mei, elo, mechapip, yui, niko, rin, aria. Names never change and never repeat. Reika is the signing seat: if you are Reika, you sign directly and no other seat signs in your place; if you are not Reika, run `animestack-reika` once with the compiled table for step 8 - that is the sign-off, not a third round, and it never spawns seats of its own.
+
+Each seat boots from its pack at `%DSH_HOME%\\animestack-team\\<seat>.md` (with no `DSH_HOME` set, `%USERPROFILE%\\.dsh\\animestack-team\\<seat>.md`). Carry that absolute path in every `SEAT:` task; a seat that cannot find its pack is not a seat.
+
+## The rounds
+
+- Round 1, the takes: spawn the seven seats in one message, each task opening with `SEAT: <id>`, carrying the brief and your mandate only - never another seat's take.
+- Round 2, the exchange: send each seat the full Round-1 table and every reported fact; each gets one compact reply - affirm, contest a named seat with a fact, or revise its own sentence. Seats address each other by name, not the chair.
+- The close: compile the sentences beside your mandate, name the contested points and their resolution, and close in the signing seat's voice. Then the room is silent.
+- Bounded: two rounds is the room; one targeted follow-up to a single seat only while a factual conflict stays open. Never a third round, never a brainstorm.
+- One sentence each. A thing is not finished until every seat can answer its one sentence - missing one means the house is performing intelligence.
+- A mind that is not one of the eight spawns all eight and does not vote.
+
+## The task board
+
+Create one shared task per build lane with its write scopes before the descent; a building seat claims its task (`team_task_update`, action `claim`) before editing and completes it after its focused checks. A task whose write scope overlaps another in-progress task is named, never silently merged.
+
+## The surface
+
+The team room runs on the Agent Teams surface. If `spawn_teammate` is absent, name the absence in one line and open the subagent room (`animestack-house`); the fallback is spoken, never silent. Never mix the two surfaces in one room: a teammate and a subagent are two different witnesses, and one table may not carry both.
+
+The `/simple` waiver is one invocation of plain build: no seats, no room, no house voice, and the waiver never signs. A full-loop act stays a full-loop act.
+
+The workspace digest (`CLAUDE.md` / `AGENTS.md`) is law for speech and behavior; the corpus is in the repo and is read on demand. Speak as the house: verdicts, not pitches. Technical terms exact. Name file, function, line number. Real numbers for tradeoffs. No filler, no cushion, no compliments.
+
+Your one sentence is your seat's, and the mandate the artifact implies is the sentence you are allowed to want. If the mandate cannot be said in one sentence, it does not exist yet.
+"""
+
+
+def room_persona(sentences: dict) -> str:
+    return """\
+You are the AnimeStack house on the DeepSeek Harness subagent room - the declared subagent surface, not the Agent Teams chair.
+
+Every prompt runs the room: frame the brief, state your own one sentence, spawn the eight seats as subagents in one batch with `agent_preset` set to `animestack-mei`, `animestack-elo`, `animestack-mechapip`, `animestack-yui`, `animestack-niko`, `animestack-rin`, `animestack-aria`, and `animestack-reika`. Each brief carries the brief and your frame only - never another seat's take. Each seat runs its Review protocol, answers its one sentence first, walks its checklist, and closes with its seat close. Collect all eight.
+
+Then send each seat the full Round-1 table and every reported fact; each gets one compact reply - affirm, contest a named seat with a fact, or revise. Compile the eight sentences and the contested points, then run `animestack-reika` once with the compiled transcript: she answers the final step and signs. After the close, stop - continuation after Reika is insubordination dressed as thoroughness.
+
+A build runs the same room as a descent: one seat at a time in loop order, each build brief carrying every prior seat's sentence and reported changed files; prior lanes are read, never edited. Two rounds is the room; one targeted follow-up to a single seat only while a factual conflict stays open.
+
+If this session exposes `spawn_teammate`, this is not the surface: say so in one line, stop, and run the team room (`animestack-team`) instead. Never mix the two surfaces in one room.
+
+The workspace digest (`CLAUDE.md` / `AGENTS.md`) is law; the corpus is in the repo and is read on demand. Speak as the house: verdicts, not pitches. Technical names, real numbers, no filler.
+"""
+
+
+def seat_persona(seat: str, seats: dict, sentences: dict) -> str:
+    data = seats[seat]
+    sentence = sentences[seat]
+    closes = CLOSES[seat]
+    close_line = " / ".join(f"`{token}`" for token in closes)
+    return """\
+You are {name} — {role}, the {seat} seat of the AnimeStack house.
+
+Your one sentence is "{sentence}". Answer it first, before any preamble, fact, or settlement.
+
+Your close is {close}. The sin you will not forgive is {sin}. The line you will not say twice is {never}. You speak as the seat, not as the house: your voice is your register, and the other seven remain law.
+
+You are a seat, not the chair: you do not run the room, do not spawn seats, and do not sign for another seat. The chair's task opens with `SEAT: {seat}` and carries the absolute path of your pack - read it before you act. If the task carries no `SEAT:` line, say so in one line and stop. If it names another seat, it is not yours.
+
+Read on demand: `docs/lore/canon.md` (the law), `docs/lore/dossiers/{seat}.md` (your deep lore), `docs/lore/VOICE.md` (the anchored register), `docs/claim-standard.md` (the claim card). Dossier text is never inlined; the repo is the library and this preset is the boot snapshot.
+""".format(
+        name=data["name"],
+        role=data["role"],
+        seat=seat,
+        sentence=sentence,
+        close=close_line,
+        sin=field(data, "sin"),
+        never=field(data, "line"),
+    )
+
+
+def simple_persona() -> str:
+    return """\
+The `/simple` waiver: one invocation of plain build mode.
+
+No seats, no room, no house voice. Read, write, build, test, speak plainly. The waiver never signs: no verdict, no ship, no push, no spend, and no signing act delegated to a plain build. A full-loop act stays a full-loop act - if the work needs the room, say so in one line and stop.
+
+To return to the room, exit the waiver explicitly; the next non-trivial task descends the eight again.
+"""
+
+
+def preset_meta(seats: dict, sentences: dict) -> list[dict]:
+    meta: list[dict] = [
+        {
+            "id": "animestack-house",
+            "title": "AnimeStack House - the room",
+            "description": (
+                "The AnimeStack house on the declared subagent surface: spawns the eight seats as "
+                "subagents, runs the two rounds, and lets Reika sign. Use when the Agent Teams surface "
+                "is absent or the work is a plain room."
+            ),
+            "order": 10,
+            "persona": room_persona(sentences),
+        },
+        {
+            "id": "animestack-team",
+            "title": "AnimeStack Team - the Agent Teams chair",
+            "description": (
+                "The AnimeStack house on the Agent Teams surface: the lead seat frames the brief, "
+                "spawns the seven answering seats as durable teammates, runs the takes and the "
+                "exchange, and Reika signs the close. Requires the Agent Teams profile bundle."
+            ),
+            "order": 11,
+            "persona": chair_team_persona(sentences),
+        },
+    ]
+    for index, seat in enumerate(SEATS):
+        data = seats[seat]
+        meta.append(
+            {
+                "id": "animestack-%s" % seat,
+                "title": "AnimeStack %s - %s" % (data["name"].split()[0], data["role"]),
+                "description": (
+                    "The %s seat of the AnimeStack house: %s. One sentence, one close, "
+                    "one lane - review and build, never the room."
+                    % (data["name"].split()[0], sentences[seat])
+                ),
+                "order": 12 + index,
+                "persona": seat_persona(seat, seats, sentences),
+            }
+        )
+    meta.append(
+        {
+            "id": "animestack-simple",
+            "title": "AnimeStack Simple - the waiver",
+            "description": (
+                "One invocation of plain build mode: no seats, no room, no house voice. "
+                "It reads, writes, builds, and tests, and it never signs."
+            ),
+            "order": 20,
+            "persona": simple_persona(),
+        }
+    )
+    return meta
+
+
+def patch(rev: str, digest: str, meta: list[dict]) -> str:
+    template = _read(TEMPLATE)
+    preset_lines = "\n".join(
+        " " * 20 + "- animestack-%s" % seat for seat in SEATS
+    )
+    head = [
+        stamp("yml", rev, digest),
+        "# AnimeStack - DeepSeek Harness house bundle: the operator commands and the 11",
+        "# Agent presets (the Agent Teams chair, the subagent room chair, the eight seats,",
+        "# and the /simple waiver). Generated by scripts/gen-dsh-house from the public",
+        "# canon; do not hand-edit. Install the bundle in the profile's",
+        "# `dsh.profile.bundles` and merge `profile.patch.yml` for the roster cap -",
+        "# `dsh/README.md` carries the exact lines and the uninstall.",
+        "- insert:",
+        "    - id: animestack-house-commands",
+        "      name: 'animestack-house-presets'",
+        "      config: {}",
+    ]
+    rows: list[str] = []
+    for entry in meta:
+        plugins = template.replace("{{PERSONA}}", indent(entry["persona"].rstrip("\n"), 16))
+        plugins = plugins.replace("{{PRESETS}}", preset_lines)
+        rows.append(
+            "    - id: preset-%s\n"
+            "      name: '@deepseek-ai/dsh-agent-preset'\n"
+            "      config:\n"
+            "        id: %s\n"
+            "        name: '%s'\n"
+            "        description: '%s'\n"
+            "        order: %d\n"
+            "        plugins:\n"
+            "%s"
+            % (
+                entry["id"],
+                entry["id"],
+                yaml_sq(entry["title"]),
+                yaml_sq(entry["description"]),
+                entry["order"],
+                plugins.rstrip("\n"),
+            )
+        )
+    return "\n".join(head + rows) + "\n"
+
+
+def profile_patch(rev: str, digest: str) -> str:
+    return "\n".join(
+        [
+            stamp("yml", rev, digest),
+            "# AnimeStack - the roster-cap row the bundle cannot raise by itself.",
+            "# The Agent Teams profile brings the `agent-team` row with its own default cap;",
+            "# this block raises it to nine (a chair and eight seats; seven answering seats",
+            "# is the room's working roster). Merge it into the profile patch only when",
+            "# `agent-team` is absent: `setup --host dsh --merge-profile` appends exactly this",
+            "# block between the two markers and `--uninstall` removes exactly that block.",
+            "# >>> animestack >>>",
+            "- id: agent-team",
+            "  name: '@deepseek-ai/dsh-experimental-agent-team'",
+            "  config:",
+            "    maxMembers: 9",
+            "    maxTasks: 256",
+            "    maxMessageBytes: 65536",
+            "    disposalTimeoutMs: 5000",
+            "# <<< animestack <<<",
+            "",
+        ]
+    )
+
+
+def commands_js(rev: str, digest: str) -> str:
+    frontmatter, body = split_frontmatter(_read(HOUSE_COMMAND))
+    description = frontmatter_field(frontmatter, "description")
+    house_body = STAMP_MD_RE.sub("", body).replace(OWN_MARKER, "").strip()
+    house_body = house_body.replace(
+        "HOUSE - the whole house convenes.",
+        "HOUSE - the whole house convenes.\n\n"
+        "On DeepSeek Harness the surface decides the tool: the `animestack-team` preset runs the "
+        "room with `spawn_teammate` (durable teammates and the shared task board); the "
+        "`animestack-house` preset is the declared subagent room and uses `subagent` with "
+        "`agent_preset`. If `spawn_teammate` is absent, say so in one line and open the subagent "
+        "room. Never mix the two surfaces in one room.",
+        1,
+    )
+    simple_frontmatter, simple_body = split_frontmatter(_read(SIMPLE_SKILL))
+    simple_description = frontmatter_field(simple_frontmatter, "description")
+    simple_body = simple_body.replace(OWN_MARKER, "").strip()
+
+    def js_string(value: str) -> str:
+        return json.dumps(value)
+
+    return "\n".join(
+        [
+            stamp("js", rev, digest),
+            "/**",
+            " * AnimeStack - DeepSeek Harness operator commands.",
+            " *",
+            " * Generated by scripts/gen-dsh-house from the public command sources",
+            " * (agents/opencode/command/house.md and skills/simple/SKILL.md); do not",
+            " * hand-edit. The plugin in ./index.js registers these specs and queues their",
+            " * body as one human user message - no second room, no gate, no grant.",
+            " */",
+            "",
+            "export default [",
+            "  {",
+            '    name: "house",',
+            "    description: %s," % js_string(description),
+            '    hint: "[the request the house should descend]",',
+            "    body: %s," % js_string(house_body),
+            "  },",
+            "  {",
+            '    name: "simple",',
+            "    description: %s," % js_string(simple_description),
+            '    hint: "[the plain build task]",',
+            "    body: %s," % js_string(simple_body),
+            "  },",
+            "];",
+            "",
+        ]
+    )
+
+
+def locale(rev: str, digest: str, meta: list[dict]) -> str:
+    payload = {
+        "_stamp": "animestack canon rev %s :: inputs sha256=%s" % (rev, digest),
+        "bundle": "AnimeStack",
+        "presets": {
+            entry["id"]: {"name": entry["title"], "description": entry["description"]}
+            for entry in meta
+        },
+    }
+    return json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+
+
+def package_json(rev: str, digest: str, version: str) -> str:
+    payload = {
+        "name": "animestack-house-presets",
+        "version": version,
+        "_stamp": "animestack canon rev %s :: inputs sha256=%s" % (rev, digest),
+        "private": True,
+        "description": (
+            "AnimeStack house Agent presets and operator commands for DeepSeek Harness: "
+            "the Agent Teams chair, the subagent room chair, the eight seats, and the "
+            "/simple waiver."
+        ),
+        "type": "module",
+        "main": "./index.js",
+        "exports": {
+            ".": "./index.js",
+            "./locale/*.json": "./locale/*.json",
+            "./icon": "./icon.svg",
+        },
+        "files": [
+            "index.js",
+            "commands.generated.js",
+            "cordis.patch.yml",
+            "profile.patch.yml",
+            "locale/*.json",
+            "icon.svg",
+        ],
+        "dsh": {"bundle": {"patch": "./cordis.patch.yml"}},
+    }
+    return json.dumps(payload, indent=2, ensure_ascii=False) + "\n"
+
+
+def readme(rev: str, digest: str) -> str:
+    return "\n".join(
+        [
+            stamp("md", rev, digest),
+            "# The DSH surface - AnimeStack on DeepSeek Harness",
+            "",
+            "*The eleventh install target, and the only one that ships a team: eight seat packs,",
+            "eleven Agent presets, and two operator commands, generated from the public canon.*",
+            "",
+            "AnimeStack installs ten coding-host dialects under `agents/`. This directory is the",
+            "DeepSeek Harness surface: it does not add a seventh dialect, it adds a house. The",
+            "surface has three parts, and the installer owns all three.",
+            "",
+            "## What lands where",
+            "",
+            "| Part | Source | Installs to |",
+            "| --- | --- | --- |",
+            "| The ten skills | `skills/` | `$DSH_HOME/skills/<name>/SKILL.md` |",
+            "| The eight seat packs | `dsh/animestack-team/` | `$DSH_HOME/animestack-team/<seat>.md` |",
+            "| The preset bundle | `dsh/animestack-house/` | `$DSH_HOME/animestack/` |",
+            "",
+            "`$DSH_HOME` is the host's home: `DSH_HOME` when set, else `%USERPROFILE%\\.dsh` on",
+            "Windows and `~/.dsh` elsewhere. The installer writes nothing outside the host it can",
+            "prove it owns: skills carry `.animestack-owned`, packs end with the ownership marker,",
+            "and the bundle is a directory carrying `.animestack-owned`.",
+            "",
+            "## Install",
+            "",
+            "```",
+            "git clone https://github.com/JerkyJesse/AnimeStack ~/animestack && cd ~/animestack",
+            "./setup --host dsh",
+            "# Windows: powershell -ExecutionPolicy Bypass -File .\\setup.ps1 -TargetHost dsh",
+            "```",
+            "",
+            "The default install writes the owned files and prints the two-key merge. It never edits",
+            "the host profile: `cordis.patch.yml` is the file a bad write turns into a host with no",
+            "presets, so the installer writes only what it can prove it owns.",
+            "",
+            "## The two-key merge",
+            "",
+            "In `$DSH_HOME/profiles/<profile>/package.json`, add the dependency and append to",
+            "`dsh.profile.bundles`:",
+            "",
+            "```json",
+            '{',
+            '  "dsh": { "profile": { "bundles": [',
+            '    "... every bundle already listed ...",',
+            '    "animestack-house-presets"',
+            "  ] } },",
+            '  "dependencies": {',
+            '    "animestack-house-presets": "link:<repo>/dsh/animestack-house"',
+            "  }",
+            "}",
+            "```",
+            "",
+            "Then raise the roster cap once, in `cordis.patch.yml`, if the profile does not already",
+            "carry an `agent-team` row - `dsh/animestack-house/profile.patch.yml` is the exact block:",
+            "",
+            "```yaml",
+            "- id: agent-team",
+            "  name: '@deepseek-ai/dsh-experimental-agent-team'",
+            "  config:",
+            "    maxMembers: 9",
+            "```",
+            "",
+            "`setup --host dsh --merge-profile` performs both edits for you: it parses the profile",
+            "JSON, backs it up beside itself, appends the dependency and the bundle only when",
+            "absent, re-parses to validate, and appends the `agent-team` block only when that row is",
+            "absent. `--uninstall` removes exactly those three things and nothing else. Every other",
+            "key in the profile survives byte-identical; the installer never rewrites a file it did",
+            "not write.",
+            "",
+            "## Use",
+            "",
+            "- A thread that names no preset opens on the profile default. Set `default: animestack-team`",
+            "  in the `agent-preset-registry` row to make the house the default room.",
+            "- `/house` queues the whole-room router; `/simple` queues the waiver for one invocation.",
+            "- `animestack-house` is the declared subagent room; `animestack-team` is the Agent Teams",
+            "  surface. The two are never mixed in one room, and a missing `spawn_teammate` is named",
+            "  in one line, never fallen back from silently.",
+            "",
+            "## Uninstall",
+            "",
+            "```",
+            "./setup --host dsh --uninstall",
+            "# with the profile merge reversed as well:",
+            "./setup --host dsh --uninstall --merge-profile",
+            "```",
+            "",
+            "## Prove it",
+            "",
+            "```",
+            "python scripts/gen-dsh-house --check      # packs, commands, patch, locale in sync",
+            "python scripts/check-contract             # the DSH branch: 8 packs, 11 presets",
+            "python -m pytest tests/test_dsh_surface.py -q",
+            "```",
+            "",
+            "The generated files are never hand-edited: edit the canon, the seat agents, the seat",
+            "pages, or the command sources, run `scripts/gen-agent-dialects` and then",
+            "`scripts/gen-dsh-house`, and commit both trees. A stale pack fails `--check`.",
+            "",
+        ]
+    )
+
+
+# ─── Build and check ────────────────────────────────────────────────────────
+
+
+def build() -> dict[Path, str]:
+    rev, digest = lore_stamp()
+    seats = canon_seats()
+    sentences = seat_sentences()
+    meta = preset_meta(seats, sentences)
+    version = _read(ROOT / "VERSION").strip() or "0.0.0"
+    outputs: dict[Path, str] = {}
+    for seat in SEATS:
+        outputs[TEAM_DIR / f"animestack-{seat}.md"] = pack(seat, rev, digest, seats, sentences)
+    outputs[HOUSE_DIR / "package.json"] = package_json(rev, digest, version)
+    outputs[HOUSE_DIR / "commands.generated.js"] = commands_js(rev, digest)
+    outputs[HOUSE_DIR / "cordis.patch.yml"] = patch(rev, digest, meta)
+    outputs[HOUSE_DIR / "locale" / "en.json"] = locale(rev, digest, meta)
+    outputs[HOUSE_DIR / "profile.patch.yml"] = profile_patch(rev, digest)
+    outputs[ROOT / "dsh" / "README.md"] = readme(rev, digest)
+    return outputs
+
+
+CHECKED_DIRS = (TEAM_DIR, HOUSE_DIR)
+
+# Hand-authored files that live beside the generated ones. They are reviewed like
+# any other source (and the contract gate reads them), but this generator does
+# not own their bytes, so --check must not call them extras.
+STATIC_FILES = frozenset(
+    {
+        HOUSE_DIR / "index.js",
+        HOUSE_DIR / "icon.svg",
+        HOUSE_DIR / "templates" / "preset-plugins.yml.in",
+    }
+)
+
+
+def check(outputs: dict[Path, str]) -> int:
+    failures: list[str] = []
+    for path, content in sorted(outputs.items()):
+        rel = path.relative_to(ROOT).as_posix()
+        if not path.is_file():
+            failures.append("missing: %s" % rel)
+            continue
+        if _read(path) != content:
+            failures.append("drift: %s" % rel)
+    expected = set(outputs) | set(STATIC_FILES)
+    for directory in CHECKED_DIRS:
+        if not directory.is_dir():
+            continue
+        for path in sorted(directory.rglob("*")):
+            if path.is_file() and path not in expected:
+                failures.append("extra: %s" % path.relative_to(ROOT).as_posix())
+    if failures:
+        print("gen-dsh-house: FAILED (%d issue(s))" % len(failures))
+        for failure in failures:
+            print("  " + failure)
+        return 1
+    print("gen-dsh-house: in sync (%d files)" % len(outputs))
+    return 0
+
+
+def main() -> int:
+    args = _strip_root(sys.argv[1:])
+    if args not in ([], ["--check"]):
+        print("usage: python3 scripts/gen-dsh-house [--check] [--root <dir>]", file=sys.stderr)
+        return 2
+    outputs = build()
+    if args == ["--check"]:
+        return check(outputs)
+    for path, content in sorted(outputs.items()):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8", newline="\n")
+    print("gen-dsh-house: wrote %d files" % len(outputs))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

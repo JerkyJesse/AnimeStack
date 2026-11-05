@@ -1,0 +1,283 @@
+#!/usr/bin/env python3
+"""check-voices - the voice register must match the live house.
+
+Two registers, one gate. `voices/house.json` is the machine-readable voice
+config: one directive, one priority instruction, and eight seats (sentence +
+register note). `docs/lore/VOICE.md` is the register the room reads: four
+anchored lines per seat, every one resolved against the live file that carries
+it and disjoint from every other seat's dossier and backstory.
+
+This check fails closed when:
+
+  - the eight seats are not the register set, exactly;
+  - the directive or priority instruction is empty;
+  - a seat's sentence is empty, absent from its canon section or digest, or
+    bleeds into another seat's canon section, digest, or agent files;
+  - a register is empty or duplicated across seats;
+  - a seat carries fewer than MIN_PHRASES well-formed anchored lines;
+  - a phrase's source path is missing or does not contain the phrase;
+  - a phrase is shared by two seats, or bleeds into another seat's dossier or
+    backstory (scenes are format models and are excluded by design).
+
+Usage: python3 scripts/check-voices [--root <dir>]
+Exit 0 = clean; 1 = failures printed; 2 = usage.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+import sys
+from pathlib import Path
+
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+def _strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+ROOT = _resolve_root(sys.argv[1:])
+VOICES = ROOT / "voices" / "house.json"
+REGISTER = ROOT / "docs" / "lore" / "VOICE.md"
+
+SEATS = ("reika", "mei", "elo", "mechapip", "yui", "niko", "rin", "aria")
+DISPLAY = {
+    "reika": "Reika",
+    "mei": "Mei",
+    "elo": "Elo",
+    "mechapip": "MechaPip",
+    "yui": "Yui",
+    "niko": "Niko",
+    "rin": "Rin",
+    "aria": "Aria",
+}
+MIN_PHRASES = 4
+
+SEAT_SECTION_RE = re.compile(r"^## (\w+)\b", re.M)
+PHRASE_RE = re.compile(r'^-\s+"(.+)"\s+\[source:\s*(.+?)\]\s*$', re.M)
+
+
+def normalize(text: str) -> str:
+    text = text.replace("\u2014", "-").replace("\u2013", "-")
+    return re.sub(r"[^a-z0-9]+", " ", text.lower()).strip()
+
+
+def seat_block(canon: str, seat: str) -> str | None:
+    match = re.search(
+        rf"^###\s+[^\r\n]*\b{seat}\b[^\r\n]*\r?\n(.*?)(?=^###\s|\Z)",
+        canon,
+        re.MULTILINE | re.DOTALL | re.IGNORECASE,
+    )
+    return match.group(1) if match else None
+
+
+def read(path: Path) -> str:
+    return path.read_text(encoding="utf-8") if path.is_file() else ""
+
+
+def register_sections(text: str) -> tuple[dict[str, str], list[str]]:
+    """The VOICE.md sections for the eight display names, in file order."""
+    failures: list[str] = []
+    sections: dict[str, str] = {}
+    matches = list(SEAT_SECTION_RE.finditer(text))
+    for index, match in enumerate(matches):
+        name = match.group(1)
+        if name not in DISPLAY.values():
+            continue
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        if name in sections:
+            failures.append("VOICE.md: seat section repeated: %s" % name)
+            continue
+        sections[name] = text[match.start():end]
+    return sections, failures
+
+
+def main() -> int:
+    if _strip_root(sys.argv[1:]):
+        print("usage: python3 scripts/check-voices [--root <dir>]", file=sys.stderr)
+        return 2
+
+    failures: list[str] = []
+    checks = 0
+
+    if not VOICES.is_file():
+        print("check-voices: voices/house.json missing", file=sys.stderr)
+        return 2
+    try:
+        config = json.loads(VOICES.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        print("check-voices: voices/house.json invalid JSON: %s" % error, file=sys.stderr)
+        return 2
+
+    directive = config.get("directive", {})
+    for key in ("compact", "full"):
+        checks += 1
+        if not str(directive.get(key, "")).strip():
+            failures.append("directive.%s is empty" % key)
+    checks += 1
+    if not str(config.get("priority_instruction", "")).strip():
+        failures.append("priority_instruction is empty")
+
+    registers = config.get("registers", {})
+    if sorted(registers) != sorted(SEATS):
+        failures.append(
+            "registers: expected the eight seats, found: %s"
+            % (", ".join(sorted(registers)) or "none")
+        )
+    pointer = config.get("register")
+    if pointer is not None:
+        checks += 1
+        if str(pointer).strip().replace("\\", "/") != "docs/lore/VOICE.md":
+            failures.append("register pointer does not resolve to docs/lore/VOICE.md: %r" % pointer)
+
+    canon = read(ROOT / "docs" / "lore" / "canon.md")
+    if not canon:
+        failures.append("docs/lore/canon.md missing")
+
+    notes: dict[str, list[str]] = {}
+    for seat in SEATS:
+        register = registers.get(seat)
+        if not isinstance(register, dict):
+            failures.append("%s: register missing" % seat)
+            continue
+        sentence = normalize(str(register.get("sentence", "")))
+        note = normalize(str(register.get("register", "")))
+        if not sentence:
+            failures.append("%s: sentence is empty" % seat)
+            continue
+        if not note:
+            failures.append("%s: register note is empty" % seat)
+        else:
+            notes.setdefault(note, []).append(seat)
+
+        digest = read(ROOT / "docs" / "seats" / ("%s.md" % seat))
+        surfaces = {
+            "docs/lore/canon.md": seat_block(canon, seat) or "",
+            "docs/seats/%s.md" % seat: digest,
+        }
+        for label, text in surfaces.items():
+            checks += 1
+            if sentence not in normalize(text):
+                failures.append("%s: one sentence missing from %s" % (seat, label))
+
+        for other in SEATS:
+            if other == seat:
+                continue
+            targets = {
+                "canon": seat_block(canon, other) or "",
+                "digest": read(ROOT / "docs" / "seats" / ("%s.md" % other)),
+                "claude agent": read(ROOT / "agents" / "claude" / ("animestack-%s.md" % other)),
+                "opencode agent": read(ROOT / "agents" / "opencode" / ("animestack-%s.md" % other)),
+            }
+            for label, text in targets.items():
+                checks += 1
+                if sentence in normalize(text):
+                    failures.append(
+                        "%s: one sentence bleeds into %s (%s)" % (seat, other, label)
+                    )
+
+    for note, seats in notes.items():
+        if len(seats) > 1:
+            failures.append(
+                "register note duplicated across seats: %s (%s)" % (note, ", ".join(seats))
+            )
+
+    register_text = read(REGISTER)
+    if not register_text:
+        failures.append("docs/lore/VOICE.md missing")
+    else:
+        sections, section_failures = register_sections(register_text)
+        failures.extend(section_failures)
+        missing = [DISPLAY[seat] for seat in SEATS if DISPLAY[seat] not in sections]
+        if missing:
+            failures.append("VOICE.md: missing seat section(s): %s" % ", ".join(missing))
+
+        phrase_owner: dict[str, str] = {}
+        for seat in SEATS:
+            display = DISPLAY[seat]
+            section = sections.get(display)
+            if section is None:
+                continue
+            phrases = PHRASE_RE.findall(section)
+            checks += 1
+            if len(phrases) < MIN_PHRASES:
+                failures.append(
+                    "VOICE.md: %s carries %d anchored line(s), floor %d"
+                    % (display, len(phrases), MIN_PHRASES)
+                )
+            for phrase, source in phrases:
+                phrase_norm = normalize(phrase)
+                source_clean = source.strip()
+                if not phrase_norm:
+                    failures.append("VOICE.md: %s carries an empty phrase" % display)
+                    continue
+                if phrase_norm in phrase_owner:
+                    failures.append(
+                        "VOICE.md: phrase shared by %s and %s: %r"
+                        % (phrase_owner[phrase_norm], display, phrase)
+                    )
+                else:
+                    phrase_owner[phrase_norm] = display
+
+                checks += 1
+                source_path = (ROOT / source_clean).resolve()
+                try:
+                    source_path.relative_to(ROOT.resolve())
+                except ValueError:
+                    failures.append(
+                        "VOICE.md: %s source escapes the tree: %s" % (display, source_clean)
+                    )
+                    continue
+                if not source_path.is_file():
+                    failures.append(
+                        "VOICE.md: %s source missing: %s" % (display, source_clean)
+                    )
+                    continue
+                if phrase_norm not in normalize(read(source_path)):
+                    failures.append(
+                        "VOICE.md: %s phrase not found in %s: %r"
+                        % (display, source_clean, phrase)
+                    )
+
+                for other in SEATS:
+                    if other == seat:
+                        continue
+                    for suffix in (".md", "_backstory.md"):
+                        target = ROOT / "docs" / "lore" / "dossiers" / (other + suffix)
+                        checks += 1
+                        if target.is_file() and phrase_norm in normalize(read(target)):
+                            failures.append(
+                                "VOICE.md: %s phrase bleeds into %s: %r"
+                                % (display, target.relative_to(ROOT).as_posix(), phrase)
+                            )
+
+    if failures:
+        print("check-voices: FAILED (%d issue(s), %d checks)" % (len(failures), checks))
+        for failure in failures:
+            print("  - %s" % failure)
+        return 1
+    print("check-voices: clean (%d checks)" % checks)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

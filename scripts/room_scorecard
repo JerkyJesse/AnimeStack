@@ -1,0 +1,277 @@
+#!/usr/bin/env python3
+"""room_scorecard - the room's recorded decisions against the tree.
+
+Every full-loop decision is appended to DECISION_LOG.md in the template the
+log carries; this audit reads it back against the checkout, read-only:
+
+  - an entry is a `## YYYY-MM-DD - title` heading; fenced blocks (the
+    template) are skipped and never counted as entries; a `## ` heading
+    without a date is malformed;
+  - each entry's backticked path tokens (*.py, *.md, *.json, *.toml, *.yml,
+    *.html, *.svg, *.ps1) resolve against the tree - present or absent;
+  - each entry's seat speech (bold **Seat.** blocks and - **Seat.** lines)
+    is counted per seat, in loop order: Mei, Elo, MechaPip, Yui, Niko, Rin,
+    Aria, Reika.
+
+Usage:
+    python scripts/room_scorecard [--seats] [--strict] [--root <dir>]
+    --seats   print the per-seat participation table
+    --strict  exit 1 on a dangling reference, a malformed entry, or an
+              entry with no Reika line
+
+Exit codes: 0 ok, 1 --strict failure, 2 usage / missing log.
+Read-only; stdlib only; no network.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import re
+import sys
+from pathlib import Path
+
+
+def _resolve_root(argv: list[str]) -> Path:
+    for index, arg in enumerate(argv):
+        if arg == "--root" and index + 1 < len(argv):
+            return Path(argv[index + 1]).resolve()
+        if arg.startswith("--root="):
+            return Path(arg.split("=", 1)[1]).resolve()
+    return Path(__file__).resolve().parent.parent
+
+
+def _strip_root(argv: list[str]) -> list[str]:
+    stripped: list[str] = []
+    index = 0
+    while index < len(argv):
+        if argv[index] == "--root":
+            index += 2
+            continue
+        if argv[index].startswith("--root="):
+            index += 1
+            continue
+        stripped.append(argv[index])
+        index += 1
+    return stripped
+
+
+ROOT = _resolve_root(sys.argv[1:])
+
+SEATS = ("Mei", "Elo", "MechaPip", "Yui", "Niko", "Rin", "Aria", "Reika")
+
+ENTRY_RE = re.compile(r"^##\s+(\d{4}-\d{2}-\d{2})\s*[-\u2013\u2014]\s*(.+?)\s*$")
+HEADING_RE = re.compile(r"^##\s+(.+?)\s*$")
+TOKEN_RE = re.compile(
+    r"`([^`\n]+?\.(?:py|md|json|toml|yml|html|svg|ps1))(?::\d+(?:-\d+)?)?`"
+)
+SEAT_RE = re.compile(r"\*\*(" + "|".join(SEATS) + r")\.\*\*")
+BAD_TOKEN_CHARS = set(" <>\t\r\n()*?[]{}|")
+TITLE_CAP = 80
+INDEX_SKIP_DIRS = {
+    ".git", "node_modules", "__pycache__", ".venv", "venv",
+    ".mypy_cache", ".pytest_cache", ".ruff_cache",
+}
+
+
+def active_lines(text: str) -> list[tuple[int, str]]:
+    """(lineno, line) outside fenced code blocks; fences never count."""
+    lines: list[tuple[int, str]] = []
+    in_fence = False
+    for lineno, line in enumerate(text.splitlines(), 1):
+        if line.strip().startswith("```"):
+            in_fence = not in_fence
+            continue
+        if not in_fence:
+            lines.append((lineno, line))
+    return lines
+
+
+def parse_log(text: str) -> tuple[list[dict], list[tuple[int, str]]]:
+    entries: list[dict] = []
+    malformed: list[tuple[int, str]] = []
+    current: dict | None = None
+    for lineno, line in active_lines(text):
+        if HEADING_RE.match(line):
+            match = ENTRY_RE.match(line)
+            if match:
+                current = {"date": match.group(1), "title": match.group(2).strip(), "body": []}
+                entries.append(current)
+            else:
+                current = None
+                malformed.append((lineno, line.strip()))
+            continue
+        if current is not None:
+            current["body"].append(line)
+    return entries, malformed
+
+
+def extract_tokens(body: str) -> list[str]:
+    tokens: list[str] = []
+    for match in TOKEN_RE.finditer(body):
+        token = match.group(1).strip().replace("\\", "/")
+        if any(char in BAD_TOKEN_CHARS for char in token):
+            continue
+        if token not in tokens:
+            tokens.append(token)
+    return tokens
+
+
+def build_file_index(root: Path) -> dict[str, str]:
+    """Basename to relative-path index of the worktree, cache dirs skipped.
+
+    A bare `canon.md` token must resolve to docs/lore/canon.md instead of
+    reading as absent, or the card calls a cited file culled while it sits
+    in the tree. One walk, first hit per basename wins.
+    """
+    index: dict[str, str] = {}
+    for dirpath, dirnames, filenames in os.walk(root):
+        dirnames[:] = [d for d in dirnames if d not in INDEX_SKIP_DIRS]
+        rel_dir = os.path.relpath(dirpath, root).replace("\\", "/")
+        for filename in filenames:
+            rel = filename if rel_dir == "." else f"{rel_dir}/{filename}"
+            index.setdefault(filename, rel)
+    return index
+
+
+def classify_token(root: Path, token: str, index: dict[str, str]) -> str:
+    norm = token.replace("\\", "/")
+    if (root / norm).exists():
+        return "present"
+    if index.get(Path(norm).name):
+        return "present"
+    return "absent"
+
+
+def build_card(root: Path, log_path: Path) -> dict:
+    text = log_path.read_text(encoding="utf-8-sig")
+    entries, malformed = parse_log(text)
+    index = build_file_index(root)
+    records = []
+    for entry in entries:
+        body = "\n".join(entry["body"])
+        refs = [
+            {"token": token, "state": classify_token(root, token, index)}
+            for token in extract_tokens(body)
+        ]
+        found = set(SEAT_RE.findall(body))
+        records.append({
+            "date": entry["date"],
+            "title": entry["title"],
+            "refs": refs,
+            "seats": [seat for seat in SEATS if seat in found],
+        })
+    return {"decisions": records, "malformed": malformed}
+
+
+def build_seat_rows(decisions: list[dict]) -> list[dict]:
+    rows = {
+        seat: {"seat": seat, "decisions": 0, "first_date": None, "last_date": None}
+        for seat in SEATS
+    }
+    for decision in decisions:
+        for seat in decision["seats"]:
+            row = rows[seat]
+            row["decisions"] += 1
+            if row["first_date"] is None:
+                row["first_date"] = decision["date"]
+            row["last_date"] = decision["date"]
+    return [rows[seat] for seat in SEATS]
+
+
+def render(card: dict) -> str:
+    decisions = card["decisions"]
+    total_refs = sum(len(decision["refs"]) for decision in decisions)
+    resolved = sum(
+        1 for decision in decisions for ref in decision["refs"] if ref["state"] == "present"
+    )
+    total_seats = sum(len(decision["seats"]) for decision in decisions)
+    lines = [
+        f"room_scorecard: {len(decisions)} decision(s), {len(card['malformed'])} malformed"
+        f" | refs {resolved}/{total_refs} resolved"
+        f" | seats {total_seats}/{8 * len(decisions)}"
+    ]
+    for decision in decisions:
+        absent = [ref["token"] for ref in decision["refs"] if ref["state"] == "absent"]
+        refs_bits = f"refs {len(decision['refs']) - len(absent)}/{len(decision['refs'])}"
+        if absent:
+            refs_bits += " (absent: " + ", ".join(absent) + ")"
+        missing = [seat for seat in SEATS if seat not in decision["seats"]]
+        seats_bits = f"seats {len(decision['seats'])}/8"
+        if missing:
+            seats_bits += " (missing: " + ", ".join(missing) + ")"
+        title = decision["title"]
+        if len(title) > TITLE_CAP:
+            title = title[:TITLE_CAP - 3] + "..."
+        lines.append(f"## {decision['date']} - {title} | {refs_bits} | {seats_bits}")
+    for lineno, heading in card["malformed"]:
+        lines.append(f"!! line {lineno}: heading without a date: {heading}")
+    return "\n".join(lines) + "\n"
+
+
+def render_seats(rows: list[dict], total: int) -> str:
+    lines = [
+        f"room_scorecard --seats: participation over {total} decision(s) (speech, not value)"
+    ]
+    for row in rows:
+        span = f"  {row['first_date']} -> {row['last_date']}" if row["decisions"] else "  -"
+        lines.append(f"  {row['seat']:<9} {row['decisions']}/{total}{span}")
+    return "\n".join(lines) + "\n"
+
+
+def strict_issues(card: dict) -> list[str]:
+    issues: list[str] = []
+    for lineno, heading in card["malformed"]:
+        issues.append(f"line {lineno}: heading without a date: {heading}")
+    for decision in card["decisions"]:
+        for ref in decision["refs"]:
+            if ref["state"] == "absent":
+                issues.append(f"entry {decision['date']}: absent ref {ref['token']}")
+        if "Reika" not in decision["seats"]:
+            issues.append(f"entry {decision['date']}: no Reika line")
+    return issues
+
+
+def _configure_stdio() -> None:
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is None:
+            continue
+        try:
+            reconfigure(encoding="utf-8", errors="replace")
+        except (OSError, ValueError):
+            continue
+
+
+def main(argv: list[str] | None = None) -> int:
+    _configure_stdio()
+    raw = sys.argv[1:] if argv is None else list(argv)
+    root = _resolve_root(raw)
+    parser = argparse.ArgumentParser(
+        description="The room's recorded decisions against the tree."
+    )
+    parser.add_argument("--seats", action="store_true",
+                        help="print the per-seat participation table")
+    parser.add_argument("--strict", action="store_true",
+                        help="exit 1 on a dangling ref, a malformed entry, or no Reika line")
+    args = parser.parse_args(_strip_root(raw))
+
+    log_path = root / "DECISION_LOG.md"
+    if not log_path.is_file():
+        print(f"room_scorecard: missing {log_path}", file=sys.stderr)
+        return 2
+    card = build_card(root, log_path)
+    print(render(card), end="")
+    if args.seats:
+        print(render_seats(build_seat_rows(card["decisions"]), len(card["decisions"])), end="")
+    issues = strict_issues(card)
+    if args.strict and issues:
+        print(f"room_scorecard: FAILED ({len(issues)} issue(s))", file=sys.stderr)
+        for issue in issues:
+            print(f"  - {issue}", file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
