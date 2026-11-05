@@ -213,8 +213,8 @@ def build_rows() -> list[dict]:
         ("board seats", "Elo", 8, False, count_board_seats),
         ("seat pages", "Aria", 8, False, lambda: _count_files(ROOT / "seats", "*.html")),
         ("site pages", "Aria", 20, True, count_site_pages),
-        ("site art images", "Aria", 19, False,
-         lambda: _count_files(ROOT / "assets" / "img", "*.jpg")),
+        ("site art images", "Aria", 20, False,
+         lambda: sum(1 for p in (ROOT / "assets" / "img").iterdir() if p.suffix.lower() in (".jpg", ".png"))),
         ("site thumbnails", "Aria", 32, False,
          lambda: sum(
              1 for path in (ROOT / "assets" / "thumbs").rglob("*") if path.is_file()

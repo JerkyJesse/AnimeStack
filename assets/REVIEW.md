@@ -23,8 +23,9 @@ unchanged verdict is a review that did not happen.
 
 At v2.0.0 the art set was re-rendered clean and then re-rendered again for the visual
 pass: the private-stamped HUD and money copy are gone, the remaining character art is
-cropped clean, and every card carries only public house text. The hero wall and the
-loop are part of the same clean pass. The chair opened the set and signs the pass.
+cropped clean, and every card carries only public house text. The hero wall, the
+roster cards, the portraits, and the rendered loop are part of the same clean pass.
+The chair opened the set and signs the pass.
 
 ## The table
 
@@ -61,6 +62,7 @@ One row per picture under `art/` and `assets/`, excluding directory READMEs.
 | `assets/img/elo-portrait.jpg` | `2c565347e56708027685ca6da23fc6060cc2df717d91a26bc901fc7df8bd9ca9` | Reika | 2026-11-05 | PASS |
 | `assets/img/elo-roster.jpg` | `83cddd77accddf32aecb68e11b80e6c5ea57d03f9eeb3605dbf0c03bbcb689d6` | Reika | 2026-11-05 | PASS |
 | `assets/img/hero-lineup.jpg` | `d6267541f25b7ac8b7d7959b57c0cb0db1e31edecbb0ebfcc0913ce8043fd7ec` | Reika | 2026-11-05 | PASS |
+| `assets/img/loop.png` | `bbc8b5794618d86e1d443664faa4f2090c24a02acd0bd127251233568c3bf316` | Reika | 2026-11-05 | PASS |
 | `assets/img/mechapip-portrait.jpg` | `f6adac646e340f725419d1ca6cb05e5f3482517a8ec7600f26c4c40d9d0cc560` | Reika | 2026-11-05 | PASS |
 | `assets/img/mechapip-roster.jpg` | `6bc09c4275215609948270c66eeda1fc4fe229f4a892947416742e80b6b94120` | Reika | 2026-11-05 | PASS |
 | `assets/img/mei-portrait.jpg` | `c0f1ae7b2fbb04b981658243f52e3c541e08c27f8825509c465b87d869649e8b` | Reika | 2026-11-05 | PASS |

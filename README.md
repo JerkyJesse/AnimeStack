@@ -46,7 +46,7 @@ The room is **Mei → Elo → MechaPip → Yui → Niko → Rin → Aria → Rei
 
 ## The loop
 
-<p align="center"><img src="assets/img/loop.svg" alt="The eight-seat design loop" width="100%"></p>
+<p align="center"><img src="assets/img/loop.png" alt="The eight-seat design loop" width="100%"></p>
 
 A decision runs two rounds: the seats that are not the lead and not Reika answer independently in one parallel batch — the takes — then see every take and get one reply each: affirm, contest a named seat with a fact, or revise. A build descends in loop order, one seat at a time, every prior sentence and changed file carried into the next brief; prior lanes are read, never edited.
 
