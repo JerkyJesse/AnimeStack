@@ -28,6 +28,7 @@ import json
 import re
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -265,6 +266,11 @@ def main(argv: list[str]) -> int:
     for path in pages(root):
         claims_seen += check_page(root, path, failures)
         scan_patterns(root, path, failures)
+    for svg in sorted((root / "assets").rglob("*.svg")):
+        try:
+            ET.parse(svg)
+        except ET.ParseError as exc:
+            failures.append("%s: invalid SVG (%s)" % (svg.relative_to(root).as_posix(), exc))
     sitemap = read(root / "sitemap.xml")
     for path in actual:
         if path == "404.html":

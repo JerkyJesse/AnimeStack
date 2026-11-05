@@ -6,12 +6,12 @@
 <circle cx="800.0" cy="170.0" r="34" fill="#0b0b11" stroke="#e276d2" stroke-width="1.6"/>
 <text x="800.0" y="177.0" text-anchor="middle" font-family="Georgia, serif" font-size="21" fill="#e276d2">01</text>
 <text x="800.0" y="63.0" text-anchor="middle" font-family="Georgia, serif" font-size="25" fill="#ece8e0">Mei</text>
-<text x="800.0" y="83.0" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" letter-spacing="1.5" fill="#e276d2">KEEPER OF CLIMATE & CONTEXT</text>
+<text x="800.0" y="83.0" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" letter-spacing="1.5" fill="#e276d2">KEEPER OF CLIMATE &amp; CONTEXT</text>
 <path d="M 1043.2 294.4 A 300 300 0 0 1 1096.2 422.2" fill="none" stroke="#f0c24a" stroke-opacity="0.45" stroke-width="1.4"/>
 <circle cx="1012.1" cy="257.9" r="34" fill="#0b0b11" stroke="#f0c24a" stroke-width="1.6"/>
 <text x="1012.1" y="264.9" text-anchor="middle" font-family="Georgia, serif" font-size="21" fill="#f0c24a">02</text>
 <text x="1086.4" y="181.6" text-anchor="start" font-family="Georgia, serif" font-size="25" fill="#ece8e0">Elo</text>
-<text x="1086.4" y="201.6" text-anchor="start" font-family="Segoe UI, sans-serif" font-size="11" letter-spacing="1.5" fill="#f0c24a">KEEPER OF RANKINGS & MEASUREMENT</text>
+<text x="1086.4" y="201.6" text-anchor="start" font-family="Segoe UI, sans-serif" font-size="11" letter-spacing="1.5" fill="#f0c24a">KEEPER OF RANKINGS &amp; MEASUREMENT</text>
 <path d="M 1096.2 517.8 A 300 300 0 0 1 1043.2 645.6" fill="none" stroke="#ff4d5e" stroke-opacity="0.45" stroke-width="1.4"/>
 <circle cx="1100.0" cy="470.0" r="34" fill="#0b0b11" stroke="#ff4d5e" stroke-width="1.6"/>
 <text x="1100.0" y="477.0" text-anchor="middle" font-family="Georgia, serif" font-size="21" fill="#ff4d5e">03</text>
@@ -41,7 +41,7 @@
 <circle cx="587.9" cy="257.9" r="34" fill="#0b0b11" stroke="#e8b552" stroke-width="1.6"/>
 <text x="587.9" y="264.9" text-anchor="middle" font-family="Georgia, serif" font-size="21" fill="#e8b552">08</text>
 <text x="513.6" y="181.6" text-anchor="end" font-family="Georgia, serif" font-size="25" fill="#ece8e0">Reika</text>
-<text x="513.6" y="201.6" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="11" letter-spacing="1.5" fill="#e8b552">FOUNDER & CHIEF ARCHITECT</text>
+<text x="513.6" y="201.6" text-anchor="end" font-family="Segoe UI, sans-serif" font-size="11" letter-spacing="1.5" fill="#e8b552">FOUNDER &amp; CHIEF ARCHITECT</text>
 <text x="800" y="412" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" letter-spacing="4" fill="#E8B552">THE DESIGN LOOP</text>
 <text x="800" y="456" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#ece8e0">One sentence each.</text>
 <text x="800" y="498" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#E8B552">Then a verdict.</text>
