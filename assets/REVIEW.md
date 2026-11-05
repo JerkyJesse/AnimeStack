@@ -21,9 +21,10 @@ reference or a live book, and records one verdict.
 takes its row and its hash in the same commit as the file; a changed hash with an
 unchanged verdict is a review that did not happen.
 
-At v2.0.0 the art set was re-rendered clean: the private-stamped HUD and money copy were
-removed with the two burned-in renders, the remaining character art was cropped clean, and
-every card carries only public house text. The chair opened the set and signs the pass.
+At v2.0.0 the art set was re-rendered clean and then re-rendered again for the visual
+pass: the private-stamped HUD and money copy are gone, the remaining character art is
+cropped clean, and every card carries only public house text. The chair opened the set
+and signs the pass.
 
 ## The table
 
@@ -31,77 +32,78 @@ One row per picture under `art/` and `assets/`, excluding directory READMEs.
 
 | File | sha256 | Reviewer | Date | Verdict |
 | --- | --- | --- | --- | --- |
-| `art/dossiers/aria.jpg` | `4be2f1fccc8891c28579a6861a8701e7343dcd9db734d0e4ae270bd9a1e9e5c6` | Reika | 2026-11-05 | PASS |
-| `art/dossiers/elo.jpg` | `113b4d47184b3bf63fcf44e460da5b197f7c2a4d1d566248ccfa3d0a0be9db95` | Reika | 2026-11-05 | PASS |
-| `art/dossiers/mechapip.jpg` | `f1fea84c234591d053dbfe69369ba9363b98db6f521cdcdfc8ffd1fa85909d2a` | Reika | 2026-11-05 | PASS |
-| `art/dossiers/mei.jpg` | `945acfc1b8e3f809acfb48a3ceb2d104460c3e465d5731a323045bbbe8d844e4` | Reika | 2026-11-05 | PASS |
-| `art/dossiers/niko.jpg` | `80882b618fe7c40d5889e5eaf379a244d32aa3e59c871c08e9c0efae71e350fc` | Reika | 2026-11-05 | PASS |
-| `art/dossiers/reika.jpg` | `5c409995a1ea3fb2aecc15cbd33894264a51f4b2ae2dac4dfb837b8dc6e1551b` | Reika | 2026-11-05 | PASS |
-| `art/dossiers/rin.jpg` | `cce0ec6a017b781d74018703b267437575729a5060bb0ab3fa935f1740b0afe5` | Reika | 2026-11-05 | PASS |
-| `art/dossiers/yui.jpg` | `6b01958e14ec33324d485ca87600db20be130fedabf484526dda9f0a3523cb92` | Reika | 2026-11-05 | PASS |
-| `art/sheets/aria-sheet-1.jpg` | `fac3e10903f0ea5fd991f8003ff29746ad6a13d8837663824933caaffca85d1a` | Reika | 2026-11-05 | PASS |
-| `art/sheets/elo-sheet-1.jpg` | `3d1a163043191476143b50d93ef238541ccf6f9eae74e0ee81d30c9d9e9a7142` | Reika | 2026-11-05 | PASS |
-| `art/sheets/mechapip-sheet-1.jpg` | `04e4272f05c2fd28c5c46bfc3d5dfa7e34c4f231206851439643c0d93a99818a` | Reika | 2026-11-05 | PASS |
-| `art/sheets/mei-sheet-1.jpg` | `68fecf17291deeba262eb3fe4b4da5a71c8c6d70a27cb8c6121da33f9d5aea4d` | Reika | 2026-11-05 | PASS |
-| `art/sheets/niko-sheet-1.jpg` | `065c6e19a47080956ec69d595226e66d61a838a434d8a22cebe47fa0b5c04812` | Reika | 2026-11-05 | PASS |
-| `art/sheets/reika-sheet-1.jpg` | `d744c1dc4a82bce43471e26f5104cb5fbac554d425ac36bbb1b52cf92420a9f3` | Reika | 2026-11-05 | PASS |
-| `art/sheets/rin-sheet-1.jpg` | `eccb2a9a979727aa2bdc75aa052bd05b317a1a1d245a30fe6777aa4396c7f3a0` | Reika | 2026-11-05 | PASS |
-| `art/sheets/yui-sheet-1.jpg` | `59a8447e1064845db505abbf2bb086182c1c4e6968e12f4707c4613ff85cdd7c` | Reika | 2026-11-05 | PASS |
-| `art/wallpapers/aria-stamped.jpg` | `5341b52f8e4cad5d0bb16412a4d7712f843f6044376b6d057be5904d43eaf780` | Reika | 2026-11-05 | PASS |
-| `art/wallpapers/elo-stamped.jpg` | `4d12a94f977facb9cb17f89136a5932caddf1ecc53bb0e244eb2565bf9f52fed` | Reika | 2026-11-05 | PASS |
-| `art/wallpapers/mechapip-stamped.jpg` | `2657cd0abeb27ae1f8eede6ea3fadb93a0d02ae3d2b4a0dd4f2928965e9fb7b8` | Reika | 2026-11-05 | PASS |
-| `art/wallpapers/mei-stamped.jpg` | `d65521340f99387c965c7b836a00c40cd2889cb5477518dc1757fe13bc5b3b08` | Reika | 2026-11-05 | PASS |
-| `art/wallpapers/niko-stamped.jpg` | `3753f4405567f16154d100357b27637764c88873bb2370b6562dc6f0854acec0` | Reika | 2026-11-05 | PASS |
-| `art/wallpapers/reika-stamped.jpg` | `d4ae2d8a7a9f54247d4c7b47504fa677215864f391fa125aa5ffdad00a5ce5f9` | Reika | 2026-11-05 | PASS |
-| `art/wallpapers/rin-stamped.jpg` | `58f1e84e3f53950a862dae1e48dcedabc0561247c51df1eba3e08ffe6b0a8a01` | Reika | 2026-11-05 | PASS |
-| `art/wallpapers/yui-stamped.jpg` | `2952dbfc6ceaecb8ceb99657c25a99d942f609b9c4e45a4d8985b7573a4d7ef2` | Reika | 2026-11-05 | PASS |
-| `assets/img/aria-portrait.jpg` | `bb8bb210bfff6dd89b7e59374167b91fe8b301c2a5ac6e19b5344592cd3b0507` | Reika | 2026-11-05 | PASS |
-| `assets/img/aria-roster.jpg` | `ad8871f40aa118471e5e815f745e0abca886dbaf1b336b964382931628d899c3` | Reika | 2026-11-05 | PASS |
-| `assets/img/elo-portrait.jpg` | `b4018ea0a3f6caa3bb846007611d41a58546e70b984d8353cd8183a65f98b26e` | Reika | 2026-11-05 | PASS |
-| `assets/img/elo-roster.jpg` | `9706ff92a2a36d1ca3003aceb6718eb2018e9b7e521a83d0888ce17ca9a6f3e6` | Reika | 2026-11-05 | PASS |
-| `assets/img/mechapip-portrait.jpg` | `cb1fbac462f588c74aa087b91998a4af62ad407b1a85047cf2cfa540d1622063` | Reika | 2026-11-05 | PASS |
-| `assets/img/mechapip-roster.jpg` | `912afebde0f328ca0699fff469124a95b91c0ff0686d5f484143a191629b7e0e` | Reika | 2026-11-05 | PASS |
-| `assets/img/mei-portrait.jpg` | `7467a866d5b33ea57ba442527aaf0cfdf959665e695d2acc767ceb461057168f` | Reika | 2026-11-05 | PASS |
-| `assets/img/mei-roster.jpg` | `8c0f4d4235d1751fa65637dc57becea927e3de77fb8d85bc7d80d7b7c383daee` | Reika | 2026-11-05 | PASS |
-| `assets/img/niko-portrait.jpg` | `515bcff3354b493e819f242371785105f3e9f07d1ca1c4b61ff62682fc9f4bd3` | Reika | 2026-11-05 | PASS |
-| `assets/img/niko-roster.jpg` | `ef22918f3682fdfee07ef2442f9390f8d15c1f6109f566e885ae64cc8967518d` | Reika | 2026-11-05 | PASS |
-| `assets/img/reika-portrait.jpg` | `a833e1b296e89cf31f8d79230aef4e4d25e3c2ea4efd46d6155e95367c398a89` | Reika | 2026-11-05 | PASS |
-| `assets/img/reika-roster.jpg` | `3bad6a61dc3415d83b65b9ff5240299c9eb05e27d6827cbe0316336a2aa30924` | Reika | 2026-11-05 | PASS |
-| `assets/img/rin-portrait.jpg` | `934c5b5fc47c29212f2d84e7bc3e592928cfdc2c796821196651fe6320bdac8f` | Reika | 2026-11-05 | PASS |
-| `assets/img/rin-roster.jpg` | `08296602b83ba9b979c0c533cea4018b03c17d1e8cbe01f2269962121aab3b0a` | Reika | 2026-11-05 | PASS |
-| `assets/img/social-preview.jpg` | `6a9b77f86c8f340314e1a86a628045c7a635d9d018bcc6a183569362e150e7b6` | Reika | 2026-11-05 | PASS |
-| `assets/img/team-composite.jpg` | `523333e5c46b839dec1c1772708d7a0f5183a5a617a04c96b50dae17bf5137b5` | Reika | 2026-11-05 | PASS |
-| `assets/img/yui-portrait.jpg` | `31188058d4254ba1c4afa83e972364fc54d81c53c7d126e39476196583a62d07` | Reika | 2026-11-05 | PASS |
-| `assets/img/yui-roster.jpg` | `6cda41efefd8c70592565c54736d071aa64d9913aab126fb717aa6721932dc4a` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/dossiers/aria.jpg` | `9a5c60b7a946d82422e2f7527de374ae6f39fbabd97dcdce24998354316e687d` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/dossiers/elo.jpg` | `554643dab13e43e56ec7e3019ce2d7ade4e2b81e9389b67d80324d1e84828125` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/dossiers/mechapip.jpg` | `5356e53e5863ec81e153f96237ec1341b113040b9ac6a5074e1ce3bc175c3055` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/dossiers/mei.jpg` | `4733a2efe99b6e18f66a9fdff3d2b0946b9115645c5f330145b956a50ac1670c` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/dossiers/niko.jpg` | `c692303a35d6be5ec759444aad0068e542e251b28a2598d7098c61884dd62ed4` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/dossiers/reika.jpg` | `8176e19899c04f3420e87952e395e425266644e0efb391c9abaf34082baacebe` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/dossiers/rin.jpg` | `229b5154cfae0a0841e28a6add9e43b0e9801d76da540a962299e0410490d0f0` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/dossiers/yui.jpg` | `0fa8c1b74c00ca8dfbeb806a130172afe96242f71c467d34ad8f67ef898c02b3` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/portraits/aria.jpg` | `b2b649b63a1728aedb50a90614ba532fe915ec22bb04636ffed05032af35c02e` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/portraits/elo.jpg` | `969b700c0fa3fc80f0717db7c75268bd7206690528718486e3c26cfb65d98abd` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/portraits/mechapip.jpg` | `592e4a149cee33b2114a59567a380d253fe4fd53c8c0b8e75401361b94a67687` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/portraits/mei.jpg` | `3b7a7820b753e42d96144595a6e1dee2f6cc91947acc5e4e628eda131d0706a2` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/portraits/niko.jpg` | `fda9dc29277f7701801fe39caeb1c093e1b96f01d7cb967ac82936b09073e8ed` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/portraits/reika.jpg` | `d46cca5a6fd963e095c3bcf46a4d5430b909b3532e0fc617eb28630d7aed4147` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/portraits/rin.jpg` | `2e58eb8f6d960167b8cb8e22cf9f8e256d638309170076c63afd20fabde39479` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/portraits/yui.jpg` | `d11ab635f00b4a0127053a08cc267a2c298a1bf08003b9b8e3e84e7904db63ab` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/sheets/aria-sheet-1.jpg` | `f75f24238c4bee0168529b2658f13661257c0aa6ef43abc4b6211ee94c2b5a62` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/sheets/elo-sheet-1.jpg` | `26cfaece8f264ba34689b84c25e4542a370d4d0a36b06d281b7c9573509e2097` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/sheets/mechapip-sheet-1.jpg` | `481b480ed655bc874cfb0818418423b2866db45ae1c355f6dcae3173b0abea93` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/sheets/mei-sheet-1.jpg` | `f7762e8bb1d75315eecd6ce7ece526ad7b24d18a26b9554cc455194f1aaf2801` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/sheets/niko-sheet-1.jpg` | `43a633bd26ea0c07915baf8db9d924b0931f1b9f2b278246712ebb17a187ddbb` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/sheets/reika-sheet-1.jpg` | `8f5281884d7e978d47449c26d09d1a1d7fb9ca90c436cd4ca63b147aeef8fa65` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/sheets/rin-sheet-1.jpg` | `4963fb0ec4fc411e3cf845526237829f99bff5d492767e468cd8b8c4482a85d8` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/sheets/yui-sheet-1.jpg` | `d2e2f53aef0ff1aa6f6270b7b4d34ffb43c5894f7f322f7eeedcb0d72d4b21fc` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/wallpapers/aria-stamped.jpg` | `949faa48a2d378f0bc534aa01a4407556989ccea9ed89d03d476f5af1fd7baa9` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/wallpapers/elo-stamped.jpg` | `d94bad833e8f028b0c4f1ace9bcca6a85eb6bc0384837690377b1d573b66759a` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/wallpapers/mechapip-stamped.jpg` | `768bbe5ffef659891578b227b6fd7e1407c0aa42703f3bef888c5d5ed13295de` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/wallpapers/mei-stamped.jpg` | `3bad584b3c224e8335eadf77c00319cf199f0ffecaff294350a24df07295e936` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/wallpapers/niko-stamped.jpg` | `5ceebcabd411f68696c9bf5b6c89c7a501d16d46dcc9e29927fb84022ce763d6` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/wallpapers/reika-stamped.jpg` | `26e978eaa3c7c51b8149835d76efe465fd9f7bfe73214aeece9d22aa1b589939` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/wallpapers/rin-stamped.jpg` | `3d312af3341ec8ada65ecf95c5c1eec1a5f5f596d4208cd1ef41238534799543` | Reika | 2026-11-05 | PASS |
-| `assets/thumbs/wallpapers/yui-stamped.jpg` | `10aa1f3b879865b351c475481af3201eac4b67f566f18bc921e7c20190fbf9b2` | Reika | 2026-11-05 | PASS |
+| `art/dossiers/aria.jpg` | `68d833b7fd960591b2035a9af78cc7f0033ab1749f07dc3f0de2b73a168df06c` | Reika | 2026-11-05 | PASS |
+| `art/dossiers/elo.jpg` | `fd5596483926305c5a221dee15fdde0f9e36dced5b7960d5e47ed840cf7bbfb7` | Reika | 2026-11-05 | PASS |
+| `art/dossiers/mechapip.jpg` | `c4ed5d86eec711bbb0f7f4f1722ec4828ee2e3ff135f2c089e88e5f6006dd121` | Reika | 2026-11-05 | PASS |
+| `art/dossiers/mei.jpg` | `ce52f10fff33b1eccfa838cce2b80a72b27ce159cb841b2d4a4f4c7f0a518538` | Reika | 2026-11-05 | PASS |
+| `art/dossiers/niko.jpg` | `46a1b8805bd409ba3c82024ffdcf6b1f94f06bf78bdfc7f3e827da3f64798ea2` | Reika | 2026-11-05 | PASS |
+| `art/dossiers/reika.jpg` | `3751de838929f1eef9699da1c7d744859123bc7a8b6fb9eecfada8cf4d0b6c80` | Reika | 2026-11-05 | PASS |
+| `art/dossiers/rin.jpg` | `eea1f55ddd2b3c3866f3c8b9ea89c4b78b470e1565e487d288fc1e5a739c89d0` | Reika | 2026-11-05 | PASS |
+| `art/dossiers/yui.jpg` | `f7e087a26868ac6f7e325894fd84be8f2554e2fb2d0097682c2f75d63d385b88` | Reika | 2026-11-05 | PASS |
+| `art/sheets/aria-sheet-1.jpg` | `f7817fdc7295e5ca130f9eb34c7d01695f06a76aa5bcca07f824cb426106e32f` | Reika | 2026-11-05 | PASS |
+| `art/sheets/elo-sheet-1.jpg` | `87b06971f5b15ba73a7181deb218c587ac766746cdae13e5dc78c87fc0d773dd` | Reika | 2026-11-05 | PASS |
+| `art/sheets/mechapip-sheet-1.jpg` | `34d652194c6350bc29d1c387078173358ca850c207f68935c62c2b9eeb705b33` | Reika | 2026-11-05 | PASS |
+| `art/sheets/mei-sheet-1.jpg` | `aba13d9217b25f616f37bddd06278bf5eb8c6681ff9053a151450f312141e0b5` | Reika | 2026-11-05 | PASS |
+| `art/sheets/niko-sheet-1.jpg` | `7e264e70b7078d718c5b7496837cb722904ff96920bffe30b54f5a5aee83dd5d` | Reika | 2026-11-05 | PASS |
+| `art/sheets/reika-sheet-1.jpg` | `0a7ee50ee9ca1c5c2d921f5f8272c344faed0a08fc0a0666556166a0a5242e2e` | Reika | 2026-11-05 | PASS |
+| `art/sheets/rin-sheet-1.jpg` | `0d5eabb1dcf7c175767e8bb29593fe7949136e2ef89c1dd522783b2b61da7671` | Reika | 2026-11-05 | PASS |
+| `art/sheets/yui-sheet-1.jpg` | `0dc14b7ef79441b12899491e631d3d6afc22183d220d624555a885c6963a0f8b` | Reika | 2026-11-05 | PASS |
+| `art/wallpapers/aria-stamped.jpg` | `0e8c75970eb192e18c36bc7a48bb52d983991227cd9054b713064b5986bb164f` | Reika | 2026-11-05 | PASS |
+| `art/wallpapers/elo-stamped.jpg` | `786c1ef7713b88d76dc2c524578468bd61c852b0d829e78e72c7aa11d0773559` | Reika | 2026-11-05 | PASS |
+| `art/wallpapers/mechapip-stamped.jpg` | `5501f92ef593ca67918ae4839b5a871ac5a3ee6895674bfba095b35a1f0c0220` | Reika | 2026-11-05 | PASS |
+| `art/wallpapers/mei-stamped.jpg` | `2a4eec2b47b5e8f2d83b46323cb0572902d98d6a90e3cab8aa5eb9a01d1596f4` | Reika | 2026-11-05 | PASS |
+| `art/wallpapers/niko-stamped.jpg` | `7c757e9766e9d0f7db7b4fe9e019e164ccb48a122ae78343a27e4fbe62d44066` | Reika | 2026-11-05 | PASS |
+| `art/wallpapers/reika-stamped.jpg` | `e39f15a2caad612c610107c8eb0e74b376b60f4907d457921a46334f0458eae0` | Reika | 2026-11-05 | PASS |
+| `art/wallpapers/rin-stamped.jpg` | `016e997895ad78ae4473e9d05db2dac9823883a1e442666332e7c3d8d6fbd975` | Reika | 2026-11-05 | PASS |
+| `art/wallpapers/yui-stamped.jpg` | `9d912d419f7740239b2509738de91b2203437c3e723b09c6db5dc7c4e4f1e8a6` | Reika | 2026-11-05 | PASS |
+| `assets/img/aria-portrait.jpg` | `5af6672568f229ac3116e5fd09273f2b3c8044df245cbcdfc4982a084bf1758c` | Reika | 2026-11-05 | PASS |
+| `assets/img/aria-roster.jpg` | `78d8819475a1eccdec518b97548109a93246e04160a7d9aba6c86f91c59540fb` | Reika | 2026-11-05 | PASS |
+| `assets/img/elo-portrait.jpg` | `2c565347e56708027685ca6da23fc6060cc2df717d91a26bc901fc7df8bd9ca9` | Reika | 2026-11-05 | PASS |
+| `assets/img/elo-roster.jpg` | `83cddd77accddf32aecb68e11b80e6c5ea57d03f9eeb3605dbf0c03bbcb689d6` | Reika | 2026-11-05 | PASS |
+| `assets/img/hero-lineup.jpg` | `db5eba03ceaa2f0badc8bf279460c5526ab5f76b14ef6c8d49f011991fdaadd8` | Reika | 2026-11-05 | PASS |
+| `assets/img/mechapip-portrait.jpg` | `f6adac646e340f725419d1ca6cb05e5f3482517a8ec7600f26c4c40d9d0cc560` | Reika | 2026-11-05 | PASS |
+| `assets/img/mechapip-roster.jpg` | `6bc09c4275215609948270c66eeda1fc4fe229f4a892947416742e80b6b94120` | Reika | 2026-11-05 | PASS |
+| `assets/img/mei-portrait.jpg` | `c0f1ae7b2fbb04b981658243f52e3c541e08c27f8825509c465b87d869649e8b` | Reika | 2026-11-05 | PASS |
+| `assets/img/mei-roster.jpg` | `c7d45c6b47345cb4f1b52c468869a5e1123e9504d1044e844ef9fcde764f06e3` | Reika | 2026-11-05 | PASS |
+| `assets/img/niko-portrait.jpg` | `3602fae164395aad6e157af9d30388c45b754cc393e2953ba99737e59db2e5e1` | Reika | 2026-11-05 | PASS |
+| `assets/img/niko-roster.jpg` | `f6ab453be21cba2e7aeff9dcb20516868e076bc622761f935e3740ab6a53d408` | Reika | 2026-11-05 | PASS |
+| `assets/img/reika-portrait.jpg` | `d9ecf15dce9b5e96487c00fb7d1e3d20ea9028828cb1cb55295b9ad1b9c5c26c` | Reika | 2026-11-05 | PASS |
+| `assets/img/reika-roster.jpg` | `a2b7ca3b6923aa999a06d592645c1c7f493229973240370cbce38ac1c48ad346` | Reika | 2026-11-05 | PASS |
+| `assets/img/rin-portrait.jpg` | `45139136974ffab1806574ddd82001fd1fee2ec3fbf1aee5b3d538573707a3b1` | Reika | 2026-11-05 | PASS |
+| `assets/img/rin-roster.jpg` | `f1bd2c85d3513ccdd54eacd34eb4871778093e138a51ca6b82f2f09e66f5254e` | Reika | 2026-11-05 | PASS |
+| `assets/img/social-preview.jpg` | `7467acea5b1fe107e5fa7123ec3d04f1c817562e791e4fea6a336b0e4c486086` | Reika | 2026-11-05 | PASS |
+| `assets/img/team-composite.jpg` | `e8b8631c75181c24d670335e37e7a3a02fa68ad8266d402935b738b1184f1b0e` | Reika | 2026-11-05 | PASS |
+| `assets/img/yui-portrait.jpg` | `ac817ced8c4099b098f899ceb5ee3a7398cadf59885db56d31a6a3889f600716` | Reika | 2026-11-05 | PASS |
+| `assets/img/yui-roster.jpg` | `40600a30604a87df1a2ccd274d47c004fcec2bc0861b674d4379bf9a3f476a0a` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/dossiers/aria.jpg` | `cc38ace486f20d81b11c45c925c23c85e43f13c64c40811575c8b3feeeb7ba50` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/dossiers/elo.jpg` | `7e841907b6206d8b83f642e30dfdb38abf59bee0ee03b4f464176f94732bfe09` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/dossiers/mechapip.jpg` | `2bf50c648276ac80875029193c35aaeab7d5804e8d570c17d077f13215b548c8` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/dossiers/mei.jpg` | `632cd7ab367826aa9164a245755401b1e009b201daa7a4af2f416b59b43aa7c3` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/dossiers/niko.jpg` | `f48eaa782b2ab02333c74430ab6c585bbfa38c566d1bf62f137f9b628f33451b` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/dossiers/reika.jpg` | `5b3687314d55acea23084c99fa56614af641013f82cf52565e8fa6de6a4a45dc` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/dossiers/rin.jpg` | `4618eeb4b5b7f5b4ae00671fed2c89b2c83c0b17876958d625750dd7e55db137` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/dossiers/yui.jpg` | `8b90bbf8b51fdeda7c98e4b7f68430f7f7c54fd32fde7192e130a0e159a6c04d` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/portraits/aria.jpg` | `8b516ddcd303cb9f9293d9e738597038831fdd5d5241234cc430efd80d96dc83` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/portraits/elo.jpg` | `b2123b5c5de3bf6a1cd4993dcaa556d626788acd5a15b24dacc1b6ec645eda00` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/portraits/mechapip.jpg` | `39b1670e10df02aa3dfeffa7bd6ffd06322903d3450756fb6621a295b11cd6c9` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/portraits/mei.jpg` | `57915cbdbd466b0a263d0d50df3e517454672c9133d4193b6c8b47926e7e2614` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/portraits/niko.jpg` | `44a130d84a5c8e39780c721989b325d664441e74a6d3ef2945dc6c0eda4faebc` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/portraits/reika.jpg` | `4df8066bafd43c6d6cc91a8411d070f1bda7787a16faac97484421c34e5a2eff` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/portraits/rin.jpg` | `696df23e568fa8b62324cf1d6a04b34ff9a03af46d98a31210a6a5a1978d4f41` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/portraits/yui.jpg` | `69f36440d6df024eef67968c6cb748c7d6f87b16f325ed91a8301b219686a079` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/sheets/aria-sheet-1.jpg` | `25af3b227efb8e1e0af78895b63c388a45c61655b12989518505321540ff1a84` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/sheets/elo-sheet-1.jpg` | `b00d2430f2ca0e12b1e8b822fcd49b9e5459a28672ad8bd615f77f29faea5191` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/sheets/mechapip-sheet-1.jpg` | `30d28f363e5129f7a0135d3e0ed1f1234e8714ad4fbfdd92b4454f5f6132b3e0` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/sheets/mei-sheet-1.jpg` | `9277d11ce150e81739a6efbcc274575c1fddc879a856e41c29e329d09ed94b05` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/sheets/niko-sheet-1.jpg` | `974bb9060ece48a044dc2eb2c31847c4eed7e4c74f3a97e76a5b0b93c86ab56e` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/sheets/reika-sheet-1.jpg` | `483e8f4851d33b55aa151870c9e9e2c905eccd8fa6595c431e4149a9fbb82988` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/sheets/rin-sheet-1.jpg` | `80c4047d7fce62ecee684559aa2fbec538637dc2e15a54ff3ccc93c1d8c43aac` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/sheets/yui-sheet-1.jpg` | `602c2d8a38a34ae45f302a60b2710b96bbc380ec201dbfd7611982eed41c8fa4` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/wallpapers/aria-stamped.jpg` | `d0913b8035caefeb6d3a3cd40a9fbc486dc20aac7c25f188ce316a6465f588b0` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/wallpapers/elo-stamped.jpg` | `152c57ad495c6ae989fdc1e9c95e0e617ffdb0f1cd52ce49bf695023ac3f26f7` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/wallpapers/mechapip-stamped.jpg` | `3cf780e3325aa9bad7971d7c3ec265c3da11d6c21e7542dd6854d39edfeff9d4` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/wallpapers/mei-stamped.jpg` | `d9e70bb07594674357824a8bea447bc8280289ec765e4759188591fd03832733` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/wallpapers/niko-stamped.jpg` | `1e6e0a2d736901a4c37c532aadf1b5c4d5e9346655c7d9b66d3cfcbb08560811` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/wallpapers/reika-stamped.jpg` | `7399e62e84eb4c8efb0ba7816c3aa1bbf98ee1fa29f4260d1c30b0a6ed94cb81` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/wallpapers/rin-stamped.jpg` | `c58d27ab398504c8288222b2e1ead5f8fd6bb05e7f9855713a9c4ac34f7716c3` | Reika | 2026-11-05 | PASS |
+| `assets/thumbs/wallpapers/yui-stamped.jpg` | `a6d85fd5f64863eb72f8e1817c72b6e5c6500a0a45848cad71310e28bcab27c0` | Reika | 2026-11-05 | PASS |

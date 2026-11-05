@@ -68,7 +68,7 @@ bar another lane is still landing, and the owner column names the seat accountab
 | 8 | board seats | Elo | `python scripts/check-board --count` |
 | 8 | seat pages | Aria | `(Get-ChildItem seats -Filter *.html).Count` |
 | 27 | site pages | Aria | `(Get-ChildItem *.html,seats/*.html,lore/*.html).Count` |
-| 18 | site art images | Aria | `(Get-ChildItem assets/img -Filter *.jpg).Count` |
+| 19 | site art images | Aria | `(Get-ChildItem assets/img -Filter *.jpg).Count` |
 | 32 | site thumbnails | Aria | `(Get-ChildItem assets/thumbs -Recurse -File).Count` |
 | 8 | art dossier cards | Aria | `(Get-ChildItem art/dossiers).Count` |
 | 8 | art character cards | Aria | `(Get-ChildItem art/sheets).Count` |

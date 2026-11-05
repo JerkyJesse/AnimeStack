@@ -559,11 +559,11 @@ def build_index(root: Path, values: dict[str, int]) -> str:
     for seat in SEATS:
         info = meta[seat]
         cards.append(
-            '<div class="card"><a href="seats/%s.html">'
+            '<div class="card" style="--accent: %s"><a href="seats/%s.html">'
             '<img src="assets/img/%s-roster.jpg" alt="%s roster card" loading="lazy">'
             '<div class="body"><span class="name">%s</span><span class="role">%s</span>'
             '<span class="sentence">%s</span></div></a></div>'
-            % (seat, seat, html.escape(info["name"], quote=True), html.escape(info["name"], quote=False),
+            % (ACCENTS[seat], seat, seat, html.escape(info["name"], quote=True), html.escape(info["name"], quote=False),
                html.escape(info["role"], quote=False), html.escape(info["sentence"], quote=False))
         )
     laws = []
@@ -611,7 +611,7 @@ def build_index(root: Path, values: dict[str, int]) -> str:
                "AnimeStack",
                "Eight seats argue in fixed order. One sentence each. Then a verdict.",
                "The eight-seat house, installed into an AI coding host. Not a mascot pack — a design layer: every material decision descends Mei → Elo → MechaPip → Yui → Niko → Rin → Aria → Reika, one sentence each, and closes with a verdict."),
-        '<figure class="hero"><img src="assets/img/social-preview.jpg" alt="The AnimeStack house — eight seats, one question: is this still allowed to live?"><figcaption>the house · one question</figcaption></figure>',
+        '<figure class="hero"><img src="assets/img/hero-lineup.jpg" alt="The eight seats of the AnimeStack house — seven women and the machine"><figcaption>the eight-seat house · one question</figcaption></figure>',
         '<p class="lede">AnimeStack is a room. A ship must survive a failure review and a pre-registered falsifier before it touches anything. No votes. No skips. No merges. The same spine runs on every surface — a bug, a refactor, a ship, a cull. <strong>One box, one mechanism.</strong> A thing is not finished when it is named; it is finished when all eight sentences exist.</p>',
         '<figure class="loop-figure"><img src="assets/img/loop.svg" alt="The eight-seat design loop"><figcaption>the design loop · Mei, Elo, MechaPip, Yui, Niko, Rin, Aria, Reika</figcaption></figure>',
         section("The eight seats", "Roster", '<div class="roster">%s</div><p class="lede">Listed by leadership, founder first; the loop order is Mei, Elo, MechaPip, Yui, Niko, Rin, Aria, Reika. The roster is seven women and the machine — the named exception. A seat page opens the digest, the dossier, and the companion backstory.</p>' % "".join(cards), "seats"),
@@ -635,7 +635,7 @@ def build_seat(root: Path, seat: str, values: dict[str, int]) -> str:
     body = "\n".join([
         header("Seat · the eight · %s" % html.escape(info["role"], quote=False), info["name"],
                html.escape(info["sentence"], quote=False)),
-        '<div class="portrait"><figure><img src="../assets/img/%s-roster.jpg" alt="%s roster card"><figcaption>%s · roster card</figcaption></figure><p class="seat-note">One card per seat. The full library — dossier cards, character sheets, and wallpapers — lives in <code>art/</code>.</p></div>' % (seat, html.escape(info["name"], quote=True), html.escape(info["name"], quote=False)),
+        '<div class="portrait"><figure><img src="../assets/img/%s-portrait.jpg" alt="%s portrait"><figcaption>%s · portrait</figcaption></figure><p class="seat-note">One portrait per seat. The full library — dossier cards, character cards, and wallpapers — lives in <code>art/</code>.</p></div>' % (seat, html.escape(info["name"], quote=True), html.escape(info["name"], quote=False)),
         '<section class="zone" id="digest"><div class="zone-kicker">Seat digest · AnimeStack</div><h2>%s — %s</h2><p class="meta">The seat\'s own digest, beside the dossier and the companion backstory below.</p>%s</section>' % (html.escape(info["name"], quote=False), html.escape(info["role"], quote=False), markdown(digest, "docs/seats/%s.md" % seat, prefix)),
         '<section class="zone" id="dossier"><div class="zone-kicker">Dossier · the deep file</div><h2>%s — the dossier</h2>%s</section>' % (html.escape(info["name"], quote=False), markdown(dossier, "docs/lore/dossiers/%s.md" % seat, prefix)),
         '<section class="zone" id="backstory"><div class="zone-kicker">Companion · the full telling</div><h2>%s — the backstory</h2>%s</section>' % (html.escape(info["name"], quote=False), markdown(backstory, "docs/lore/dossiers/%s_backstory.md" % seat, prefix)),

@@ -65,3 +65,12 @@ form):
 **Correction.** The v2.0.0 entry's evidence line records the asset manifest at 77 rows. The shipped manifest is 74 pictures: the review instrument is picture-only, so the stylesheet and the two SVGs left the human review (a line-ending-normalized CSS file is not an asset). The v2.0.0 decision, the tag, and the release are unchanged; the count is corrected here, not rewritten.
 
 - **Reika.** The number moved with the instrument; the manifest is the authority, and the release stands.
+
+## 2026-11-05 — v2.0.0 visual pass: the public face rebuilt; version kept
+
+**Proposal.** Operator: "fully rebuild the web page and README; fix the images; maximum visual appeal and creative expression; keep version 2.0." The face changed; the law did not. The version stays 2.0.0, and the tag moves to this tree.
+
+- **Reika.** The house got a face: a cinematic hero, a seat accent per character, full-bleed portraits, a new loop, new roster cards, and a rebuilt README. The art is clean; the law is unchanged.
+
+**Operator.** "keep version 2.0" — the version, the release tag, and the pages all read v2.0.0; the tag moves to this tree.
+**Evidence.** Art: 8 dossier cards, 8 character cards, 8 poster wallpapers, 8 portraits, 8 roster cards, the lineup, the team composite, the loop, the social card; 75 pictures in the manifest, 0 holds. Site: 27 generated pages, `gen-site --check` in sync, `check-site` clean. README rebuilt with the seat grid, the credentials, the loop, the record, the claim standard, the archive, the evidence ladder, and the DSH surface. Gates: all static gates green; the full suite run beside this entry; the zero-leak tree clean; the tag `v2.0.0` moved; Pages live-verified.

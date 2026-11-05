@@ -120,17 +120,25 @@ def find_bash() -> str | None:
         if not (Path(candidate).is_file() and _probe_bash(candidate)):
             continue
         # A bash that cannot run the installer itself is not a usable bash for
-        # this lane: probe the setup --check under the same timeout.
+        # this lane: probe a real throwaway install, not just --check.
+        probe_home = tempfile.mkdtemp(prefix="animestack-bash-probe-")
+        env = os.environ.copy()
+        env["HOME"] = probe_home
+        env["USERPROFILE"] = probe_home
+        env["DSH_HOME"] = str(Path(probe_home) / ".dsh")
         try:
             check = subprocess.run(
-                [candidate, str(SETUP), "--check"],
-                capture_output=True,
-                text=True,
+                [candidate, str(SETUP), "--host", "openclaw"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
                 timeout=20,
                 cwd=REPO,
+                env=env,
             )
         except (OSError, subprocess.TimeoutExpired):
+            shutil.rmtree(probe_home, ignore_errors=True)
             continue
+        shutil.rmtree(probe_home, ignore_errors=True)
         if check.returncode == 0:
             return candidate
     return None

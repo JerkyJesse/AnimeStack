@@ -21,8 +21,9 @@ Seat slugs: `reika`, `yui`, `rin`, `niko`, `mei`, `aria`, `elo`, `mechapip` (lea
 The v2.0.0 set is a clean public render from the house's own character art. The
 private-stamped HUD, the money copy, and the brand marks are gone: each card carries
 only the public name, the title, the sin, and the seat's one sentence. The two
-burned-in renders and their display copies were removed, not republished; the set is
-complete at 8/8/8 without them.
+burned-in renders were replaced with clean renders, and the set is complete at
+8/8/8. The visual pass re-rendered the cards, the full-bleed portraits, the roster
+cards, the lineup, the loop, and the social card from the same clean crops.
 
 The asset review in `assets/REVIEW.md` holds the rule and the manifest: the review is
 human, the manifest is machine-checked, and the chair signs the pass. A clean render
